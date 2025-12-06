@@ -76,7 +76,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <p className="text-sm text-white font-extrabold uppercase tracking-wide drop-shadow-sm">Appelez-nous</p>
-                  <p className="text-xl font-extrabold text-white drop-shadow">+32 (0) 42 85 92 55</p>
+                  <p className="text-xl font-extrabold text-white drop-shadow">+32(0)42859255</p>
                 </div>
               </div>
 
@@ -96,8 +96,14 @@ export default function Contact() {
                 </div>
                 <div>
                   <p className="text-sm text-white font-extrabold uppercase tracking-wide drop-shadow-sm">Rendez-nous visite</p>
-                  <p className="text-xl font-extrabold text-white drop-shadow">Rue du Fond du Flo 29B, Fléron</p>
+                  <p className="text-xl font-extrabold text-white drop-shadow">Rue du Fond du Flo 29B 4621 Fléron, Belgique</p>
                 </div>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <p className="text-sm text-white font-extrabold uppercase tracking-wide drop-shadow-sm mb-2">Horaires</p>
+                <p className="text-white text-sm">Lun-Ven: 9 AM – 5 PM</p>
+                <p className="text-white text-sm">Samedi / Dimanche: Fermé</p>
               </div>
             </div>
           </div>
@@ -113,7 +119,7 @@ export default function Contact() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-bold text-white mb-1">Nom complet</label>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Nom complet</label>
                   <input
                     type="text"
                     {...register("name", { required: true })}
@@ -123,7 +129,7 @@ export default function Contact() {
                   {errors.name && <span className="text-red-600 text-xs mt-1 font-bold">Requis</span>}
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-white mb-1">Email</label>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Email</label>
                   <input
                     type="email"
                     {...register("email", { required: true })}
@@ -135,7 +141,7 @@ export default function Contact() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-white mb-1">Sujet</label>
+                <label className="block text-sm font-bold text-gray-900 mb-1">Sujet</label>
                 <select
                   {...register("subject", { required: true })}
                   className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all appearance-none text-gray-900 font-semibold"
@@ -148,7 +154,7 @@ export default function Contact() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-white mb-1">Message</label>
+                <label className="block text-sm font-bold text-gray-900 mb-1">Message</label>
                 <textarea
                   rows={4}
                   {...register("message", { required: true })}

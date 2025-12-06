@@ -1,9 +1,11 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import Services from "@/components/Services";
-import WhyChooseUs from "@/components/WhyChooseUs";
-import Realisations from "@/components/Realisations";
-import Contact from "@/components/Contact";
+import Promotions from "@/components/Promotions";
+import BestSellers from "@/components/BestSellers";
+import Clearance from "@/components/Clearance";
+import SpecialOffers from "@/components/SpecialOffers";
+import News from "@/components/News";
+import BrandLogos from "@/components/BrandLogos";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -11,10 +13,12 @@ export default function Home() {
     <main className="min-h-screen">
       <Navbar />
       <Hero />
-      <Services />
-      <WhyChooseUs />
-      <Realisations />
-      <Contact />
+      <Promotions />
+      <BestSellers />
+      <Clearance />
+      <SpecialOffers />
+      <News />
+      <BrandLogos />
       <Footer />
     </main>
   );

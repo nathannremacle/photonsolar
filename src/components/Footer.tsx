@@ -1,72 +1,213 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { Facebook, Instagram, Youtube, Sun } from "lucide-react";
+import { Sun, Facebook } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState("");
+  const { t } = useLanguage();
 
   return (
-    <footer className="bg-black text-white pt-20 pb-10 border-t border-white/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+    <footer className="bg-gray-900 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           
           {/* Brand Column */}
-          <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="bg-primary-500 p-1.5 rounded-lg">
-                <Sun size={20} className="fill-current text-white" />
-              </div>
-              <span className="text-xl font-bold">Photon<span className="text-primary-500">Solar</span></span>
+          <div className="lg:col-span-2">
+            <Link href="/" className="flex items-center gap-2 mb-6">
+              <Sun size={24} className="text-orange-500" />
+              <span className="text-2xl font-bold">Photon<span className="text-orange-500">Solar</span></span>
             </Link>
-            <p className="text-gray-400 text-sm leading-relaxed font-medium">
-              Expertise belge en énergie solaire depuis 2008. Nous transformons chaque toiture en source d'énergie durable et rentable.
-            </p>
-            <div className="flex gap-4">
-              {[Facebook, Instagram, Youtube].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary-500 hover:text-white transition-all duration-300 text-white">
-                  <Icon size={18} />
-                </a>
-              ))}
+            <div className="space-y-2 text-gray-300 text-sm mb-6">
+              <p><strong>{t("footer.hours")} :</strong></p>
+              <p>{t("footer.hoursWeek")}</p>
+              <p>{t("footer.hoursWeekend")}</p>
+            </div>
+            <div className="space-y-2 text-gray-300 text-sm mb-6">
+              <p><strong>{t("footer.phone")}:</strong> +32(0)42859255</p>
+              <p><strong>{t("footer.email")}:</strong> info@photonsolar.be</p>
+              <p><strong>{t("footer.address")}:</strong> Rue du Fond du Flo 29B 4621 Fléron, Belgique</p>
             </div>
           </div>
 
-          {/* Links Columns */}
-          {[
-            {
-              title: "Solutions",
-              links: ["Panneaux Solaires", "Batteries", "Bornes de recharge", "Maintenance"]
-            },
-            {
-              title: "Entreprise",
-              links: ["À propos", "Nos réalisations", "Carrières", "Contact"]
-            },
-            {
-              title: "Légal",
-              links: ["Mentions légales", "Confidentialité", "Conditions générales", "Cookies"]
-            }
-          ].map((col, idx) => (
-            <div key={idx}>
-              <h4 className="font-bold text-lg mb-6 text-white">{col.title}</h4>
-              <ul className="space-y-4">
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+          {/* Navigation Column */}
+          <div>
+            <h4 className="font-bold text-lg mb-6 text-white">{t("footer.navigation")}</h4>
+            <ul className="space-y-3">
+              <li>
+                <Link href="/" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.home")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/telechargements" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.downloads")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/news" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.news")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.contact")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/mon-compte" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.account")}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Catalogue Column */}
+          <div>
+            <h4 className="font-bold text-lg mb-6 text-white">{t("footer.catalog")}</h4>
+            <ul className="space-y-3">
+              <li>
+                <Link href="/collections/panneaux-solaires" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.solarPanels")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/collections/onduleurs" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.inverters")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/collections/onduleurs/hybride" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.hybrid")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/collections/onduleurs/on-grid" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.onGrid")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/collections/batteries-stockage" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.batteries")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/collections/structure-montage" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.mounting")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/collections/borne-recharge" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.charging")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/collections/pompe-chaleur" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  {t("nav.heatPump")}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Social Links Column */}
+          <div>
+            <h4 className="font-bold text-lg mb-6 text-white">{t("footer.follow")}</h4>
+            <div className="flex gap-4 mb-6">
+              <a
+                href="https://www.instagram.com/photonsolar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-orange-600 transition-colors"
+                aria-label="Instagram"
+              >
+                <span className="text-white text-sm">IG</span>
+              </a>
+              <a
+                href="https://www.facebook.com/photonsolar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-orange-600 transition-colors"
+                aria-label="Facebook"
+              >
+                <Facebook size={18} />
+              </a>
+              <a
+                href="https://www.youtube.com/photonsolar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-orange-600 transition-colors"
+                aria-label="YouTube"
+              >
+                <span className="text-white text-sm">YT</span>
+              </a>
             </div>
-          ))}
+            <div className="text-gray-300 text-sm space-y-2">
+              <p><strong>{t("footer.hours")} :</strong></p>
+              <p>{t("footer.hoursWeek")}</p>
+              <p>{t("footer.hoursWeekend")}</p>
+            </div>
+          </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-400 text-sm">
-            &copy; {currentYear} Photon Solar. Tous droits réservés.
-          </p>
-          <p className="text-gray-400 text-xs flex items-center gap-2">
-            Designed with <span className="text-primary-500">⚡</span> in Belgium
-          </p>
+        {/* Newsletter */}
+        <div className="border-t border-gray-800 pt-8 mb-8">
+          <div className="max-w-md">
+            <h4 className="font-bold text-lg mb-4 text-white">Abonnez-vous à nos e-mails</h4>
+            <form className="flex gap-2">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="e-mail"
+                className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                required
+              />
+              <button
+                type="submit"
+                className="px-6 py-2 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition-colors"
+              >
+                S'inscrire
+              </button>
+            </form>
+            <p className="text-gray-400 text-xs mt-2">
+              En vous abonnant, vous acceptez de recevoir la newsletter Photon Solar, conformément à notre{" "}
+              <Link href="/pages/politique-de-confidentialite" className="underline hover:text-white">
+                politique de confidentialité
+              </Link>
+              {" *"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="border-t border-gray-800 bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-gray-400 text-sm">
+              © {currentYear}{" "}
+              <Link href="/" className="hover:text-white transition-colors">
+                Photon Solar Belgium
+              </Link>
+            </p>
+            <div className="flex items-center gap-4">
+              <span className="text-gray-400 text-sm">Moyens de paiement</span>
+              <div className="flex gap-2">
+                {["Bancontact", "Maestro", "Mastercard", "Visa"].map((method) => (
+                  <div
+                    key={method}
+                    className="w-10 h-6 bg-gray-700 rounded flex items-center justify-center"
+                    title={method}
+                  >
+                    <span className="text-xs text-gray-400">{method[0]}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
