@@ -42,35 +42,47 @@ export default function Promotions() {
               transition={{ delay: index * 0.1 }}
               className="relative rounded-2xl overflow-hidden shadow-lg group"
             >
-              <div className={`${promo.bgColor} p-8 text-white h-full flex flex-col`}>
-                <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold mb-4 uppercase">
-                  {promo.badge}
-                </span>
-                
-                <h3 className="text-2xl font-bold mb-4 leading-tight">
-                  {promo.title}
-                </h3>
-                
-                <p className="text-white/90 mb-6 flex-grow">
-                  {promo.description}
-                </p>
+              <div
+                className={`${promo.backgroundImage ? '' : promo.bgColor} p-8 text-white h-full flex flex-col relative overflow-hidden`}
+                style={promo.backgroundImage ? {
+                  backgroundImage: `url(${promo.backgroundImage})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                } : {}}
+              >
+                {promo.backgroundImage && (
+                  <div className="absolute inset-0 bg-black/50"></div>
+                )}
+                <div className="relative z-10 flex flex-col h-full">
+                  <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold mb-4 uppercase">
+                    {promo.badge}
+                  </span>
+                  
+                  <h3 className="text-2xl font-bold mb-4 leading-tight">
+                    {promo.title}
+                  </h3>
+                  
+                  <p className="text-white/90 mb-6 flex-grow">
+                    {promo.description}
+                  </p>
 
-                <ul className="space-y-2 mb-6">
-                  {promo.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm">
-                      <span className="text-white font-bold mt-1">✓</span>
-                      <span className="text-white/90">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                  <ul className="space-y-2 mb-6">
+                    {promo.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm">
+                        <span className="text-white font-bold mt-1">✓</span>
+                        <span className="text-white/90">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                <Link
-                  href={promo.ctaLink}
-                  className="inline-flex items-center gap-2 bg-white text-gray-900 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors w-fit group-hover:gap-3"
-                >
-                  {promo.cta}
-                  <ArrowRight size={18} />
-                </Link>
+                  <Link
+                    href={promo.ctaLink}
+                    className="inline-flex items-center gap-2 bg-white text-gray-900 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors w-fit group-hover:gap-3"
+                  >
+                    {promo.cta}
+                    <ArrowRight size={18} />
+                  </Link>
+                </div>
               </div>
             </motion.div>
           ))}

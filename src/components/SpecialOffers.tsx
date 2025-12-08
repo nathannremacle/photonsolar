@@ -42,31 +42,41 @@ export default function SpecialOffers() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className={`${offer.bgColor} rounded-2xl p-8 text-white`}
+              className={`${offer.backgroundImage ? '' : offer.bgColor} rounded-2xl p-8 text-white relative overflow-hidden`}
+              style={offer.backgroundImage ? {
+                backgroundImage: `url(${offer.backgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              } : {}}
             >
-              <h3 className="text-2xl font-bold mb-4">{offer.title}</h3>
-              <p className="text-white/90 mb-6">{offer.description}</p>
-              
-              <ul className="space-y-2 mb-6">
-                {offer.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <span className="text-white font-bold mt-1">✓</span>
-                    <span className="text-white/90">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {offer.note && (
-                <p className="text-white/80 text-sm mb-6 italic">{offer.note}</p>
+              {offer.backgroundImage && (
+                <div className="absolute inset-0 bg-black/50 rounded-2xl"></div>
               )}
+              <div className="relative z-10">
+                <h3 className="text-2xl font-bold mb-4">{offer.title}</h3>
+                <p className="text-white/90 mb-6">{offer.description}</p>
+                
+                <ul className="space-y-2 mb-6">
+                  {offer.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="text-white font-bold mt-1">✓</span>
+                      <span className="text-white/90">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
 
-              <Link
-                href={offer.ctaLink}
-                className="inline-flex items-center gap-2 bg-white text-gray-900 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors"
-              >
-                {offer.cta}
-                <ArrowRight size={18} />
-              </Link>
+                {offer.note && (
+                  <p className="text-white/80 text-sm mb-6 italic">{offer.note}</p>
+                )}
+
+                <Link
+                  href={offer.ctaLink}
+                  className="inline-flex items-center gap-2 bg-white text-gray-900 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors"
+                >
+                  {offer.cta}
+                  <ArrowRight size={18} />
+                </Link>
+              </div>
             </motion.div>
           ))}
         </div>

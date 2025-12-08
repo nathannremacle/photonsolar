@@ -14,7 +14,7 @@
       "description": "Depuis 2008, PhotonSolar s'impose comme un acteur incontournable dans le domaine de l'énergie solaire. Nous vous accompagnons dans votre transition énergétique grâce à une large gamme d'équipements de haute qualité.",
       "cta": "En savoir plus",
       "ctaLink": "/pages/a-propos",
-      "bgColor": "bg-gradient-to-br from-orange-500 to-orange-600"
+      "bgColor": "bg-gradient-to-br from-green-600 to-green-700"
     },
     {
       "id": 2,
@@ -96,7 +96,7 @@
       ],
       "cta": "Découvrir",
       "ctaLink": "/collections?brands=SolaX",
-      "bgColor": "bg-gradient-to-br from-blue-600 to-blue-700"
+      "bgColor": "bg-gradient-to-br from-purple-600 to-purple-700"
     }
   ],
   "bestSellers": {

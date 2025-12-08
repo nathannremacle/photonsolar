@@ -26,6 +26,11 @@ import {
 } from "lucide-react";
 import { checkAdminSession } from "@/lib/admin-auth";
 import ImageSelector from "@/components/ImageSelector";
+import ProductSelector from "@/components/ProductSelector";
+import LinkSelector from "@/components/LinkSelector";
+import DatePicker from "@/components/DatePicker";
+import CategorySelector from "@/components/CategorySelector";
+import ColorPicker from "@/components/ColorPicker";
 
 // Types (duplicated to avoid importing server-side code)
 export interface HeroSlide {
@@ -36,6 +41,7 @@ export interface HeroSlide {
   cta: string;
   ctaLink: string;
   bgColor: string;
+  backgroundImage?: string; // Optional background image
 }
 
 export interface Promotion {
@@ -47,6 +53,7 @@ export interface Promotion {
   cta: string;
   ctaLink: string;
   bgColor: string;
+  backgroundImage?: string; // Optional background image
 }
 
 export interface SpecialOffer {
@@ -58,6 +65,7 @@ export interface SpecialOffer {
   cta: string;
   ctaLink: string;
   bgColor: string;
+  backgroundImage?: string; // Optional background image
 }
 
 export interface NewsItem {
@@ -366,19 +374,15 @@ export default function AdminHomepage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Lien du bouton
-                        </label>
-                        <input
-                          type="text"
+                        <LinkSelector
                           value={content.banner.ctaLink}
-                          onChange={(e) =>
+                          onChange={(url) =>
                             setContent({
                               ...content,
-                              banner: { ...content.banner, ctaLink: e.target.value },
+                              banner: { ...content.banner, ctaLink: url },
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                          label="Lien du bouton"
                         />
                       </div>
                     </div>
@@ -535,29 +539,19 @@ export default function AdminHomepage() {
                   </label>
                 </div>
                 {content.bestSellers.enabled && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      IDs des produits (séparés par des virgules)
-                    </label>
-                    <input
-                      type="text"
-                      value={content.bestSellers.productIds.join(", ")}
-                      onChange={(e) =>
-                        setContent({
-                          ...content,
-                          bestSellers: {
-                            ...content.bestSellers,
-                            productIds: e.target.value
-                              .split(",")
-                              .map((id) => id.trim())
-                              .filter(Boolean),
-                          },
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      placeholder="elitec-xmax-560, elitec-xmax-470"
-                    />
-                  </div>
+                  <ProductSelector
+                    selectedIds={content.bestSellers.productIds}
+                    onChange={(ids) =>
+                      setContent({
+                        ...content,
+                        bestSellers: {
+                          ...content.bestSellers,
+                          productIds: ids,
+                        },
+                      })
+                    }
+                    label="Produits en vedette"
+                  />
                 )}
               </div>
             </SectionCard>
@@ -590,29 +584,19 @@ export default function AdminHomepage() {
                   </label>
                 </div>
                 {content.clearance.enabled && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      IDs des produits (séparés par des virgules)
-                    </label>
-                    <input
-                      type="text"
-                      value={content.clearance.productIds.join(", ")}
-                      onChange={(e) =>
-                        setContent({
-                          ...content,
-                          clearance: {
-                            ...content.clearance,
-                            productIds: e.target.value
-                              .split(",")
-                              .map((id) => id.trim())
-                              .filter(Boolean),
-                          },
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      placeholder="deye-sun-3kw, deye-sun-5kw"
-                    />
-                  </div>
+                  <ProductSelector
+                    selectedIds={content.clearance.productIds}
+                    onChange={(ids) =>
+                      setContent({
+                        ...content,
+                        clearance: {
+                          ...content.clearance,
+                          productIds: ids,
+                        },
+                      })
+                    }
+                    label="Produits en déstockage"
+                  />
                 )}
               </div>
             </SectionCard>
@@ -782,51 +766,61 @@ export default function AdminHomepage() {
                     {content.brands.items.map((brand, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                        className="p-4 bg-gray-50 rounded-lg border border-gray-200"
                       >
-                        <GripVertical className="w-5 h-5 text-gray-400" />
-                        <input
-                          type="text"
-                          value={brand.name}
-                          onChange={(e) => {
-                            const newBrands = [...content.brands.items];
-                            newBrands[index] = { ...brand, name: e.target.value };
-                            setContent({
-                              ...content,
-                              brands: { ...content.brands, items: newBrands },
-                            });
-                          }}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
-                          placeholder="Nom de la marque"
-                        />
-                        <input
-                          type="text"
-                          value={brand.link}
-                          onChange={(e) => {
-                            const newBrands = [...content.brands.items];
-                            newBrands[index] = { ...brand, link: e.target.value };
-                            setContent({
-                              ...content,
-                              brands: { ...content.brands, items: newBrands },
-                            });
-                          }}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
-                          placeholder="Lien"
-                        />
-                        <button
-                          onClick={() => {
-                            const newBrands = content.brands.items.filter(
-                              (_, i) => i !== index
-                            );
-                            setContent({
-                              ...content,
-                              brands: { ...content.brands, items: newBrands },
-                            });
-                          }}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-start gap-3">
+                          <GripVertical className="w-5 h-5 text-gray-400 mt-2" />
+                          <div className="flex-1 space-y-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Nom de la marque
+                              </label>
+                              <input
+                                type="text"
+                                value={brand.name}
+                                onChange={(e) => {
+                                  const newBrands = [...content.brands.items];
+                                  newBrands[index] = { ...brand, name: e.target.value };
+                                  setContent({
+                                    ...content,
+                                    brands: { ...content.brands, items: newBrands },
+                                  });
+                                }}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                placeholder="Ex: ELITEC, DEYE, SMA..."
+                              />
+                            </div>
+                            <div>
+                              <LinkSelector
+                                value={brand.link}
+                                onChange={(url) => {
+                                  const newBrands = [...content.brands.items];
+                                  newBrands[index] = { ...brand, link: url };
+                                  setContent({
+                                    ...content,
+                                    brands: { ...content.brands, items: newBrands },
+                                  });
+                                }}
+                                label="Lien vers la collection"
+                              />
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const newBrands = content.brands.items.filter(
+                                (_, i) => i !== index
+                              );
+                              setContent({
+                                ...content,
+                                brands: { ...content.brands, items: newBrands },
+                              });
+                            }}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                     <button
@@ -884,9 +878,17 @@ function HomepagePreview({ content }: { content: HomepageContent }) {
             {content.heroSlides.slice(0, 1).map((slide) => (
               <div
                 key={slide.id}
-                className={`absolute inset-0 ${slide.bgColor} flex items-center justify-center p-6`}
+                className={`absolute inset-0 ${slide.backgroundImage ? '' : slide.bgColor} flex items-center justify-center p-6`}
+                style={slide.backgroundImage ? {
+                  backgroundImage: `url(${slide.backgroundImage})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                } : {}}
               >
-                <div className="text-center text-white">
+                {slide.backgroundImage && (
+                  <div className="absolute inset-0 bg-black/40"></div>
+                )}
+                <div className="text-center text-white relative z-10">
                   <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-semibold mb-3">
                     {slide.badge}
                   </span>
@@ -915,13 +917,23 @@ function HomepagePreview({ content }: { content: HomepageContent }) {
             {content.promotions.slice(0, 2).map((promo) => (
               <div
                 key={promo.id}
-                className={`${promo.bgColor} rounded-lg p-4 text-white`}
+                className={`${promo.backgroundImage ? '' : promo.bgColor} rounded-lg p-4 text-white relative overflow-hidden`}
+                style={promo.backgroundImage ? {
+                  backgroundImage: `url(${promo.backgroundImage})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                } : {}}
               >
-                <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-bold mb-2 uppercase">
-                  {promo.badge}
-                </span>
-                <h4 className="font-bold text-sm mb-2 line-clamp-1">{promo.title}</h4>
-                <p className="text-white/90 text-xs line-clamp-2">{promo.description}</p>
+                {promo.backgroundImage && (
+                  <div className="absolute inset-0 bg-black/50 rounded-lg"></div>
+                )}
+                <div className="relative z-10">
+                  <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-bold mb-2 uppercase">
+                    {promo.badge}
+                  </span>
+                  <h4 className="font-bold text-sm mb-2 line-clamp-1">{promo.title}</h4>
+                  <p className="text-white/90 text-xs line-clamp-2">{promo.description}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -1102,15 +1114,27 @@ function SlideEditor({
         {showPreview && (
           <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
             <p className="text-xs font-semibold text-gray-600 mb-2">Aperçu :</p>
-            <div className={`${slide.bgColor} rounded-lg p-6 text-white`}>
-              <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-semibold mb-3">
-                {slide.badge}
-              </span>
-              <h3 className="text-lg font-bold mb-2">{slide.title}</h3>
-              <p className="text-white/90 text-sm mb-4 line-clamp-2">{slide.description}</p>
-              <button className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-semibold">
-                {slide.cta}
-              </button>
+            <div
+              className={`${slide.backgroundImage ? '' : slide.bgColor} rounded-lg p-6 text-white relative overflow-hidden`}
+              style={slide.backgroundImage ? {
+                backgroundImage: `url(${slide.backgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              } : {}}
+            >
+              {slide.backgroundImage && (
+                <div className="absolute inset-0 bg-black/50 rounded-lg"></div>
+              )}
+              <div className="relative z-10">
+                <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-semibold mb-3">
+                  {slide.badge}
+                </span>
+                <h3 className="text-lg font-bold mb-2">{slide.title}</h3>
+                <p className="text-white/90 text-sm mb-4 line-clamp-2">{slide.description}</p>
+                <button className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-semibold">
+                  {slide.cta}
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -1128,16 +1152,18 @@ function SlideEditor({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
+          <div className="md:col-span-2">
+            <ImageSelector
+              value={slide.backgroundImage || ""}
+              onChange={(url) => onUpdate({ ...slide, backgroundImage: url })}
+              label="Image de fond (optionnel - remplace la couleur si définie)"
+            />
+          </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Couleur de fond (ex: bg-gradient-to-br from-orange-500 to-orange-600)
-            </label>
-            <input
-              type="text"
+            <ColorPicker
               value={slide.bgColor}
-              onChange={(e) => onUpdate({ ...slide, bgColor: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              placeholder="bg-gradient-to-br from-orange-500 to-orange-600"
+              onChange={(color) => onUpdate({ ...slide, bgColor: color })}
+              label="Couleur de fond (utilisée si aucune image n'est sélectionnée)"
             />
           </div>
           <div className="md:col-span-2">
@@ -1176,14 +1202,10 @@ function SlideEditor({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Lien du bouton
-            </label>
-            <input
-              type="text"
+            <LinkSelector
               value={slide.ctaLink}
-              onChange={(e) => onUpdate({ ...slide, ctaLink: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              onChange={(url) => onUpdate({ ...slide, ctaLink: url })}
+              label="Lien du bouton"
             />
           </div>
         </div>
@@ -1231,23 +1253,35 @@ function PromotionEditor({
         {showPreview && (
           <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
             <p className="text-xs font-semibold text-gray-600 mb-2">Aperçu :</p>
-            <div className={`${promotion.bgColor} rounded-lg p-6 text-white`}>
-              <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold mb-3 uppercase">
-                {promotion.badge}
-              </span>
-              <h3 className="text-lg font-bold mb-2">{promotion.title}</h3>
-              <p className="text-white/90 text-sm mb-3 line-clamp-2">{promotion.description}</p>
-              <ul className="space-y-1 mb-4">
-                {promotion.features.slice(0, 2).map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-xs">
-                    <span className="font-bold mt-0.5">✓</span>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <button className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-bold">
-                {promotion.cta}
-              </button>
+            <div
+              className={`${promotion.backgroundImage ? '' : promotion.bgColor} rounded-lg p-6 text-white relative overflow-hidden`}
+              style={promotion.backgroundImage ? {
+                backgroundImage: `url(${promotion.backgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              } : {}}
+            >
+              {promotion.backgroundImage && (
+                <div className="absolute inset-0 bg-black/50 rounded-lg"></div>
+              )}
+              <div className="relative z-10">
+                <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold mb-3 uppercase">
+                  {promotion.badge}
+                </span>
+                <h3 className="text-lg font-bold mb-2">{promotion.title}</h3>
+                <p className="text-white/90 text-sm mb-3 line-clamp-2">{promotion.description}</p>
+                <ul className="space-y-1 mb-4">
+                  {promotion.features.slice(0, 2).map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-xs">
+                      <span className="font-bold mt-0.5">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <button className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-bold">
+                  {promotion.cta}
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -1267,17 +1301,18 @@ function PromotionEditor({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
+          <div className="md:col-span-2">
+            <ImageSelector
+              value={promotion.backgroundImage || ""}
+              onChange={(url) => onUpdate({ ...promotion, backgroundImage: url })}
+              label="Image de fond (optionnel - remplace la couleur si définie)"
+            />
+          </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Couleur de fond
-            </label>
-            <input
-              type="text"
+            <ColorPicker
               value={promotion.bgColor}
-              onChange={(e) =>
-                onUpdate({ ...promotion, bgColor: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              onChange={(color) => onUpdate({ ...promotion, bgColor: color })}
+              label="Couleur de fond (utilisée si aucune image n'est sélectionnée)"
             />
           </div>
           <div className="md:col-span-2">
@@ -1334,16 +1369,10 @@ function PromotionEditor({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Lien du bouton
-            </label>
-            <input
-              type="text"
+            <LinkSelector
               value={promotion.ctaLink}
-              onChange={(e) =>
-                onUpdate({ ...promotion, ctaLink: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              onChange={(url) => onUpdate({ ...promotion, ctaLink: url })}
+              label="Lien du bouton"
             />
           </div>
         </div>
@@ -1391,35 +1420,50 @@ function SpecialOfferEditor({
         {showPreview && (
           <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
             <p className="text-xs font-semibold text-gray-600 mb-2">Aperçu :</p>
-            <div className={`${offer.bgColor} rounded-lg p-6 text-white`}>
-              <h3 className="text-lg font-bold mb-2">{offer.title}</h3>
-              <p className="text-white/90 text-sm mb-3 line-clamp-2">{offer.description}</p>
-              <ul className="space-y-1 mb-3">
-                {offer.features.slice(0, 2).map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-xs">
-                    <span className="font-bold mt-0.5">✓</span>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <button className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-bold">
-                {offer.cta}
-              </button>
+            <div
+              className={`${offer.backgroundImage ? '' : offer.bgColor} rounded-lg p-6 text-white relative overflow-hidden`}
+              style={offer.backgroundImage ? {
+                backgroundImage: `url(${offer.backgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              } : {}}
+            >
+              {offer.backgroundImage && (
+                <div className="absolute inset-0 bg-black/50 rounded-lg"></div>
+              )}
+              <div className="relative z-10">
+                <h3 className="text-lg font-bold mb-2">{offer.title}</h3>
+                <p className="text-white/90 text-sm mb-3 line-clamp-2">{offer.description}</p>
+                <ul className="space-y-1 mb-3">
+                  {offer.features.slice(0, 2).map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-xs">
+                      <span className="font-bold mt-0.5">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <button className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-bold">
+                  {offer.cta}
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {/* Form */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <ImageSelector
+              value={offer.backgroundImage || ""}
+              onChange={(url) => onUpdate({ ...offer, backgroundImage: url })}
+              label="Image de fond (optionnel - remplace la couleur si définie)"
+            />
+          </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Couleur de fond
-            </label>
-            <input
-              type="text"
+            <ColorPicker
               value={offer.bgColor}
-              onChange={(e) => onUpdate({ ...offer, bgColor: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              onChange={(color) => onUpdate({ ...offer, bgColor: color })}
+              label="Couleur de fond (utilisée si aucune image n'est sélectionnée)"
             />
           </div>
           <div className="md:col-span-2">
@@ -1485,14 +1529,10 @@ function SpecialOfferEditor({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Lien du bouton
-            </label>
-            <input
-              type="text"
+            <LinkSelector
               value={offer.ctaLink}
-              onChange={(e) => onUpdate({ ...offer, ctaLink: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              onChange={(url) => onUpdate({ ...offer, ctaLink: url })}
+              label="Lien du bouton"
             />
           </div>
         </div>
@@ -1572,25 +1612,17 @@ function NewsItemEditor({
         {/* Form */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Catégorie
-            </label>
-            <input
-              type="text"
+            <CategorySelector
               value={item.category}
-              onChange={(e) => onUpdate({ ...item, category: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              onChange={(category) => onUpdate({ ...item, category })}
+              label="Catégorie"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Date
-            </label>
-            <input
-              type="text"
+            <DatePicker
               value={item.date}
-              onChange={(e) => onUpdate({ ...item, date: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              onChange={(date) => onUpdate({ ...item, date })}
+              label="Date"
             />
           </div>
           <div className="md:col-span-2">
@@ -1612,14 +1644,10 @@ function NewsItemEditor({
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Lien
-            </label>
-            <input
-              type="text"
+            <LinkSelector
               value={item.link}
-              onChange={(e) => onUpdate({ ...item, link: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              onChange={(url) => onUpdate({ ...item, link: url })}
+              label="Lien de l'actualité"
             />
           </div>
         </div>

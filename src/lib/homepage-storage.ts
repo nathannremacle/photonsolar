@@ -9,6 +9,7 @@ export interface HeroSlide {
   cta: string;
   ctaLink: string;
   bgColor: string;
+  backgroundImage?: string; // Optional background image
 }
 
 export interface Promotion {
@@ -20,6 +21,7 @@ export interface Promotion {
   cta: string;
   ctaLink: string;
   bgColor: string;
+  backgroundImage?: string; // Optional background image
 }
 
 export interface SpecialOffer {
@@ -31,6 +33,7 @@ export interface SpecialOffer {
   cta: string;
   ctaLink: string;
   bgColor: string;
+  backgroundImage?: string; // Optional background image
 }
 
 export interface NewsItem {

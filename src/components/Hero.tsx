@@ -106,9 +106,17 @@ export default function Hero() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -100 }}
                 transition={{ duration: 0.5 }}
-                className={`absolute inset-0 ${slide.bgColor} flex items-center justify-center`}
+                className={`absolute inset-0 ${slide.backgroundImage ? '' : slide.bgColor} flex items-center justify-center`}
+                style={slide.backgroundImage ? {
+                  backgroundImage: `url(${slide.backgroundImage})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                } : {}}
               >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                {slide.backgroundImage && (
+                  <div className="absolute inset-0 bg-black/40"></div>
+                )}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
                   <div className="max-w-3xl">
                     <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
                       {slide.badge}
