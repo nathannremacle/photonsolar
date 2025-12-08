@@ -112,22 +112,22 @@ export default function CatalogPage() {
 
   // Get unique values for filters
   const categories = [...new Set(products.map(p => p.category))].sort();
-  const brands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort();
-  const warranties = [...new Set(products.map(p => p.warranty).filter(Boolean))].sort();
-  const types = [...new Set(products.map(p => p.type).filter(Boolean))].sort();
+  const brands = [...new Set(products.map(p => p.brand).filter((p): p is string => Boolean(p)))].sort();
+  const warranties = [...new Set(products.map(p => p.warranty).filter((p): p is string => Boolean(p)))].sort();
+  const types = [...new Set(products.map(p => p.type).filter((p): p is string => Boolean(p)))].sort();
   const mpptCounts = [...new Set(products.map(p => p.mpptCount).filter((v): v is number => v !== undefined))].sort((a, b) => a - b);
-  const cellTypes = [...new Set(products.map(p => p.cellType).filter(Boolean))].sort();
-  const efficiencies = [...new Set(products.map(p => p.efficiency).filter(Boolean))].sort();
-  const maxPowers = [...new Set(products.map(p => p.maxPower).filter(Boolean))].sort();
-  const capacities = [...new Set(products.map(p => p.capacity).filter(Boolean))].sort();
-  const batteryTypes = [...new Set(products.map(p => p.batteryType).filter(Boolean))].sort();
-  const cops = [...new Set(products.map(p => p.cop).filter(Boolean))].sort();
-  const heatingPowers = [...new Set(products.map(p => p.heatingPower).filter(Boolean))].sort();
-  const apparentPowers = [...new Set(products.map(p => p.apparentPower).filter(Boolean))].sort();
-  const nominalPowers = [...new Set(products.map(p => p.nominalPower).filter(Boolean))].sort();
-  const networkConnections = [...new Set(products.map(p => p.networkConnection).filter(Boolean))].sort();
-  const voltages = [...new Set(products.map(p => p.voltage).filter(Boolean))].sort();
-  const powers = [...new Set(products.map(p => p.power).filter(Boolean))].sort();
+  const cellTypes = [...new Set(products.map(p => p.cellType).filter((p): p is string => Boolean(p)))].sort();
+  const efficiencies = [...new Set(products.map(p => p.efficiency).filter((p): p is string => Boolean(p)))].sort();
+  const maxPowers = [...new Set(products.map(p => p.maxPower).filter((p): p is string => Boolean(p)))].sort();
+  const capacities = [...new Set(products.map(p => p.capacity).filter((p): p is string => Boolean(p)))].sort();
+  const batteryTypes = [...new Set(products.map(p => p.batteryType).filter((p): p is string => Boolean(p)))].sort();
+  const cops = [...new Set(products.map(p => p.cop).filter((p): p is string => Boolean(p)))].sort();
+  const heatingPowers = [...new Set(products.map(p => p.heatingPower).filter((p): p is string => Boolean(p)))].sort();
+  const apparentPowers = [...new Set(products.map(p => p.apparentPower).filter((p): p is string => Boolean(p)))].sort();
+  const nominalPowers = [...new Set(products.map(p => p.nominalPower).filter((p): p is string => Boolean(p)))].sort();
+  const networkConnections = [...new Set(products.map(p => p.networkConnection).filter((p): p is string => Boolean(p)))].sort();
+  const voltages = [...new Set(products.map(p => p.voltage).filter((p): p is string => Boolean(p)))].sort();
+  const powers = [...new Set(products.map(p => p.power).filter((p): p is string => Boolean(p)))].sort();
 
   // Apply filters and search
   useEffect(() => {
