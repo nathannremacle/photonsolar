@@ -36,7 +36,14 @@ export default function ImageGallerySelector({
       const data = await response.json();
       
       // Filter only product images
-      let productImages = (data.images || []).filter((img: any) => {
+      type ProductImage = {
+        url: string;
+        name: string;
+        path: string;
+        category: string;
+      };
+      
+      let productImages: ProductImage[] = (data.images || []).filter((img: any) => {
         return img.path && img.path.includes('products/');
       }).map((img: any) => {
         // Extract category from path: products/category/filename
@@ -54,7 +61,7 @@ export default function ImageGallerySelector({
       
       // Sort: images from current category first, then others
       if (category) {
-        productImages.sort((a, b) => {
+        productImages.sort((a: ProductImage, b: ProductImage) => {
           const aInCategory = a.category === category;
           const bInCategory = b.category === category;
           if (aInCategory && !bInCategory) return -1;
