@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -43,7 +43,7 @@ function FilterSection({
   );
 }
 
-export default function CatalogPage() {
+function CatalogContent() {
   const { t, language } = useLanguage();
   const searchParams = useSearchParams();
   const [allProducts] = useState<Product[]>(products);
@@ -812,5 +812,26 @@ export default function CatalogPage() {
       </div>
       <Footer />
     </main>
+  );
+}
+
+export default function CatalogPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen">
+        <Navbar />
+        <div className="pt-24 pb-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+              <p className="mt-4 text-gray-600">Chargement...</p>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    }>
+      <CatalogContent />
+    </Suspense>
   );
 }
