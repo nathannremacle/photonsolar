@@ -1,57 +1,34 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-
-const promotions = [
-  {
-    id: 1,
-    badge: "PROMO",
-    title: "Baisse de prix significative sur la gamme SMA Hybride",
-    description: "Les performances SMA, désormais plus accessibles pour tous vos projets hybrides.",
-    features: [
-      "Réduction permanente du prix des onduleurs hybrides SMA",
-      "Autoconsommation maximisée",
-      "Triphasé et monophasé",
-      "Garantie 5+5 ans",
-    ],
-    cta: "J'en profite!",
-    ctaLink: "/collections/hybrides",
-    bgColor: "bg-gradient-to-br from-orange-500 to-orange-600",
-  },
-  {
-    id: 2,
-    badge: "Nouveau",
-    title: "Panneau Jinko JKM460N - Full Black",
-    description: "Un panneau noir intégral hautement performant et durable pour vos installations résidentielles.",
-    features: [
-      "Destiné à un usage résidentiel : full black – esthétique parfaite",
-      "Garantie du produit : 25 ans",
-      "Rendement : jusqu'à 23,02 %",
-      "En stock",
-    ],
-    cta: "En savoir plus",
-    ctaLink: "/products/jinko-jkm460n",
-    bgColor: "bg-gradient-to-br from-gray-800 to-gray-900",
-  },
-  {
-    id: 3,
-    badge: "NOUVEAU AU CATALOGUE",
-    title: "Onduleurs hybrides et batteries SolaX",
-    description: "Une solution hybride complète et intelligente pour optimiser chaque installation.",
-    features: [
-      "Onduleurs hybrides avec écran – CT et dongle inclus",
-      "Fonctionnement de secours intégré avec ou sans batteries",
-      "Gestion intelligente de la charge",
-    ],
-    cta: "Découvrir",
-    ctaLink: "/collections/solax",
-    bgColor: "bg-gradient-to-br from-blue-600 to-blue-700",
-  },
-];
+import type { Promotion } from "@/lib/homepage-storage";
 
 export default function Promotions() {
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+
+  useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      const response = await fetch("/api/homepage");
+      const data = await response.json();
+      if (response.ok && data.content) {
+        setPromotions(data.content.promotions || []);
+      }
+    } catch (error) {
+      console.error("Error loading promotions:", error);
+    }
+  };
+
+  if (promotions.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -102,4 +79,3 @@ export default function Promotions() {
     </section>
   );
 }
-

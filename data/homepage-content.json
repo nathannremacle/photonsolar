@@ -1,0 +1,243 @@
+{
+  "banner": {
+    "enabled": true,
+    "title": "Bienvenue chez Photon Solar",
+    "subtitle": "Votre spécialiste en énergie solaire depuis 2008",
+    "ctaText": "Voir le catalogue",
+    "ctaLink": "/collections"
+  },
+  "heroSlides": [
+    {
+      "id": 1,
+      "badge": "Depuis 2008",
+      "title": "Pourquoi PhotonSolar ?",
+      "description": "Depuis 2008, PhotonSolar s'impose comme un acteur incontournable dans le domaine de l'énergie solaire. Nous vous accompagnons dans votre transition énergétique grâce à une large gamme d'équipements de haute qualité.",
+      "cta": "En savoir plus",
+      "ctaLink": "/pages/a-propos",
+      "bgColor": "bg-gradient-to-br from-orange-500 to-orange-600"
+    },
+    {
+      "id": 2,
+      "badge": "Nouveautés",
+      "title": "ELITEC SOLAR Xmax - La nouvelle génération",
+      "description": "Découvrez nos panneaux solaires ELITEC SOLAR Xmax bifacial jusqu'à 560Wc et 600Wc. Technologie de pointe avec garantie 30 ans.",
+      "cta": "Voir les produits",
+      "ctaLink": "/collections/panneaux-solaires",
+      "bgColor": "bg-gradient-to-br from-blue-600 to-blue-700"
+    },
+    {
+      "id": 3,
+      "badge": "PROMO",
+      "title": "ELITEC SOLAR Xmax 460Wc - 34% de réduction",
+      "description": "Profitez de notre offre spéciale sur le panneau ELITEC SOLAR Xmax 460Wc. Prix réduit pour un produit de qualité premium.",
+      "cta": "Voir l'offre",
+      "ctaLink": "/promo",
+      "bgColor": "bg-gradient-to-br from-red-600 to-red-700"
+    },
+    {
+      "id": 4,
+      "badge": "Formation",
+      "title": "Besoin de conseils ?",
+      "description": "Demandez notre catalogue de produits et inscrivez-vous à nos formations. Notre équipe d'experts vous accompagne dans vos projets solaires.",
+      "cta": "Contactez-nous",
+      "ctaLink": "/contact",
+      "bgColor": "bg-gradient-to-br from-green-600 to-green-700"
+    },
+    {
+      "id": 5,
+      "badge": "Catalogue complet",
+      "title": "Tous nos produits en ligne",
+      "description": "Panneaux solaires, onduleurs, batteries, structures de montage, bornes de recharge et bien plus encore. Tout pour votre installation solaire.",
+      "cta": "Voir tous les produits",
+      "ctaLink": "/collections",
+      "bgColor": "bg-gradient-to-br from-gray-700 to-gray-800"
+    }
+  ],
+  "promotions": [
+    {
+      "id": 1,
+      "badge": "PROMO",
+      "title": "Baisse de prix significative sur la gamme SMA Hybride",
+      "description": "Les performances SMA, désormais plus accessibles pour tous vos projets hybrides.",
+      "features": [
+        "Réduction permanente du prix des onduleurs hybrides SMA",
+        "Autoconsommation maximisée",
+        "Triphasé et monophasé",
+        "Garantie 5+5 ans"
+      ],
+      "cta": "J'en profite!",
+      "ctaLink": "/collections/onduleurs?subcategory=hybride",
+      "bgColor": "bg-gradient-to-br from-orange-500 to-orange-600"
+    },
+    {
+      "id": 2,
+      "badge": "Nouveau",
+      "title": "Panneau Jinko JKM460N - Full Black",
+      "description": "Un panneau noir intégral hautement performant et durable pour vos installations résidentielles.",
+      "features": [
+        "Destiné à un usage résidentiel : full black – esthétique parfaite",
+        "Garantie du produit : 25 ans",
+        "Rendement : jusqu'à 23,02 %",
+        "En stock"
+      ],
+      "cta": "En savoir plus",
+      "ctaLink": "/collections/panneaux-solaires?brands=Jinko",
+      "bgColor": "bg-gradient-to-br from-gray-800 to-gray-900"
+    },
+    {
+      "id": 3,
+      "badge": "NOUVEAU AU CATALOGUE",
+      "title": "Onduleurs hybrides et batteries SolaX",
+      "description": "Une solution hybride complète et intelligente pour optimiser chaque installation.",
+      "features": [
+        "Onduleurs hybrides avec écran – CT et dongle inclus",
+        "Fonctionnement de secours intégré avec ou sans batteries",
+        "Gestion intelligente de la charge"
+      ],
+      "cta": "Découvrir",
+      "ctaLink": "/collections?brands=SolaX",
+      "bgColor": "bg-gradient-to-br from-blue-600 to-blue-700"
+    }
+  ],
+  "bestSellers": {
+    "enabled": true,
+    "productIds": [
+      "elitec-xmax-560-bifacial",
+      "elitec-xmax-470-bifacial",
+      "elitec-xmax-600",
+      "elitec-hc7-540",
+      "elitec-xmax-560",
+      "elitec-xmax-460"
+    ]
+  },
+  "clearance": {
+    "enabled": true,
+    "productIds": [
+      "deye-sun-3kw",
+      "deye-sun-5kw",
+      "growatt-min-3000tl",
+      "elitec-xmax-460"
+    ]
+  },
+  "specialOffers": [
+    {
+      "id": 1,
+      "title": "Offre de cashback prolongée jusqu'au 31/12/2025 !",
+      "description": "Participer à la campagne est un jeu d'enfant pour les entreprises d'installation :",
+      "features": [
+        "Achetez et installez les appareils SMA éligibles",
+        "Enregistrez les appareils via les systèmes SMA",
+        "Recevez automatiquement votre montant de cashback"
+      ],
+      "note": "Inscription possible jusqu'au 30/11/2025. Après cette date, seules les entreprises déjà enregistrées pourront continuer à cumuler du cashback jusqu'au 31/12/2025.",
+      "cta": "Découvrir",
+      "ctaLink": "/pages/sma-offre",
+      "bgColor": "bg-gradient-to-br from-orange-500 to-orange-600"
+    },
+    {
+      "id": 2,
+      "title": "Kits de modernisation SMA – prêts pour l'avenir !",
+      "description": "Pourquoi choisir les kits de modernisation SMA ?",
+      "features": [
+        "Un package tout-en-un",
+        "Une offre attractive",
+        "Prêts pour une gestion intelligente de l'énergie",
+        "Une installation simplifiée",
+        "Une forte demande sur le marché"
+      ],
+      "cta": "Découvrir",
+      "ctaLink": "/pages/sma-offre",
+      "bgColor": "bg-gradient-to-br from-blue-600 to-blue-700"
+    }
+  ],
+  "news": {
+    "enabled": true,
+    "items": [
+      {
+        "id": 1,
+        "category": "News",
+        "title": "Wallonie : un tournant énergétique décisif – Le rôle d'Ecostal dans cette transformation",
+        "date": "3 December 2025",
+        "image": "/placeholder-news.jpg",
+        "link": "/blogs/news/wallonia-energy-turning-point"
+      },
+      {
+        "id": 2,
+        "category": "News",
+        "title": "Vincent Maurice rejoint Ecostal pour piloter les activités de Distribution",
+        "date": "11 September 2025",
+        "image": "/placeholder-news.jpg",
+        "link": "/blogs/news/vincent-maurice-joins-ecostal"
+      }
+    ]
+  },
+  "brands": {
+    "enabled": true,
+    "items": [
+      {
+        "name": "Easee",
+        "link": "/collections?brands=Easee"
+      },
+      {
+        "name": "Eurener",
+        "link": "/collections?brands=Eurener"
+      },
+      {
+        "name": "Growatt",
+        "link": "/collections?brands=Growatt"
+      },
+      {
+        "name": "Jinko Solar",
+        "link": "/collections?brands=Jinko"
+      },
+      {
+        "name": "Longi",
+        "link": "/collections?brands=Longi"
+      },
+      {
+        "name": "Peblar",
+        "link": "/collections?brands=Peblar"
+      },
+      {
+        "name": "Schletter",
+        "link": "/collections?brands=Schletter"
+      },
+      {
+        "name": "SMA",
+        "link": "/collections?brands=SMA"
+      },
+      {
+        "name": "Smappee",
+        "link": "/collections?brands=Smappee"
+      },
+      {
+        "name": "Solaredge",
+        "link": "/collections?brands=Solaredge"
+      },
+      {
+        "name": "Staubli",
+        "link": "/collections?brands=Staubli"
+      },
+      {
+        "name": "Sunbeam",
+        "link": "/collections?brands=Sunbeam"
+      },
+      {
+        "name": "Sunpower",
+        "link": "/collections?brands=Sunpower"
+      },
+      {
+        "name": "Trina Solar",
+        "link": "/collections?brands=Trina"
+      },
+      {
+        "name": "V2C",
+        "link": "/collections?brands=V2C"
+      },
+      {
+        "name": "Wallbox",
+        "link": "/collections?brands=Wallbox"
+      }
+    ]
+  }
+}

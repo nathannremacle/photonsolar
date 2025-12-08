@@ -2,25 +2,35 @@
 
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getProductById } from "@/data/products";
 
-const productIds = [
-  "elitec-xmax-560-bifacial",
-  "elitec-xmax-470-bifacial",
-  "elitec-xmax-600",
-  "elitec-hc7-540",
-  "elitec-xmax-560",
-  "elitec-xmax-460",
-];
-
 export default function BestSellers() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const itemsPerView = 4;
   const { t, language } = useLanguage();
+  const [productIds, setProductIds] = useState<string[]>([]);
+  const [enabled, setEnabled] = useState(true);
+
+  useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      const response = await fetch("/api/homepage");
+      const data = await response.json();
+      if (response.ok && data.content) {
+        setProductIds(data.content.bestSellers?.productIds || []);
+        setEnabled(data.content.bestSellers?.enabled ?? true);
+      }
+    } catch (error) {
+      console.error("Error loading best sellers:", error);
+    }
+  };
 
   const products = productIds.map(id => getProductById(id)).filter(Boolean) as any[];
 
@@ -39,6 +49,10 @@ export default function BestSellers() {
   };
 
   const visibleProducts = products.slice(currentIndex, currentIndex + itemsPerView);
+
+  if (!enabled || products.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-16 bg-white">

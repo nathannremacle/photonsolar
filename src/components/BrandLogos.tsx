@@ -1,28 +1,35 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-
-const brands = [
-  { name: "Easee", link: "/collections/easee" },
-  { name: "Eurener", link: "/collections/eurener" },
-  { name: "Growatt", link: "/collections/growatt" },
-  { name: "Jinko Solar", link: "/collections/jinko-solar" },
-  { name: "Longi", link: "/collections/longi" },
-  { name: "Peblar", link: "/collections/peblar" },
-  { name: "Schletter", link: "/collections/schletter" },
-  { name: "SMA", link: "/collections/sma" },
-  { name: "Smappee", link: "/collections/smappee" },
-  { name: "Solaredge", link: "/collections/solaredge" },
-  { name: "Staubli", link: "/collections/staubli" },
-  { name: "Sunbeam", link: "/collections/sunbeam" },
-  { name: "Sunpower", link: "/collections/sunpower" },
-  { name: "Trina Solar", link: "/collections/trinasolar" },
-  { name: "V2C", link: "/collections/v2c" },
-  { name: "Wallbox", link: "/collections/wallbox" },
-];
+import type { Brand } from "@/lib/homepage-storage";
 
 export default function BrandLogos() {
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [enabled, setEnabled] = useState(true);
+
+  useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      const response = await fetch("/api/homepage");
+      const data = await response.json();
+      if (response.ok && data.content) {
+        setBrands(data.content.brands?.items || []);
+        setEnabled(data.content.brands?.enabled ?? true);
+      }
+    } catch (error) {
+      console.error("Error loading brands:", error);
+    }
+  };
+
+  if (!enabled || brands.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -51,4 +58,3 @@ export default function BrandLogos() {
     </section>
   );
 }
-

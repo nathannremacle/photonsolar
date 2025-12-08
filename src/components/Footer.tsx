@@ -48,18 +48,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/news" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link href="/blogs/news" className="text-gray-300 hover:text-white transition-colors text-sm">
                   {t("nav.news")}
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="text-gray-300 hover:text-white transition-colors text-sm">
                   {t("nav.contact")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/mon-compte" className="text-gray-300 hover:text-white transition-colors text-sm">
-                  {t("nav.account")}
                 </Link>
               </li>
             </ul>

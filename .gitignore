@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# admin panel data (sensitive)
+data/admin-settings.json
+# Keep content and products in repo for version control
+# data/site-content.json
+# data/products.json

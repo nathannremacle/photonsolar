@@ -1,0 +1,36 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "title": "Catalogues produits",
+      "description": "Téléchargez nos catalogues complets de produits solaires",
+      "icon": "BookOpen",
+      "color": "bg-blue-500",
+      "files": []
+    },
+    {
+      "id": 2,
+      "title": "Guides d'installation",
+      "description": "Manuels et guides techniques pour vos installations",
+      "icon": "FileText",
+      "color": "bg-green-500",
+      "files": []
+    },
+    {
+      "id": 3,
+      "title": "Fiches techniques",
+      "description": "Documentation technique détaillée de nos produits",
+      "icon": "FileCheck",
+      "color": "bg-orange-500",
+      "files": []
+    },
+    {
+      "id": 4,
+      "title": "Formations",
+      "description": "Documents et supports de formation",
+      "icon": "Download",
+      "color": "bg-purple-500",
+      "files": []
+    }
+  ]
+}

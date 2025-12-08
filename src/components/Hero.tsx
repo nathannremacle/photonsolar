@@ -4,65 +4,57 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import Link from "next/link";
-
-const slides = [
-  {
-    id: 1,
-    badge: "Depuis 2008",
-    title: "Pourquoi PhotonSolar ?",
-    description: "Depuis 2008, PhotonSolar s'impose comme un acteur incontournable dans le domaine de l'énergie solaire. Nous vous accompagnons dans votre transition énergétique grâce à une large gamme d'équipements de haute qualité.",
-    cta: "En savoir plus",
-    ctaLink: "/pages/a-propos",
-    bgColor: "bg-gradient-to-br from-orange-500 to-orange-600",
-  },
-  {
-    id: 2,
-    badge: "Nouveautés",
-    title: "ELITEC SOLAR Xmax - La nouvelle génération",
-    description: "Découvrez nos panneaux solaires ELITEC SOLAR Xmax bifacial jusqu'à 560Wc et 600Wc. Technologie de pointe avec garantie 30 ans.",
-    cta: "Voir les produits",
-    ctaLink: "/collections/panneaux-solaires",
-    bgColor: "bg-gradient-to-br from-blue-600 to-blue-700",
-  },
-  {
-    id: 3,
-    badge: "PROMO",
-    title: "ELITEC SOLAR Xmax 460Wc - 34% de réduction",
-    description: "Profitez de notre offre spéciale sur le panneau ELITEC SOLAR Xmax 460Wc. Prix réduit pour un produit de qualité premium.",
-    cta: "Voir l'offre",
-    ctaLink: "/promo",
-    bgColor: "bg-gradient-to-br from-red-600 to-red-700",
-  },
-  {
-    id: 4,
-    badge: "Formation",
-    title: "Besoin de conseils ?",
-    description: "Demandez notre catalogue de produits et inscrivez-vous à nos formations. Notre équipe d'experts vous accompagne dans vos projets solaires.",
-    cta: "Contactez-nous",
-    ctaLink: "/contact",
-    bgColor: "bg-gradient-to-br from-green-600 to-green-700",
-  },
-  {
-    id: 5,
-    badge: "Catalogue complet",
-    title: "Tous nos produits en ligne",
-    description: "Panneaux solaires, onduleurs, batteries, structures de montage, bornes de recharge et bien plus encore. Tout pour votre installation solaire.",
-    cta: "Voir tous les produits",
-    ctaLink: "/collections",
-    bgColor: "bg-gradient-to-br from-gray-700 to-gray-800",
-  },
-];
+import type { HeroSlide } from "@/lib/homepage-storage";
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showBanner, setShowBanner] = useState(true);
+  const [slides, setSlides] = useState<HeroSlide[]>([]);
+  const [banner, setBanner] = useState({
+    enabled: true,
+    title: "",
+    subtitle: "",
+    ctaText: "",
+    ctaLink: "",
+  });
 
   useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      const response = await fetch("/api/homepage");
+      const data = await response.json();
+      if (response.ok && data.content) {
+        setSlides(data.content.heroSlides || []);
+        setBanner(data.content.banner || { enabled: true, title: "", subtitle: "", ctaText: "", ctaLink: "" });
+        setShowBanner(data.content.banner?.enabled ?? true);
+      }
+    } catch (error) {
+      console.error("Error loading homepage content:", error);
+      // Fallback to default slides
+      setSlides([
+        {
+          id: 1,
+          badge: "Depuis 2008",
+          title: "Pourquoi PhotonSolar ?",
+          description: "Depuis 2008, PhotonSolar s'impose comme un acteur incontournable dans le domaine de l'énergie solaire.",
+          cta: "En savoir plus",
+          ctaLink: "/pages/a-propos",
+          bgColor: "bg-gradient-to-br from-orange-500 to-orange-600",
+        },
+      ]);
+    }
+  };
+
+  useEffect(() => {
+    if (slides.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -72,20 +64,24 @@ export default function Hero() {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
+  if (slides.length === 0) {
+    return null;
+  }
+
   return (
     <section className="relative w-full overflow-hidden">
       {/* Top Banner */}
-      {showBanner && (
+      {showBanner && banner.enabled && (
         <div className="bg-orange-600 text-white py-3 px-4 relative">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex-1 text-center">
               <h2 className="text-lg font-bold">
-                Bienvenue chez <strong>Photon Solar</strong>
+                {banner.title || "Bienvenue chez Photon Solar"}
               </h2>
-              <p className="text-sm mt-1">Votre spécialiste en énergie solaire depuis 2008</p>
+              <p className="text-sm mt-1">{banner.subtitle || "Votre spécialiste en énergie solaire depuis 2008"}</p>
             </div>
-            <Link href="/collections" className="text-sm underline hover:no-underline mr-4">
-              Voir le catalogue
+            <Link href={banner.ctaLink || "/collections"} className="text-sm underline hover:no-underline mr-4">
+              {banner.ctaText || "Voir le catalogue"}
             </Link>
             <button
               onClick={() => setShowBanner(false)}

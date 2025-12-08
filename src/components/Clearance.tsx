@@ -2,25 +2,35 @@
 
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getProductById } from "@/data/products";
 
-// Utiliser les produits en déstockage depuis la base de données
-// Pour l'instant, on utilise quelques produits existants comme exemples
-const clearanceProductIds = [
-  "deye-sun-3kw",
-  "deye-sun-5kw",
-  "growatt-min-3000tl",
-  "elitec-xmax-460",
-];
-
 export default function Clearance() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const itemsPerView = 4;
   const { t, language } = useLanguage();
+  const [clearanceProductIds, setClearanceProductIds] = useState<string[]>([]);
+  const [enabled, setEnabled] = useState(true);
+
+  useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      const response = await fetch("/api/homepage");
+      const data = await response.json();
+      if (response.ok && data.content) {
+        setClearanceProductIds(data.content.clearance?.productIds || []);
+        setEnabled(data.content.clearance?.enabled ?? true);
+      }
+    } catch (error) {
+      console.error("Error loading clearance:", error);
+    }
+  };
 
   // Récupérer les produits depuis la base de données
   const clearanceProducts = clearanceProductIds
@@ -42,6 +52,10 @@ export default function Clearance() {
   };
 
   const visibleProducts = clearanceProducts.slice(currentIndex, currentIndex + itemsPerView);
+
+  if (!enabled || clearanceProducts.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-16 bg-gray-50">

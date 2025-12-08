@@ -1,42 +1,34 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-
-const offers = [
-  {
-    id: 1,
-    title: "Offre de cashback prolongée jusqu'au 31/12/2025 !",
-    description: "Participer à la campagne est un jeu d'enfant pour les entreprises d'installation :",
-    features: [
-      "Achetez et installez les appareils SMA éligibles",
-      "Enregistrez les appareils via les systèmes SMA",
-      "Recevez automatiquement votre montant de cashback",
-    ],
-    note: "Inscription possible jusqu'au 30/11/2025. Après cette date, seules les entreprises déjà enregistrées pourront continuer à cumuler du cashback jusqu'au 31/12/2025.",
-    cta: "Découvrir",
-    ctaLink: "/pages/sma-offre",
-    bgColor: "bg-gradient-to-br from-orange-500 to-orange-600",
-  },
-  {
-    id: 2,
-    title: "Kits de modernisation SMA – prêts pour l'avenir !",
-    description: "Pourquoi choisir les kits de modernisation SMA ?",
-    features: [
-      "Un package tout-en-un",
-      "Une offre attractive",
-      "Prêts pour une gestion intelligente de l'énergie",
-      "Une installation simplifiée",
-      "Une forte demande sur le marché",
-    ],
-    cta: "Découvrir",
-    ctaLink: "/pages/sma-offre",
-    bgColor: "bg-gradient-to-br from-blue-600 to-blue-700",
-  },
-];
+import type { SpecialOffer } from "@/lib/homepage-storage";
 
 export default function SpecialOffers() {
+  const [offers, setOffers] = useState<SpecialOffer[]>([]);
+
+  useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      const response = await fetch("/api/homepage");
+      const data = await response.json();
+      if (response.ok && data.content) {
+        setOffers(data.content.specialOffers || []);
+      }
+    } catch (error) {
+      console.error("Error loading special offers:", error);
+    }
+  };
+
+  if (offers.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -82,4 +74,3 @@ export default function SpecialOffers() {
     </section>
   );
 }
-

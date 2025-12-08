@@ -1,29 +1,36 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-
-const newsItems = [
-  {
-    id: 1,
-    category: "News",
-    title: "Wallonie : un tournant énergétique décisif – Le rôle d'Ecostal dans cette transformation",
-    date: "3 December 2025",
-    image: "/placeholder-news.jpg",
-    link: "/blogs/news/wallonia-energy-turning-point",
-  },
-  {
-    id: 2,
-    category: "News",
-    title: "Vincent Maurice rejoint Ecostal pour piloter les activités de Distribution",
-    date: "11 September 2025",
-    image: "/placeholder-news.jpg",
-    link: "/blogs/news/vincent-maurice-joins-ecostal",
-  },
-];
+import type { NewsItem } from "@/lib/homepage-storage";
 
 export default function News() {
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [enabled, setEnabled] = useState(true);
+
+  useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      const response = await fetch("/api/homepage");
+      const data = await response.json();
+      if (response.ok && data.content) {
+        setNewsItems(data.content.news?.items || []);
+        setEnabled(data.content.news?.enabled ?? true);
+      }
+    } catch (error) {
+      console.error("Error loading news:", error);
+    }
+  };
+
+  if (!enabled || newsItems.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -40,9 +47,17 @@ export default function News() {
               <Link href={item.link} className="block">
                 <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                   <div className="aspect-video bg-gray-200 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
-                      <span className="text-gray-500 text-sm">Image article</span>
-                    </div>
+                    {item.image && item.image !== "/placeholder-news.jpg" ? (
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
+                        <span className="text-gray-500 text-sm">Image article</span>
+                      </div>
+                    )}
                     <span className="absolute top-4 left-4 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase">
                       {item.category}
                     </span>
@@ -52,13 +67,10 @@ export default function News() {
                       {item.title}
                     </h3>
                     <p className="text-gray-500 text-sm mb-4">{item.date}</p>
-                    <Link
-                      href={item.link}
-                      className="inline-flex items-center gap-2 text-orange-600 font-semibold hover:gap-3 transition-all"
-                    >
+                    <div className="inline-flex items-center gap-2 text-orange-600 font-semibold group-hover:gap-3 transition-all pointer-events-none">
                       En savoir plus
                       <ArrowRight size={16} />
-                    </Link>
+                    </div>
                   </div>
                 </div>
               </Link>
@@ -78,4 +90,3 @@ export default function News() {
     </section>
   );
 }
-

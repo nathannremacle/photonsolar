@@ -45,9 +45,8 @@ export default function Navbar() {
   const topMenuItems = [
     { name: t("nav.home"), key: "nav.home", href: "/" },
     { name: t("nav.downloads"), key: "nav.downloads", href: "/telechargements" },
-    { name: t("nav.news"), key: "nav.news", href: "/news" },
+    { name: t("nav.news"), key: "nav.news", href: "/blogs/news" },
     { name: t("nav.contact"), key: "nav.contact", href: "/contact" },
-    { name: t("nav.account"), key: "nav.account", href: "/mon-compte" },
   ];
 
   // Mapping des hrefs vers les catégories pour les icônes

@@ -103,6 +103,11 @@ export const products: Product[] = [
   },
   {
     id: "deye-sun-3kw",
+    image: "/images/products/onduleurs/deye-sun-3-6kw.png", // Image principale (pour compatibilité)
+    images: [
+      "/images/products/onduleurs/deye-sun-3-6kw.png",
+      "/images/products/onduleurs/deye-sun-3-6kw-2.png",
+    ],
     name: "Deye SUN-3KW SG04LP1-BE Monophasé",
     brand: "DEYE",
     category: "onduleurs",
@@ -150,6 +155,12 @@ export const products: Product[] = [
   },
   {
     id: "deye-sun-5kw",
+    image: "/images/products/onduleurs/deye-sun-5kw.png", // Image principale (pour compatibilité)
+    images: [
+      "/images/products/onduleurs/deye-sun-5kw.png",
+      "/images/products/onduleurs/deye-sun-5kw-2.png",
+      "/images/products/onduleurs/deye-sun-5kw-3.png",
+    ],
     name: "Deye SUN-5KW SG05LP1-EU-AM2-P",
     brand: "DEYE",
     category: "onduleurs",
@@ -191,6 +202,12 @@ export const products: Product[] = [
   },
   {
     id: "deye-sun-6kw",
+    image: "/images/products/onduleurs/deye-sun-5kw.png", // Image principale (pour compatibilité)
+    images: [
+      "/images/products/onduleurs/deye-sun-5kw.png",
+      "/images/products/onduleurs/deye-sun-5kw-2.png",
+      "/images/products/onduleurs/deye-sun-5kw-3.png",
+    ],
     name: "Deye SUN-6KW SG05LP1-EU-AM2-P",
     brand: "DEYE",
     category: "onduleurs",
@@ -232,6 +249,12 @@ export const products: Product[] = [
   },
   {
     id: "deye-sun-8kw",
+    image: "/images/products/onduleurs/deye-sun-5kw.png", // Image principale (pour compatibilité)
+    images: [
+      "/images/products/onduleurs/deye-sun-5kw.png",
+      "/images/products/onduleurs/deye-sun-5kw-2.png",
+      "/images/products/onduleurs/deye-sun-5kw-3.png",
+    ],
     name: "Deye SUN-8KW SG05LP1-EU-AM2-P",
     brand: "DEYE",
     category: "onduleurs",
