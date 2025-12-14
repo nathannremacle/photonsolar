@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,7 +9,7 @@ import ProductFilters from "@/components/ProductFilters";
 import { getProductsByCategory, type Product } from "@/data/products";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-export default function CategoryPage() {
+function CategoryContent() {
   const { t, language } = useLanguage();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -96,6 +96,27 @@ export default function CategoryPage() {
       </div>
       <Footer />
     </main>
+  );
+}
+
+export default function CategoryPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen">
+        <Navbar />
+        <div className="pt-24 pb-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    }>
+      <CategoryContent />
+    </Suspense>
   );
 }
 
