@@ -120,12 +120,14 @@ export default function ProductListSelector({
                   ${isDragOver ? 'border-orange-500 bg-orange-50' : ''}
                 `}
               >
-                <GripVertical 
-                  className="w-5 h-5 text-gray-400 flex-shrink-0 cursor-move"
+                <div
                   draggable
                   onDragStart={() => handleDragStart(index)}
                   onDragEnd={handleDragEnd}
-                />
+                  className="cursor-move flex-shrink-0"
+                >
+                  <GripVertical className="w-5 h-5 text-gray-400" />
+                </div>
                 <div className="relative w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                   <img
                     src={normalizeImageUrl(productImage)}

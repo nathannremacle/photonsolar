@@ -245,15 +245,17 @@ export default function AdminNews() {
                     />
                   ) : (
                     <div className="flex items-start gap-4">
-                      <GripVertical 
-                        className="w-6 h-6 text-gray-400 flex-shrink-0 mt-1 cursor-move"
+                      <div
                         draggable
                         onDragStart={() => handleDragStart(index)}
                         onDragEnd={() => {
                           setDraggedIndex(null);
                           setDragOverIndex(null);
                         }}
-                      />
+                        className="cursor-move mt-1 flex-shrink-0"
+                      >
+                        <GripVertical className="w-6 h-6 text-gray-400" />
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start gap-4">
                           {/* Thumbnail */}
