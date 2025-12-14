@@ -6,8 +6,6 @@ import { registrationRateLimiter, getClientIP } from "@/lib/rate-limit";
 import { Resend } from "resend";
 import { randomBytes } from "crypto";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 /**
  * POST /api/auth/register
  * 
@@ -104,6 +102,7 @@ export async function POST(request: NextRequest) {
     // Send verification email (if Resend is configured)
     if (process.env.RESEND_API_KEY) {
       try {
+        const resend = new Resend(process.env.RESEND_API_KEY);
         const verificationUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/auth/verify-email?token=${verificationToken}`;
         
         await resend.emails.send({
