@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import type { Product } from '@/data/products';
 import { 
   loadProducts, 
@@ -47,6 +48,17 @@ export async function POST(request: NextRequest) {
 
     const createdProduct = await createProduct(product);
 
+    // Revalidate cache for product pages
+    revalidatePath('/products');
+    revalidatePath('/');
+    revalidatePath('/collections');
+    revalidatePath('/promo');
+    revalidatePath(`/products/${createdProduct.id}`);
+    // Revalidate category page if category exists
+    if (createdProduct.category) {
+      revalidatePath(`/collections/${createdProduct.category}`);
+    }
+
     return NextResponse.json({ success: true, product: createdProduct });
   } catch (error) {
     console.error('Error adding product:', error);
@@ -69,6 +81,17 @@ export async function PUT(request: NextRequest) {
     }
 
     const updatedProduct = await updateProduct(product);
+
+    // Revalidate cache for product pages
+    revalidatePath('/products');
+    revalidatePath('/');
+    revalidatePath('/collections');
+    revalidatePath('/promo');
+    revalidatePath(`/products/${updatedProduct.id}`);
+    // Revalidate category page if category exists
+    if (updatedProduct.category) {
+      revalidatePath(`/collections/${updatedProduct.category}`);
+    }
 
     return NextResponse.json({ success: true, product: updatedProduct });
   } catch (error: any) {
@@ -101,7 +124,23 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Get product before deletion to know its category
+    const { getProduct } = await import('@/lib/products-storage');
+    const productToDelete = await getProduct(id);
+    const category = productToDelete?.category;
+
     await deleteProduct(id);
+
+    // Revalidate cache for product pages
+    revalidatePath('/products');
+    revalidatePath('/');
+    revalidatePath('/collections');
+    revalidatePath('/promo');
+    revalidatePath(`/products/${id}`);
+    // Revalidate category page if category exists
+    if (category) {
+      revalidatePath(`/collections/${category}`);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
