@@ -1,6 +1,7 @@
 import { prisma } from './prisma';
 import type { Product } from '@/data/products';
 import type { Product as PrismaProduct } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 // ==============================================
 // Type conversion helpers
@@ -10,14 +11,17 @@ import type { Product as PrismaProduct } from '@prisma/client';
  * Convert Prisma Product to frontend Product type
  */
 function prismaToProduct(p: PrismaProduct): Product {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/8c389881-52ef-4ac5-9288-d85afd18b471',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'products-storage.ts:12',message:'Converting Prisma product',data:{id:p.id,price:p.price,originalPrice:p.originalPrice,priceType:typeof p.price,originalPriceType:typeof p.originalPrice},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+  // #endregion
   return {
     id: p.id,
     name: p.name,
     brand: p.brand,
     category: p.category,
     subcategory: p.subcategory || undefined,
-    price: p.price || undefined,
-    originalPrice: p.originalPrice || undefined,
+    price: p.price ?? undefined,
+    originalPrice: p.originalPrice ?? undefined,
     sku: p.sku || undefined,
     description: p.description || undefined,
     technicalDescription: p.technicalDescription || undefined,
@@ -80,8 +84,8 @@ function productToPrismaData(product: Product) {
     type: product.type || null,
     voltage: product.voltage || null,
     features: product.features || [],
-    specifications: product.specifications || null,
-    documentation: product.documentation || null,
+    specifications: (product.specifications ?? Prisma.DbNull) as Prisma.InputJsonValue,
+    documentation: (product.documentation ?? Prisma.DbNull) as Prisma.InputJsonValue,
     mpptCount: product.mpptCount || null,
     apparentPower: product.apparentPower || null,
     nominalPower: product.nominalPower || null,
