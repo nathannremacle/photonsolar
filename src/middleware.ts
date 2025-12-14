@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "@/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/auth.config";
 
 /**
  * Middleware to protect private routes
@@ -14,6 +15,9 @@ import { auth } from "@/auth";
  * - /login (redirects to / if already logged in)
  * - /register (redirects to / if already logged in)
  */
+// Create a lightweight auth instance for middleware (no Prisma)
+const { auth } = NextAuth(authConfig);
+
 export async function middleware(request: NextRequest) {
   try {
     const session = await auth();
