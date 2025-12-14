@@ -703,12 +703,14 @@ function HeroRepeaterEditor({
                 `}
               >
                 <div className="p-4 flex items-start gap-4">
-                  <GripVertical 
-                    className="w-6 h-6 text-gray-400 flex-shrink-0 mt-1 cursor-move"
+                  <div
                     draggable
                     onDragStart={() => handleDragStart(index)}
                     onDragEnd={handleDragEnd}
-                  />
+                    className="cursor-move mt-1 flex-shrink-0"
+                  >
+                    <GripVertical className="w-6 h-6 text-gray-400" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     {isEditing ? (
                       <SlideEditor
@@ -881,15 +883,17 @@ function PromotionsRepeaterEditor({
                 `}
               >
                 <div className="p-4 flex items-start gap-4">
-                  <GripVertical 
-                    className="w-6 h-6 text-gray-400 flex-shrink-0 mt-1 cursor-move"
+                  <div
                     draggable
                     onDragStart={() => handleDragStart(index)}
                     onDragEnd={() => {
                       setDraggedIndex(null);
                       setDragOverIndex(null);
                     }}
-                  />
+                    className="cursor-move mt-1 flex-shrink-0"
+                  >
+                    <GripVertical className="w-6 h-6 text-gray-400" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     {isEditing ? (
                       <PromotionEditor
@@ -1059,15 +1063,17 @@ function SpecialOffersRepeaterEditor({
                 `}
               >
                 <div className="p-4 flex items-start gap-4">
-                  <GripVertical 
-                    className="w-6 h-6 text-gray-400 flex-shrink-0 mt-1 cursor-move"
+                  <div
                     draggable
                     onDragStart={() => handleDragStart(index)}
                     onDragEnd={() => {
                       setDraggedIndex(null);
                       setDragOverIndex(null);
                     }}
-                  />
+                    className="cursor-move mt-1 flex-shrink-0"
+                  >
+                    <GripVertical className="w-6 h-6 text-gray-400" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     {isEditing ? (
                       <SpecialOfferEditor
@@ -1233,15 +1239,17 @@ function NewsRepeaterEditor({
                 `}
               >
                 <div className="p-4 flex items-start gap-4">
-                  <GripVertical 
-                    className="w-6 h-6 text-gray-400 flex-shrink-0 mt-1 cursor-move"
+                  <div
                     draggable
                     onDragStart={() => handleDragStart(index)}
                     onDragEnd={() => {
                       setDraggedIndex(null);
                       setDragOverIndex(null);
                     }}
-                  />
+                    className="cursor-move mt-1 flex-shrink-0"
+                  >
+                    <GripVertical className="w-6 h-6 text-gray-400" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     {isEditing ? (
                       <NewsItemEditor
