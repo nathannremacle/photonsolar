@@ -659,6 +659,19 @@ function HeroRepeaterEditor({
     onSlidesChange(newSlides);
   };
 
+  const handleMove = (index: number, direction: "up" | "down") => {
+    if (
+      (direction === "up" && index === 0) ||
+      (direction === "down" && index === slides.length - 1)
+    )
+      return;
+
+    const newSlides = [...slides];
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    [newSlides[index], newSlides[newIndex]] = [newSlides[newIndex], newSlides[index]];
+    onSlidesChange(newSlides);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -715,11 +728,17 @@ function HeroRepeaterEditor({
                     {isEditing ? (
                       <SlideEditor
                         slide={slide}
+                        index={index}
                         onUpdate={(updated) => {
                           handleUpdate(index, updated);
                           setEditingIndex(null);
                         }}
-                        onCancel={() => setEditingIndex(null)}
+                        onDelete={() => {
+                          handleDelete(index);
+                        }}
+                        onMove={(direction) => handleMove(index, direction)}
+                        canMoveUp={index > 0}
+                        canMoveDown={index < slides.length - 1}
                       />
                     ) : (
                       <div className="flex items-start gap-4">
@@ -898,13 +917,16 @@ function PromotionsRepeaterEditor({
                     {isEditing ? (
                       <PromotionEditor
                         promotion={promo}
+                        index={index}
                         onUpdate={(updated) => {
                           const newPromos = [...promotions];
                           newPromos[index] = updated;
                           onPromotionsChange(newPromos);
                           setEditingIndex(null);
                         }}
-                        onCancel={() => setEditingIndex(null)}
+                        onDelete={() => {
+                          handleDelete(index);
+                        }}
                       />
                     ) : (
                       <div className="flex items-start gap-4">
@@ -1078,13 +1100,16 @@ function SpecialOffersRepeaterEditor({
                     {isEditing ? (
                       <SpecialOfferEditor
                         offer={offer}
+                        index={index}
                         onUpdate={(updated) => {
                           const newOffers = [...offers];
                           newOffers[index] = updated;
                           onOffersChange(newOffers);
                           setEditingIndex(null);
                         }}
-                        onCancel={() => setEditingIndex(null)}
+                        onDelete={() => {
+                          handleDelete(index);
+                        }}
                       />
                     ) : (
                       <div className="flex items-start gap-4">
@@ -1254,13 +1279,16 @@ function NewsRepeaterEditor({
                     {isEditing ? (
                       <NewsItemEditor
                         item={item}
+                        index={index}
                         onUpdate={(updated) => {
                           const newItems = [...items];
                           newItems[index] = updated;
                           onItemsChange(newItems);
                           setEditingIndex(null);
                         }}
-                        onCancel={() => setEditingIndex(null)}
+                        onDelete={() => {
+                          handleDelete(index);
+                        }}
                       />
                     ) : (
                       <div className="flex items-start gap-4">
