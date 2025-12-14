@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Underline from '@tiptap/extension-underline';
+import Placeholder from '@tiptap/extension-placeholder';
 import { Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Heading1, Heading2, Undo, Redo } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 import { Upload } from 'lucide-react';
@@ -44,6 +45,9 @@ export default function RichTextEditor({
           class: 'max-w-full h-auto rounded-lg my-6',
         },
       }),
+      Placeholder.configure({
+        placeholder: placeholder || 'Écrivez ici...',
+      }),
     ],
     content: value || '',
     editorProps: {
@@ -58,7 +62,6 @@ export default function RichTextEditor({
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
-    placeholder,
   });
 
   const handleFileUpload = async (file: File) => {
