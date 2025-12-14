@@ -5,7 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/contexts/CartContext";
 import type { Product } from "@/data/products";
+import { ShoppingCart } from "lucide-react";
 
 interface ProductGridProps {
   products: Product[];
@@ -13,6 +15,7 @@ interface ProductGridProps {
 
 export default function ProductGrid({ products }: ProductGridProps) {
   const { t, language } = useLanguage();
+  const { addItem, openCart } = useCart();
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -101,7 +104,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
                     )}
                   </div>
                   {/* Price */}
-                  <div className="mb-2">
+                  <div className="mb-3">
                     {product.price ? (
                       <div className="flex items-baseline gap-2">
                         {product.originalPrice && product.originalPrice > product.price && (
@@ -129,6 +132,30 @@ export default function ProductGrid({ products }: ProductGridProps) {
                       </div>
                     )}
                   </div>
+                  
+                  {/* Add to Cart Button */}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      addItem(product, 1);
+                      openCart();
+                    }}
+                    className={`
+                      w-full py-2.5 px-4 rounded-lg font-semibold 
+                      flex items-center justify-center gap-2
+                      transition-all duration-300 ease-out
+                      transform hover:scale-[1.02] active:scale-[0.98]
+                      ${product.price 
+                        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 hover:from-orange-600 hover:to-orange-700' 
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      }
+                    `}
+                    disabled={!product.price}
+                  >
+                    <ShoppingCart size={18} className={product.price ? 'group-hover:animate-bounce' : ''} />
+                    <span>{language === "fr" ? "Ajouter au panier" : "Add to cart"}</span>
+                  </button>
                 </div>
               </article>
             </Link>

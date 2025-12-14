@@ -9,10 +9,10 @@ import {
   Search, 
   X,
   Save,
-  ArrowLeft,
   Image as ImageIcon
 } from 'lucide-react';
 import { checkAdminSession } from '@/lib/admin-auth';
+import AdminLayout from '@/components/admin/AdminLayout';
 import type { Product } from '@/data/products';
 import ImageGallerySelector from '@/components/ImageGallerySelector';
 
@@ -111,7 +111,12 @@ export default function AdminProducts() {
   };
 
   const updateFormField = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      if (field === 'documentation') {
+        return { ...prev, documentation: value };
+      }
+      return { ...prev, [field]: value };
+    });
   };
 
   const updateSpecification = (key: string, value: string) => {
@@ -151,47 +156,24 @@ export default function AdminProducts() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement...</p>
+      <AdminLayout title="Produits" description="Chargement...">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Chargement...</p>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.push('/admin/dashboard')}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Gestion des Produits</h1>
-                <p className="text-sm text-gray-600 mt-1">{products.length} produits</p>
-              </div>
-            </div>
-            <button
-              onClick={handleAdd}
-              className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Ajouter un produit
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search */}
-        <div className="mb-6">
+    <AdminLayout
+      title="Produits"
+      description={`${products.length} produit${products.length > 1 ? 's' : ''} au catalogue`}
+    >
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
@@ -199,11 +181,21 @@ export default function AdminProducts() {
               placeholder="Rechercher un produit..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
+        <button
+          onClick={handleAdd}
+          className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        >
+          <Plus className="w-5 h-5" />
+          <span className="hidden sm:inline">Ajouter un produit</span>
+          <span className="sm:hidden">Ajouter</span>
+        </button>
+      </div>
 
+      <div>
         {/* Products List */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
@@ -295,7 +287,7 @@ export default function AdminProducts() {
             </table>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Form Modal */}
       {showForm && (
@@ -544,6 +536,60 @@ export default function AdminProducts() {
                   placeholder="Caractéristique 1&#10;Caractéristique 2"
                 />
               </div>
+
+              {/* Documentation */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Documentation technique
+                </label>
+                <div className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                      Manuel d'installation (URL)
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.documentation?.installationManual || ''}
+                      onChange={(e) => updateFormField('documentation', {
+                        ...formData.documentation,
+                        installationManual: e.target.value
+                      })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      placeholder="https://example.com/manual.pdf"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                      Fiche technique (URL)
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.documentation?.technicalSheet || ''}
+                      onChange={(e) => updateFormField('documentation', {
+                        ...formData.documentation,
+                        technicalSheet: e.target.value
+                      })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      placeholder="https://example.com/technical-sheet.pdf"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                      Guide d'utilisation (URL)
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.documentation?.userGuide || ''}
+                      onChange={(e) => updateFormField('documentation', {
+                        ...formData.documentation,
+                        userGuide: e.target.value
+                      })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      placeholder="https://example.com/user-guide.pdf"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="sticky bottom-0 bg-gray-50 border-t px-6 py-4 flex items-center justify-end gap-4 z-10 shadow-sm">
@@ -559,7 +605,7 @@ export default function AdminProducts() {
               </button>
               <button
                 onClick={handleSave}
-                className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+                className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors shadow-md"
               >
                 <Save className="w-4 h-4" />
                 Enregistrer
@@ -568,7 +614,7 @@ export default function AdminProducts() {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }
 

@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Download, FileText, BookOpen, FileCheck } from "lucide-react";
 import Link from "next/link";
 import type { DownloadsContent, DownloadCategory, DownloadFile } from "@/lib/downloads-storage";
+import { safeFetchJson } from "@/utils/api";
 
 const iconMap: Record<string, any> = {
   BookOpen,
@@ -26,9 +27,12 @@ export default function DownloadsPage() {
 
   const loadContent = async () => {
     try {
-      const response = await fetch("/api/downloads");
-      const data = await response.json();
-      if (response.ok) {
+      const { data, error } = await safeFetchJson<{ content: DownloadsContent }>("/api/downloads");
+      if (error) {
+        console.error("Error loading downloads:", error);
+        return;
+      }
+      if (data?.content) {
         setContent(data.content);
       }
     } catch (error) {

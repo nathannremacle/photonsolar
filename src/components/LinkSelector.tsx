@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link as LinkIcon, ExternalLink } from 'lucide-react';
 
 interface LinkSelectorProps {
@@ -28,9 +28,32 @@ export default function LinkSelector({
   label = "Lien",
 }: LinkSelectorProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    if (showSuggestions) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showSuggestions]);
 
   return (
-    <div>
+    <div className="relative" ref={containerRef}>
       <label className="block text-sm font-medium text-gray-700 mb-1">
         {label}
       </label>
@@ -55,24 +78,51 @@ export default function LinkSelector({
         </div>
         
         {showSuggestions && (
-          <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-            <div className="p-2">
-              <p className="text-xs font-semibold text-gray-500 px-2 py-1 mb-1">Liens rapides :</p>
-              {commonLinks.map((link) => (
-                <button
-                  key={link.value}
-                  onClick={() => {
-                    onChange(link.value);
-                    setShowSuggestions(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-between"
-                >
-                  <span className="text-sm text-gray-700">{link.label}</span>
-                  <span className="text-xs text-gray-400 font-mono">{link.value}</span>
-                </button>
-              ))}
+          <>
+            {/* Backdrop to close on outside click */}
+            <div 
+              className="fixed inset-0 z-[9998]" 
+              onClick={() => setShowSuggestions(false)}
+            />
+            {/* Dropdown with very high z-index - using fixed positioning to escape any overflow constraints */}
+            <div 
+              ref={dropdownRef}
+              className="fixed z-[9999] bg-white border-2 border-gray-300 rounded-lg shadow-2xl max-h-60 overflow-y-auto"
+              style={{
+                top: containerRef.current ? 
+                  `${containerRef.current.getBoundingClientRect().bottom + 4}px` : 
+                  'auto',
+                left: containerRef.current ? 
+                  `${containerRef.current.getBoundingClientRect().left}px` : 
+                  'auto',
+                width: containerRef.current ? 
+                  `${containerRef.current.getBoundingClientRect().width}px` : 
+                  '100%',
+              }}
+            >
+              <div className="p-2">
+                <p className="text-xs font-semibold text-gray-500 px-2 py-1 mb-1">Liens rapides :</p>
+                {commonLinks.map((link) => (
+                  <button
+                    key={link.value}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onChange(link.value);
+                      setShowSuggestions(false);
+                    }}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-orange-50 rounded-lg transition-colors flex items-center justify-between"
+                  >
+                    <span className="text-sm text-gray-700">{link.label}</span>
+                    <span className="text-xs text-gray-400 font-mono">{link.value}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
       {value && (

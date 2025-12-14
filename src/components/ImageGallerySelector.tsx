@@ -177,20 +177,19 @@ export default function ImageGallerySelector({
                       target.style.display = 'block';
                     }}
                   />
-                  <div className="absolute inset-0 pointer-events-none group-hover:pointer-events-auto opacity-0 group-hover:opacity-100 bg-black bg-opacity-50 transition-opacity flex items-center justify-center gap-2 z-10">
-                    <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 text-white text-xs mb-1">
-                      <GripVertical className="w-4 h-4" />
-                      <span>Glisser pour réorganiser</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemove(index)}
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-600 text-white p-1.5 rounded-full hover:bg-red-700 transition-opacity z-20"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                  {/* Hover controls - positioned above the image without overlay */}
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(index)}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-600 text-white p-1.5 rounded-full hover:bg-red-700 transition-opacity z-20 shadow-lg"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 flex items-center gap-1 bg-gray-900/70 text-white text-xs px-2 py-1 rounded transition-opacity z-20">
+                    <GripVertical className="w-3 h-3" />
+                    <span>Glisser</span>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs py-1 px-2 text-center z-10">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900/70 to-transparent text-white text-xs py-2 px-2 text-center z-10">
                     Image {index + 1} {index === 0 && '(principale)'}
                   </div>
                 </div>
@@ -272,12 +271,10 @@ export default function ImageGallerySelector({
                   }}
                 />
                 {images.includes(img.url) && (
-                  <div className="absolute inset-0 bg-primary-500 bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-primary-600 text-white rounded-full p-1">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
+                  <div className="absolute top-1 right-1 bg-orange-600 text-white rounded-full p-1 shadow-lg">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
                   </div>
                 )}
               </div>

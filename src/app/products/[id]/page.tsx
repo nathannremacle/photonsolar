@@ -3,10 +3,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/contexts/CartContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getProductById, type Product } from "@/data/products";
-import { ChevronDown, Mail, Share2, CheckCircle2 } from "lucide-react";
+import { ChevronDown, Mail, Share2, CheckCircle2, ShoppingCart, Plus, Minus, Check } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -14,9 +15,12 @@ import { motion } from "framer-motion";
 export default function ProductPage() {
   const params = useParams();
   const { t, language } = useLanguage();
+  const { addItem, openCart } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState<string>("description");
   const [imageIndex, setImageIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [addedToCart, setAddedToCart] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -278,6 +282,101 @@ export default function ProductPage() {
                   </div>
                 )}
               </div>
+
+              {/* Add to Cart Section */}
+              {product.price ? (
+                <div className="mb-8 p-6 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-100">
+                  {/* Quantity Selector */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <span className="text-sm font-medium text-gray-700">
+                      {language === "fr" ? "Quantité" : "Quantity"}:
+                    </span>
+                    <div className="flex items-center border border-gray-300 rounded-lg bg-white overflow-hidden">
+                      <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="p-2 hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
+                        disabled={quantity <= 1}
+                      >
+                        <Minus size={18} />
+                      </button>
+                      <input
+                        type="number"
+                        min="1"
+                        value={quantity}
+                        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-16 text-center border-x border-gray-300 py-2 font-semibold text-gray-900 focus:outline-none"
+                      />
+                      <button
+                        onClick={() => setQuantity(quantity + 1)}
+                        className="p-2 hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
+                      >
+                        <Plus size={18} />
+                      </button>
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      = <strong className="text-gray-900">€ {(product.price * quantity).toFixed(2)}</strong>
+                    </span>
+                  </div>
+
+                  {/* Add to Cart Button */}
+                  <motion.button
+                    onClick={() => {
+                      addItem(product, quantity);
+                      setAddedToCart(true);
+                      setTimeout(() => {
+                        setAddedToCart(false);
+                        openCart();
+                      }, 800);
+                    }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`
+                      w-full py-4 px-6 rounded-xl font-bold text-lg
+                      flex items-center justify-center gap-3
+                      transition-all duration-300 ease-out
+                      ${addedToCart 
+                        ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' 
+                        : 'bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 text-white shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40'
+                      }
+                    `}
+                  >
+                    {addedToCart ? (
+                      <>
+                        <Check size={24} className="animate-bounce" />
+                        <span>{language === "fr" ? "Ajouté !" : "Added!"}</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart size={24} />
+                        <span>{language === "fr" ? "Ajouter au panier" : "Add to cart"}</span>
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+              ) : (
+                <div className="mb-8 p-6 bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl border border-gray-200">
+                  <p className="text-gray-600 text-sm mb-4">
+                    {language === "fr" 
+                      ? "Ce produit nécessite un devis personnalisé. Contactez-nous pour obtenir le meilleur prix."
+                      : "This product requires a custom quote. Contact us for the best price."}
+                  </p>
+                  <a
+                    href={`mailto:info@photonsolar.be?subject=${encodeURIComponent((language === "fr" ? "Demande de devis: " : "Quote request: ") + product.name)}&body=${encodeURIComponent(language === "fr" ? `Bonjour,\n\nJe souhaiterais obtenir un devis pour le produit suivant:\n\n${product.name}\nRéférence: ${product.sku || 'N/A'}\n\nMerci de me contacter.\n\nCordialement` : `Hello,\n\nI would like to request a quote for the following product:\n\n${product.name}\nReference: ${product.sku || 'N/A'}\n\nPlease contact me.\n\nBest regards`)}`}
+                    className="
+                      w-full py-4 px-6 rounded-xl font-bold text-lg
+                      flex items-center justify-center gap-3
+                      bg-gradient-to-r from-gray-700 to-gray-900 text-white 
+                      shadow-lg shadow-gray-900/20 
+                      hover:shadow-xl hover:shadow-gray-900/30
+                      transition-all duration-300 ease-out
+                      hover:scale-[1.02] active:scale-[0.98]
+                    "
+                  >
+                    <Mail size={24} />
+                    <span>{language === "fr" ? "Demander un devis" : "Request a quote"}</span>
+                  </a>
+                </div>
+              )}
 
               {/* Actions */}
               <div className="space-y-4 mb-8">

@@ -1,5 +1,15 @@
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { prisma } from './prisma';
+import type {
+  SiteConfig as PrismaSiteConfig,
+  HeroSlide as PrismaHeroSlide,
+  Promotion as PrismaPromotion,
+  SpecialOffer as PrismaSpecialOffer,
+  Brand as PrismaBrand,
+} from '@prisma/client';
+
+// ==============================================
+// Types (matching frontend expectations)
+// ==============================================
 
 export interface HeroSlide {
   id: number;
@@ -9,7 +19,7 @@ export interface HeroSlide {
   cta: string;
   ctaLink: string;
   bgColor: string;
-  backgroundImage?: string; // Optional background image
+  backgroundImage?: string;
 }
 
 export interface Promotion {
@@ -21,7 +31,7 @@ export interface Promotion {
   cta: string;
   ctaLink: string;
   bgColor: string;
-  backgroundImage?: string; // Optional background image
+  backgroundImage?: string;
 }
 
 export interface SpecialOffer {
@@ -33,7 +43,7 @@ export interface SpecialOffer {
   cta: string;
   ctaLink: string;
   bgColor: string;
-  backgroundImage?: string; // Optional background image
+  backgroundImage?: string;
 }
 
 export interface NewsItem {
@@ -43,6 +53,7 @@ export interface NewsItem {
   date: string;
   image: string;
   link: string;
+  excerpt?: string;
 }
 
 export interface Brand {
@@ -51,6 +62,11 @@ export interface Brand {
 }
 
 export interface HomepageContent {
+  metadata?: {
+    title: string;
+    description: string;
+    keywords: string;
+  };
   banner: {
     enabled: boolean;
     title: string;
@@ -71,7 +87,8 @@ export interface HomepageContent {
   specialOffers: SpecialOffer[];
   news: {
     enabled: boolean;
-    items: NewsItem[];
+    selectedIds: number[];
+    items?: NewsItem[];
   };
   brands: {
     enabled: boolean;
@@ -79,9 +96,68 @@ export interface HomepageContent {
   };
 }
 
-const HOMEPAGE_DATA_FILE = join(process.cwd(), 'data', 'homepage-content.json');
+// ==============================================
+// Conversion helpers
+// ==============================================
+
+function prismaToHeroSlide(slide: PrismaHeroSlide): HeroSlide {
+  return {
+    id: slide.id,
+    badge: slide.badge,
+    title: slide.title,
+    description: slide.description,
+    cta: slide.cta,
+    ctaLink: slide.ctaLink,
+    bgColor: slide.bgColor,
+    backgroundImage: slide.backgroundImage || undefined,
+  };
+}
+
+function prismaToPromotion(promo: PrismaPromotion): Promotion {
+  return {
+    id: promo.id,
+    badge: promo.badge,
+    title: promo.title,
+    description: promo.description,
+    features: promo.features,
+    cta: promo.cta,
+    ctaLink: promo.ctaLink,
+    bgColor: promo.bgColor,
+    backgroundImage: promo.backgroundImage || undefined,
+  };
+}
+
+function prismaToSpecialOffer(offer: PrismaSpecialOffer): SpecialOffer {
+  return {
+    id: offer.id,
+    title: offer.title,
+    description: offer.description,
+    features: offer.features,
+    note: offer.note || undefined,
+    cta: offer.cta,
+    ctaLink: offer.ctaLink,
+    bgColor: offer.bgColor,
+    backgroundImage: offer.backgroundImage || undefined,
+  };
+}
+
+function prismaToBrand(brand: PrismaBrand): Brand {
+  return {
+    name: brand.name,
+    link: brand.link,
+  };
+}
+
+// ==============================================
+// Default content (for initial setup)
+// ==============================================
 
 const defaultContent: HomepageContent = {
+  metadata: {
+    title: "Photon Solar - L'énergie solaire pour votre avenir | Belgique",
+    description: "Photon Solar, expert en énergie solaire en Belgique depuis 2008.",
+    keywords: "panneaux solaires, photovoltaïque, énergie solaire, Belgique",
+  },
   banner: {
     enabled: true,
     title: "Bienvenue chez Photon Solar",
@@ -89,223 +165,263 @@ const defaultContent: HomepageContent = {
     ctaText: "Voir le catalogue",
     ctaLink: "/collections",
   },
-  heroSlides: [
-    {
-      id: 1,
-      badge: "Depuis 2008",
-      title: "Pourquoi PhotonSolar ?",
-      description: "Depuis 2008, PhotonSolar s'impose comme un acteur incontournable dans le domaine de l'énergie solaire. Nous vous accompagnons dans votre transition énergétique grâce à une large gamme d'équipements de haute qualité.",
-      cta: "En savoir plus",
-      ctaLink: "/pages/a-propos",
-      bgColor: "bg-gradient-to-br from-orange-500 to-orange-600",
-    },
-    {
-      id: 2,
-      badge: "Nouveautés",
-      title: "ELITEC SOLAR Xmax - La nouvelle génération",
-      description: "Découvrez nos panneaux solaires ELITEC SOLAR Xmax bifacial jusqu'à 560Wc et 600Wc. Technologie de pointe avec garantie 30 ans.",
-      cta: "Voir les produits",
-      ctaLink: "/collections/panneaux-solaires",
-      bgColor: "bg-gradient-to-br from-blue-600 to-blue-700",
-    },
-    {
-      id: 3,
-      badge: "PROMO",
-      title: "ELITEC SOLAR Xmax 460Wc - 34% de réduction",
-      description: "Profitez de notre offre spéciale sur le panneau ELITEC SOLAR Xmax 460Wc. Prix réduit pour un produit de qualité premium.",
-      cta: "Voir l'offre",
-      ctaLink: "/promo",
-      bgColor: "bg-gradient-to-br from-red-600 to-red-700",
-    },
-    {
-      id: 4,
-      badge: "Formation",
-      title: "Besoin de conseils ?",
-      description: "Demandez notre catalogue de produits et inscrivez-vous à nos formations. Notre équipe d'experts vous accompagne dans vos projets solaires.",
-      cta: "Contactez-nous",
-      ctaLink: "/contact",
-      bgColor: "bg-gradient-to-br from-green-600 to-green-700",
-    },
-    {
-      id: 5,
-      badge: "Catalogue complet",
-      title: "Tous nos produits en ligne",
-      description: "Panneaux solaires, onduleurs, batteries, structures de montage, bornes de recharge et bien plus encore. Tout pour votre installation solaire.",
-      cta: "Voir tous les produits",
-      ctaLink: "/collections",
-      bgColor: "bg-gradient-to-br from-gray-700 to-gray-800",
-    },
-  ],
-  promotions: [
-    {
-      id: 1,
-      badge: "PROMO",
-      title: "Baisse de prix significative sur la gamme SMA Hybride",
-      description: "Les performances SMA, désormais plus accessibles pour tous vos projets hybrides.",
-      features: [
-        "Réduction permanente du prix des onduleurs hybrides SMA",
-        "Autoconsommation maximisée",
-        "Triphasé et monophasé",
-        "Garantie 5+5 ans",
-      ],
-      cta: "J'en profite!",
-      ctaLink: "/collections/onduleurs?subcategory=hybride",
-      bgColor: "bg-gradient-to-br from-orange-500 to-orange-600",
-    },
-    {
-      id: 2,
-      badge: "Nouveau",
-      title: "Panneau Jinko JKM460N - Full Black",
-      description: "Un panneau noir intégral hautement performant et durable pour vos installations résidentielles.",
-      features: [
-        "Destiné à un usage résidentiel : full black – esthétique parfaite",
-        "Garantie du produit : 25 ans",
-        "Rendement : jusqu'à 23,02 %",
-        "En stock",
-      ],
-      cta: "En savoir plus",
-      ctaLink: "/collections/panneaux-solaires?brands=Jinko",
-      bgColor: "bg-gradient-to-br from-gray-800 to-gray-900",
-    },
-    {
-      id: 3,
-      badge: "NOUVEAU AU CATALOGUE",
-      title: "Onduleurs hybrides et batteries SolaX",
-      description: "Une solution hybride complète et intelligente pour optimiser chaque installation.",
-      features: [
-        "Onduleurs hybrides avec écran – CT et dongle inclus",
-        "Fonctionnement de secours intégré avec ou sans batteries",
-        "Gestion intelligente de la charge",
-      ],
-      cta: "Découvrir",
-      ctaLink: "/collections?brands=SolaX",
-      bgColor: "bg-gradient-to-br from-blue-600 to-blue-700",
-    },
-  ],
+  heroSlides: [],
+  promotions: [],
   bestSellers: {
     enabled: true,
-    productIds: [
-      "elitec-xmax-560-bifacial",
-      "elitec-xmax-470-bifacial",
-      "elitec-xmax-600",
-      "elitec-hc7-540",
-      "elitec-xmax-560",
-      "elitec-xmax-460",
-    ],
+    productIds: [],
   },
   clearance: {
     enabled: true,
-    productIds: [
-      "deye-sun-3kw",
-      "deye-sun-5kw",
-      "growatt-min-3000tl",
-      "elitec-xmax-460",
-    ],
+    productIds: [],
   },
-  specialOffers: [
-    {
-      id: 1,
-      title: "Offre de cashback prolongée jusqu'au 31/12/2025 !",
-      description: "Participer à la campagne est un jeu d'enfant pour les entreprises d'installation :",
-      features: [
-        "Achetez et installez les appareils SMA éligibles",
-        "Enregistrez les appareils via les systèmes SMA",
-        "Recevez automatiquement votre montant de cashback",
-      ],
-      note: "Inscription possible jusqu'au 30/11/2025. Après cette date, seules les entreprises déjà enregistrées pourront continuer à cumuler du cashback jusqu'au 31/12/2025.",
-      cta: "Découvrir",
-      ctaLink: "/pages/sma-offre",
-      bgColor: "bg-gradient-to-br from-orange-500 to-orange-600",
-    },
-    {
-      id: 2,
-      title: "Kits de modernisation SMA – prêts pour l'avenir !",
-      description: "Pourquoi choisir les kits de modernisation SMA ?",
-      features: [
-        "Un package tout-en-un",
-        "Une offre attractive",
-        "Prêts pour une gestion intelligente de l'énergie",
-        "Une installation simplifiée",
-        "Une forte demande sur le marché",
-      ],
-      cta: "Découvrir",
-      ctaLink: "/pages/sma-offre",
-      bgColor: "bg-gradient-to-br from-blue-600 to-blue-700",
-    },
-  ],
+  specialOffers: [],
   news: {
     enabled: true,
-    items: [
-      {
-        id: 1,
-        category: "News",
-        title: "Wallonie : un tournant énergétique décisif – Le rôle d'Ecostal dans cette transformation",
-        date: "3 December 2025",
-        image: "/placeholder-news.jpg",
-        link: "/blogs/news/wallonia-energy-turning-point",
-      },
-      {
-        id: 2,
-        category: "News",
-        title: "Vincent Maurice rejoint Ecostal pour piloter les activités de Distribution",
-        date: "11 September 2025",
-        image: "/placeholder-news.jpg",
-        link: "/blogs/news/vincent-maurice-joins-ecostal",
-      },
-    ],
+    selectedIds: [],
   },
   brands: {
     enabled: true,
-    items: [
-      { name: "Easee", link: "/collections?brands=Easee" },
-      { name: "Eurener", link: "/collections?brands=Eurener" },
-      { name: "Growatt", link: "/collections?brands=Growatt" },
-      { name: "Jinko Solar", link: "/collections?brands=Jinko" },
-      { name: "Longi", link: "/collections?brands=Longi" },
-      { name: "Peblar", link: "/collections?brands=Peblar" },
-      { name: "Schletter", link: "/collections?brands=Schletter" },
-      { name: "SMA", link: "/collections?brands=SMA" },
-      { name: "Smappee", link: "/collections?brands=Smappee" },
-      { name: "Solaredge", link: "/collections?brands=Solaredge" },
-      { name: "Staubli", link: "/collections?brands=Staubli" },
-      { name: "Sunbeam", link: "/collections?brands=Sunbeam" },
-      { name: "Sunpower", link: "/collections?brands=Sunpower" },
-      { name: "Trina Solar", link: "/collections?brands=Trina" },
-      { name: "V2C", link: "/collections?brands=V2C" },
-      { name: "Wallbox", link: "/collections?brands=Wallbox" },
-    ],
+    items: [],
   },
 };
 
-export function loadHomepageContent(): HomepageContent {
+// ==============================================
+// Load homepage content from database
+// ==============================================
+
+export async function loadHomepageContent(): Promise<HomepageContent> {
   try {
-    if (existsSync(HOMEPAGE_DATA_FILE)) {
-      const fileContent = readFileSync(HOMEPAGE_DATA_FILE, 'utf-8');
-      return JSON.parse(fileContent);
+    // Load all content in parallel
+    const [siteConfig, heroSlides, promotions, specialOffers, brands] = await Promise.all([
+      prisma.siteConfig.findUnique({ where: { id: 'main' } }),
+      prisma.heroSlide.findMany({ orderBy: { order: 'asc' } }),
+      prisma.promotion.findMany({ orderBy: { order: 'asc' } }),
+      prisma.specialOffer.findMany({ orderBy: { order: 'asc' } }),
+      prisma.brand.findMany({ orderBy: { order: 'asc' } }),
+    ]);
+
+    // If no site config exists, return defaults
+    if (!siteConfig) {
+      return defaultContent;
     }
+
+    return {
+      metadata: {
+        title: siteConfig.metaTitle || defaultContent.metadata!.title,
+        description: siteConfig.metaDescription || defaultContent.metadata!.description,
+        keywords: siteConfig.metaKeywords || defaultContent.metadata!.keywords,
+      },
+      banner: {
+        enabled: siteConfig.bannerEnabled,
+        title: siteConfig.bannerTitle || '',
+        subtitle: siteConfig.bannerSubtitle || '',
+        ctaText: siteConfig.bannerCtaText || '',
+        ctaLink: siteConfig.bannerCtaLink || '',
+      },
+      heroSlides: heroSlides.map(prismaToHeroSlide),
+      promotions: promotions.map(prismaToPromotion),
+      bestSellers: {
+        enabled: siteConfig.bestSellersEnabled,
+        productIds: siteConfig.bestSellersIds,
+      },
+      clearance: {
+        enabled: siteConfig.clearanceEnabled,
+        productIds: siteConfig.clearanceIds,
+      },
+      specialOffers: specialOffers.map(prismaToSpecialOffer),
+      news: {
+        enabled: siteConfig.newsEnabled,
+        selectedIds: siteConfig.newsSelectedIds,
+      },
+      brands: {
+        enabled: siteConfig.brandsEnabled,
+        items: brands.map(prismaToBrand),
+      },
+    };
   } catch (error) {
-    console.error('Error loading homepage content:', error);
+    console.error('Error loading homepage content from database:', error);
+    return defaultContent;
   }
-  
-  // Create default file if it doesn't exist
-  if (!existsSync(HOMEPAGE_DATA_FILE)) {
-    saveHomepageContent(defaultContent);
-  }
-  
-  return defaultContent;
 }
 
-export function saveHomepageContent(content: HomepageContent): void {
+// ==============================================
+// Save homepage content to database
+// ==============================================
+
+export async function saveHomepageContent(content: HomepageContent): Promise<void> {
   try {
-    const dir = join(process.cwd(), 'data');
-    if (!existsSync(dir)) {
-      const { mkdirSync } = require('fs');
-      mkdirSync(dir, { recursive: true });
-    }
-    writeFileSync(HOMEPAGE_DATA_FILE, JSON.stringify(content, null, 2), 'utf-8');
+    await prisma.$transaction(async (tx) => {
+      // 1. Upsert SiteConfig
+      await tx.siteConfig.upsert({
+        where: { id: 'main' },
+        update: {
+          metaTitle: content.metadata?.title || null,
+          metaDescription: content.metadata?.description || null,
+          metaKeywords: content.metadata?.keywords || null,
+          bannerEnabled: content.banner?.enabled ?? true,
+          bannerTitle: content.banner?.title || null,
+          bannerSubtitle: content.banner?.subtitle || null,
+          bannerCtaText: content.banner?.ctaText || null,
+          bannerCtaLink: content.banner?.ctaLink || null,
+          bestSellersEnabled: content.bestSellers?.enabled ?? true,
+          bestSellersIds: content.bestSellers?.productIds || [],
+          clearanceEnabled: content.clearance?.enabled ?? true,
+          clearanceIds: content.clearance?.productIds || [],
+          newsEnabled: content.news?.enabled ?? true,
+          newsSelectedIds: content.news?.selectedIds || [],
+          brandsEnabled: content.brands?.enabled ?? true,
+        },
+        create: {
+          id: 'main',
+          metaTitle: content.metadata?.title || null,
+          metaDescription: content.metadata?.description || null,
+          metaKeywords: content.metadata?.keywords || null,
+          bannerEnabled: content.banner?.enabled ?? true,
+          bannerTitle: content.banner?.title || null,
+          bannerSubtitle: content.banner?.subtitle || null,
+          bannerCtaText: content.banner?.ctaText || null,
+          bannerCtaLink: content.banner?.ctaLink || null,
+          bestSellersEnabled: content.bestSellers?.enabled ?? true,
+          bestSellersIds: content.bestSellers?.productIds || [],
+          clearanceEnabled: content.clearance?.enabled ?? true,
+          clearanceIds: content.clearance?.productIds || [],
+          newsEnabled: content.news?.enabled ?? true,
+          newsSelectedIds: content.news?.selectedIds || [],
+          brandsEnabled: content.brands?.enabled ?? true,
+        },
+      });
+
+      // 2. Replace Hero Slides
+      await tx.heroSlide.deleteMany();
+      if (content.heroSlides && content.heroSlides.length > 0) {
+        await tx.heroSlide.createMany({
+          data: content.heroSlides.map((slide, index) => ({
+            order: index,
+            badge: slide.badge,
+            title: slide.title,
+            description: slide.description,
+            cta: slide.cta,
+            ctaLink: slide.ctaLink,
+            bgColor: slide.bgColor,
+            backgroundImage: slide.backgroundImage || null,
+          })),
+        });
+      }
+
+      // 3. Replace Promotions
+      await tx.promotion.deleteMany();
+      if (content.promotions && content.promotions.length > 0) {
+        await tx.promotion.createMany({
+          data: content.promotions.map((promo, index) => ({
+            order: index,
+            badge: promo.badge,
+            title: promo.title,
+            description: promo.description,
+            features: promo.features || [],
+            cta: promo.cta,
+            ctaLink: promo.ctaLink,
+            bgColor: promo.bgColor,
+            backgroundImage: promo.backgroundImage || null,
+          })),
+        });
+      }
+
+      // 4. Replace Special Offers
+      await tx.specialOffer.deleteMany();
+      if (content.specialOffers && content.specialOffers.length > 0) {
+        await tx.specialOffer.createMany({
+          data: content.specialOffers.map((offer, index) => ({
+            order: index,
+            title: offer.title,
+            description: offer.description,
+            features: offer.features || [],
+            note: offer.note || null,
+            cta: offer.cta,
+            ctaLink: offer.ctaLink,
+            bgColor: offer.bgColor,
+            backgroundImage: offer.backgroundImage || null,
+          })),
+        });
+      }
+
+      // 5. Replace Brands
+      await tx.brand.deleteMany();
+      if (content.brands?.items && content.brands.items.length > 0) {
+        await tx.brand.createMany({
+          data: content.brands.items.map((brand, index) => ({
+            order: index,
+            name: brand.name,
+            link: brand.link,
+          })),
+        });
+      }
+    });
   } catch (error) {
-    console.error('Error saving homepage content:', error);
+    console.error('Error saving homepage content to database:', error);
     throw error;
   }
 }
 
+// ==============================================
+// Individual section getters (for optimization)
+// ==============================================
+
+export async function getHeroSlides(): Promise<HeroSlide[]> {
+  try {
+    const slides = await prisma.heroSlide.findMany({
+      orderBy: { order: 'asc' },
+    });
+    return slides.map(prismaToHeroSlide);
+  } catch (error) {
+    console.error('Error loading hero slides:', error);
+    return [];
+  }
+}
+
+export async function getPromotions(): Promise<Promotion[]> {
+  try {
+    const promotions = await prisma.promotion.findMany({
+      orderBy: { order: 'asc' },
+    });
+    return promotions.map(prismaToPromotion);
+  } catch (error) {
+    console.error('Error loading promotions:', error);
+    return [];
+  }
+}
+
+export async function getSpecialOffers(): Promise<SpecialOffer[]> {
+  try {
+    const offers = await prisma.specialOffer.findMany({
+      orderBy: { order: 'asc' },
+    });
+    return offers.map(prismaToSpecialOffer);
+  } catch (error) {
+    console.error('Error loading special offers:', error);
+    return [];
+  }
+}
+
+export async function getBrands(): Promise<Brand[]> {
+  try {
+    const brands = await prisma.brand.findMany({
+      orderBy: { order: 'asc' },
+    });
+    return brands.map(prismaToBrand);
+  } catch (error) {
+    console.error('Error loading brands:', error);
+    return [];
+  }
+}
+
+export async function getSiteConfig(): Promise<PrismaSiteConfig | null> {
+  try {
+    return await prisma.siteConfig.findUnique({
+      where: { id: 'main' },
+    });
+  } catch (error) {
+    console.error('Error loading site config:', error);
+    return null;
+  }
+}

@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getProductById } from "@/data/products";
+import { safeFetchJson } from "@/utils/api";
 
 export default function BestSellers() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -21,9 +22,12 @@ export default function BestSellers() {
 
   const loadContent = async () => {
     try {
-      const response = await fetch("/api/homepage");
-      const data = await response.json();
-      if (response.ok && data.content) {
+      const { data, error } = await safeFetchJson<{ content: any }>("/api/homepage");
+      if (error) {
+        console.error("Error loading best sellers:", error);
+        return;
+      }
+      if (data?.content) {
         setProductIds(data.content.bestSellers?.productIds || []);
         setEnabled(data.content.bestSellers?.enabled ?? true);
       }

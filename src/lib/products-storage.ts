@@ -1,171 +1,365 @@
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { prisma } from './prisma';
 import type { Product } from '@/data/products';
+import type { Product as PrismaProduct } from '@prisma/client';
 
-const PRODUCTS_TS_FILE = join(process.cwd(), 'src/data/products.ts');
-const PRODUCTS_JSON_FILE = join(process.cwd(), 'data/products.json');
+// ==============================================
+// Type conversion helpers
+// ==============================================
 
-// Try to use JSON file first, fallback to TS file
-export function loadProducts(): Product[] {
-  // Try JSON file first (easier to manage)
-  if (existsSync(PRODUCTS_JSON_FILE)) {
-    try {
-      const content = readFileSync(PRODUCTS_JSON_FILE, 'utf-8');
-      return JSON.parse(content);
-    } catch (error) {
-      console.error('Error reading JSON file:', error);
-    }
-  }
+/**
+ * Convert Prisma Product to frontend Product type
+ */
+function prismaToProduct(p: PrismaProduct): Product {
+  return {
+    id: p.id,
+    name: p.name,
+    brand: p.brand,
+    category: p.category,
+    subcategory: p.subcategory || undefined,
+    price: p.price || undefined,
+    originalPrice: p.originalPrice || undefined,
+    sku: p.sku || undefined,
+    description: p.description || undefined,
+    technicalDescription: p.technicalDescription || undefined,
+    image: p.image || undefined,
+    images: p.images || undefined,
+    link: p.link,
+    weight: p.weight || undefined,
+    dimensions: p.dimensions || undefined,
+    warranty: p.warranty || undefined,
+    power: p.power || undefined,
+    type: p.type || undefined,
+    voltage: p.voltage || undefined,
+    features: p.features || undefined,
+    specifications: (p.specifications as Record<string, string>) || undefined,
+    documentation: (p.documentation as {
+      installationManual?: string;
+      technicalSheet?: string;
+      userGuide?: string;
+    }) || undefined,
+    mpptCount: p.mpptCount || undefined,
+    apparentPower: p.apparentPower || undefined,
+    nominalPower: p.nominalPower || undefined,
+    hasEthernet: p.hasEthernet || undefined,
+    hasWiFi: p.hasWiFi || undefined,
+    networkConnection: p.networkConnection || undefined,
+    cellType: p.cellType || undefined,
+    efficiency: p.efficiency || undefined,
+    maxPower: p.maxPower || undefined,
+    capacity: p.capacity || undefined,
+    batteryType: p.batteryType || undefined,
+    cop: p.cop || undefined,
+    heatingPower: p.heatingPower || undefined,
+    color: p.color || undefined,
+    material: p.material || undefined,
+  };
+}
 
-  // Fallback: Import from TS file
-  // In a Next.js API route, we can use dynamic import
+/**
+ * Convert frontend Product to Prisma create/update data
+ */
+function productToPrismaData(product: Product) {
+  return {
+    id: product.id,
+    name: product.name,
+    brand: product.brand,
+    category: product.category,
+    subcategory: product.subcategory || null,
+    price: product.price || null,
+    originalPrice: product.originalPrice || null,
+    sku: product.sku || null,
+    description: product.description || null,
+    technicalDescription: product.technicalDescription || null,
+    image: product.image || (product.images && product.images[0]) || null,
+    images: product.images || [],
+    link: product.link || `/products/${product.id}`,
+    weight: product.weight || null,
+    dimensions: product.dimensions || null,
+    warranty: product.warranty || null,
+    power: product.power || null,
+    type: product.type || null,
+    voltage: product.voltage || null,
+    features: product.features || [],
+    specifications: product.specifications || null,
+    documentation: product.documentation || null,
+    mpptCount: product.mpptCount || null,
+    apparentPower: product.apparentPower || null,
+    nominalPower: product.nominalPower || null,
+    hasEthernet: product.hasEthernet || null,
+    hasWiFi: product.hasWiFi || null,
+    networkConnection: product.networkConnection || null,
+    cellType: product.cellType || null,
+    efficiency: product.efficiency || null,
+    maxPower: product.maxPower || null,
+    capacity: product.capacity || null,
+    batteryType: product.batteryType || null,
+    cop: product.cop || null,
+    heatingPower: product.heatingPower || null,
+    color: product.color || null,
+    material: product.material || null,
+  };
+}
+
+// ==============================================
+// CRUD Operations
+// ==============================================
+
+/**
+ * Load all products from database
+ */
+export async function loadProducts(): Promise<Product[]> {
   try {
-    // This will work in Node.js environment (API routes)
-    const productsModule = require('@/data/products');
-    return productsModule.products || [];
+    const products = await prisma.product.findMany({
+      orderBy: [
+        { category: 'asc' },
+        { brand: 'asc' },
+        { name: 'asc' },
+      ],
+    });
+    return products.map(prismaToProduct);
   } catch (error) {
-    console.error('Error loading products from TS file:', error);
+    console.error('Error loading products from database:', error);
     return [];
   }
 }
 
-export function saveProducts(products: Product[]): void {
-  // Save to JSON file (easier to manage)
+/**
+ * Get a single product by ID
+ */
+export async function getProduct(id: string): Promise<Product | null> {
   try {
-    // Ensure directory exists
-    const fs = require('fs');
-    const path = require('path');
-    const dir = path.dirname(PRODUCTS_JSON_FILE);
-    if (!existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    const product = await prisma.product.findUnique({
+      where: { id },
+    });
+    return product ? prismaToProduct(product) : null;
+  } catch (error) {
+    console.error('Error getting product:', error);
+    return null;
+  }
+}
+
+/**
+ * Get products by category
+ */
+export async function getProductsByCategory(category: string): Promise<Product[]> {
+  try {
+    const products = await prisma.product.findMany({
+      where: { category },
+      orderBy: { name: 'asc' },
+    });
+    return products.map(prismaToProduct);
+  } catch (error) {
+    console.error('Error getting products by category:', error);
+    return [];
+  }
+}
+
+/**
+ * Get products by IDs (for best sellers, clearance, etc.)
+ */
+export async function getProductsByIds(ids: string[]): Promise<Product[]> {
+  try {
+    const products = await prisma.product.findMany({
+      where: { id: { in: ids } },
+    });
+    
+    // Maintain the order of the input IDs
+    const productMap = new Map(products.map(p => [p.id, p]));
+    return ids
+      .map(id => productMap.get(id))
+      .filter((p): p is PrismaProduct => p !== undefined)
+      .map(prismaToProduct);
+  } catch (error) {
+    console.error('Error getting products by IDs:', error);
+    return [];
+  }
+}
+
+/**
+ * Search products
+ */
+export async function searchProducts(query: string): Promise<Product[]> {
+  try {
+    const searchTerm = query.toLowerCase();
+    const products = await prisma.product.findMany({
+      where: {
+        OR: [
+          { name: { contains: searchTerm, mode: 'insensitive' } },
+          { brand: { contains: searchTerm, mode: 'insensitive' } },
+          { category: { contains: searchTerm, mode: 'insensitive' } },
+          { description: { contains: searchTerm, mode: 'insensitive' } },
+        ],
+      },
+      orderBy: { name: 'asc' },
+    });
+    return products.map(prismaToProduct);
+  } catch (error) {
+    console.error('Error searching products:', error);
+    return [];
+  }
+}
+
+/**
+ * Create a new product
+ */
+export async function createProduct(product: Product): Promise<Product> {
+  try {
+    // Generate ID if not provided
+    if (!product.id) {
+      product.id = product.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
     }
     
-    writeFileSync(PRODUCTS_JSON_FILE, JSON.stringify(products, null, 2), 'utf-8');
+    // Generate link if not provided
+    if (!product.link) {
+      product.link = `/products/${product.id}`;
+    }
     
-    // Also update the TS file for compatibility
-    updateTSFile(products);
+    const created = await prisma.product.create({
+      data: productToPrismaData(product),
+    });
+    
+    return prismaToProduct(created);
+  } catch (error) {
+    console.error('Error creating product:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update an existing product
+ */
+export async function updateProduct(product: Product): Promise<Product> {
+  try {
+    if (!product.id) {
+      throw new Error('Product ID is required for update');
+    }
+    
+    const updated = await prisma.product.update({
+      where: { id: product.id },
+      data: productToPrismaData(product),
+    });
+    
+    return prismaToProduct(updated);
+  } catch (error) {
+    console.error('Error updating product:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a product
+ */
+export async function deleteProduct(id: string): Promise<void> {
+  try {
+    await prisma.product.delete({
+      where: { id },
+    });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    throw error;
+  }
+}
+
+/**
+ * Save all products (bulk replace) - for backward compatibility
+ * @deprecated Use createProduct, updateProduct, deleteProduct instead
+ */
+export async function saveProducts(products: Product[]): Promise<void> {
+  try {
+    // Use a transaction for atomic operation
+    await prisma.$transaction(async (tx) => {
+      // Get existing product IDs
+      const existingProducts = await tx.product.findMany({
+        select: { id: true },
+      });
+      const existingIds = new Set(existingProducts.map(p => p.id));
+      
+      // Determine which products to create, update, or delete
+      const newProductIds = new Set(products.map(p => p.id));
+      const toDelete = [...existingIds].filter(id => !newProductIds.has(id));
+      
+      // Delete removed products
+      if (toDelete.length > 0) {
+        await tx.product.deleteMany({
+          where: { id: { in: toDelete } },
+        });
+      }
+      
+      // Upsert all products
+      for (const product of products) {
+        await tx.product.upsert({
+          where: { id: product.id },
+          update: productToPrismaData(product),
+          create: productToPrismaData(product),
+        });
+      }
+    });
   } catch (error) {
     console.error('Error saving products:', error);
     throw error;
   }
 }
 
-function updateTSFile(products: Product[]): void {
+/**
+ * Get product count
+ */
+export async function getProductCount(): Promise<number> {
   try {
-    const fileContent = readFileSync(PRODUCTS_TS_FILE, 'utf-8');
-    
-    // Create the products array string
-    const productsString = formatProductsArray(products);
-    
-    // Replace the products array in the file
-    const newContent = fileContent.replace(
-      /export const products: Product\[\] = \[[\s\S]*?\];/,
-      `export const products: Product[] = ${productsString};`
-    );
-    
-    writeFileSync(PRODUCTS_TS_FILE, newContent, 'utf-8');
+    return await prisma.product.count();
   } catch (error) {
-    console.error('Error updating TS file:', error);
-    // Don't throw - JSON file is the source of truth
+    console.error('Error counting products:', error);
+    return 0;
   }
 }
 
-function formatProductsArray(products: Product[]): string {
-  // Format products as a TypeScript array
-  const formatted = products.map(product => {
-    const lines: string[] = ['    {'];
+/**
+ * Get products with pagination
+ */
+export async function getProductsPaginated(
+  page: number = 1,
+  pageSize: number = 20,
+  filters?: {
+    category?: string;
+    brand?: string;
+    search?: string;
+  }
+): Promise<{ products: Product[]; total: number; pages: number }> {
+  try {
+    const where: any = {};
     
-    // Format each field
-    if (product.id) lines.push(`      id: "${product.id}",`);
-    if (product.name) lines.push(`      name: "${escapeString(product.name)}",`);
-    if (product.brand) lines.push(`      brand: "${escapeString(product.brand)}",`);
-    if (product.category) lines.push(`      category: "${product.category}",`);
-    if (product.subcategory) lines.push(`      subcategory: "${product.subcategory}",`);
-    if (product.price !== undefined) lines.push(`      price: ${product.price},`);
-    if (product.originalPrice !== undefined) lines.push(`      originalPrice: ${product.originalPrice},`);
-    if (product.power) lines.push(`      power: "${escapeString(product.power)}",`);
-    if (product.type) lines.push(`      type: "${escapeString(product.type)}",`);
-    if (product.voltage) lines.push(`      voltage: "${escapeString(product.voltage)}",`);
-    if (product.warranty) lines.push(`      warranty: "${escapeString(product.warranty)}",`);
-    if (product.weight) lines.push(`      weight: "${escapeString(product.weight)}",`);
-    if (product.dimensions) lines.push(`      dimensions: "${escapeString(product.dimensions)}",`);
-    if (product.sku) lines.push(`      sku: "${escapeString(product.sku)}",`);
-    if (product.description) lines.push(`      description: "${escapeString(product.description)}",`);
-    if (product.technicalDescription) lines.push(`      technicalDescription: "${escapeString(product.technicalDescription)}",`);
-    
-    // Images
-    if (product.images && product.images.length > 0) {
-      lines.push(`      image: "${product.images[0]}",`);
-      lines.push(`      images: [`);
-      product.images.forEach(img => {
-        lines.push(`        "${img}",`);
-      });
-      lines.push(`      ],`);
-    } else if (product.image) {
-      lines.push(`      image: "${product.image}",`);
+    if (filters?.category) {
+      where.category = filters.category;
+    }
+    if (filters?.brand) {
+      where.brand = filters.brand;
+    }
+    if (filters?.search) {
+      where.OR = [
+        { name: { contains: filters.search, mode: 'insensitive' } },
+        { brand: { contains: filters.search, mode: 'insensitive' } },
+      ];
     }
     
-    // Link
-    if (product.link) lines.push(`      link: "${product.link}",`);
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: { name: 'asc' },
+      }),
+      prisma.product.count({ where }),
+    ]);
     
-    // Features
-    if (product.features && product.features.length > 0) {
-      lines.push(`      features: [`);
-      product.features.forEach(feature => {
-        lines.push(`        "${escapeString(feature)}",`);
-      });
-      lines.push(`      ],`);
-    }
-    
-    // Specifications
-    if (product.specifications && Object.keys(product.specifications).length > 0) {
-      lines.push(`      specifications: {`);
-      Object.entries(product.specifications).forEach(([key, value]) => {
-        lines.push(`        "${escapeString(key)}": "${escapeString(value)}",`);
-      });
-      lines.push(`      },`);
-    }
-    
-    // Documentation
-    if (product.documentation) {
-      lines.push(`      documentation: {`);
-      if (product.documentation.installationManual) {
-        lines.push(`        installationManual: "${product.documentation.installationManual}",`);
-      }
-      if (product.documentation.technicalSheet) {
-        lines.push(`        technicalSheet: "${product.documentation.technicalSheet}",`);
-      }
-      if (product.documentation.userGuide) {
-        lines.push(`        userGuide: "${product.documentation.userGuide}",`);
-      }
-      lines.push(`      },`);
-    }
-    
-    // Additional fields
-    if (product.mpptCount !== undefined) lines.push(`      mpptCount: ${product.mpptCount},`);
-    if (product.apparentPower) lines.push(`      apparentPower: "${escapeString(product.apparentPower)}",`);
-    if (product.nominalPower) lines.push(`      nominalPower: "${escapeString(product.nominalPower)}",`);
-    if (product.hasEthernet !== undefined) lines.push(`      hasEthernet: ${product.hasEthernet},`);
-    if (product.hasWiFi !== undefined) lines.push(`      hasWiFi: ${product.hasWiFi},`);
-    if (product.networkConnection) lines.push(`      networkConnection: "${escapeString(product.networkConnection)}",`);
-    if (product.cellType) lines.push(`      cellType: "${escapeString(product.cellType)}",`);
-    if (product.efficiency) lines.push(`      efficiency: "${escapeString(product.efficiency)}",`);
-    if (product.maxPower) lines.push(`      maxPower: "${escapeString(product.maxPower)}",`);
-    if (product.capacity) lines.push(`      capacity: "${escapeString(product.capacity)}",`);
-    if (product.batteryType) lines.push(`      batteryType: "${escapeString(product.batteryType)}",`);
-    if (product.cop) lines.push(`      cop: "${escapeString(product.cop)}",`);
-    if (product.heatingPower) lines.push(`      heatingPower: "${escapeString(product.heatingPower)}",`);
-    if (product.color) lines.push(`      color: "${escapeString(product.color)}",`);
-    if (product.material) lines.push(`      material: "${escapeString(product.material)}",`);
-    
-    lines.push('    },');
-    return lines.join('\n');
-  }).join('\n');
-  
-  return `[\n${formatted}\n  ]`;
+    return {
+      products: products.map(prismaToProduct),
+      total,
+      pages: Math.ceil(total / pageSize),
+    };
+  } catch (error) {
+    console.error('Error getting paginated products:', error);
+    return { products: [], total: 0, pages: 0 };
+  }
 }
-
-function escapeString(str: string): string {
-  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
-}
-

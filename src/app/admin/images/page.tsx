@@ -7,11 +7,11 @@ import {
   Trash2, 
   Search, 
   Image as ImageIcon,
-  ArrowLeft,
   X,
   Check
 } from 'lucide-react';
 import { checkAdminSession } from '@/lib/admin-auth';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface ImageFile {
   name: string;
@@ -153,33 +153,22 @@ export default function AdminImages() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement...</p>
+      <AdminLayout title="Images" description="Chargement...">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Chargement...</p>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.push('/admin/dashboard')}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Gestion des Images</h1>
-                <p className="text-sm text-gray-600 mt-1">{images.length} images</p>
-              </div>
-            </div>
+    <AdminLayout
+      title="Images"
+      description={`${images.length} image${images.length > 1 ? 's' : ''} dans la bibliothèque`}
+    >
             <div className="flex items-center gap-4">
               {selectedImages.size > 0 && (
                 <button
@@ -190,21 +179,9 @@ export default function AdminImages() {
                   Supprimer ({selectedImages.size})
                 </button>
               )}
-              <button
-                onClick={() => setShowUploadModal(true)}
-                className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
-              >
-                <Upload className="w-4 h-4" />
-                Uploader des images
-              </button>
             </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search */}
-        <div className="mb-6">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
@@ -212,11 +189,32 @@ export default function AdminImages() {
               placeholder="Rechercher une image..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
             />
           </div>
         </div>
+        <div className="flex items-center gap-3">
+          {selectedImages.size > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Supprimer ({selectedImages.size})
+            </button>
+          )}
+          <button
+            onClick={() => setShowUploadModal(true)}
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+          >
+            <Upload className="w-5 h-5" />
+            <span className="hidden sm:inline">Uploader des images</span>
+            <span className="sm:hidden">Uploader</span>
+          </button>
+        </div>
+      </div>
 
+      <div>
         {/* Images Grid */}
         {filteredImages.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-12 text-center">
@@ -275,13 +273,14 @@ export default function AdminImages() {
                       target.style.display = 'block';
                     }}
                   />
-                  <div className="absolute inset-0 pointer-events-none group-hover:pointer-events-auto opacity-0 group-hover:opacity-100 bg-black bg-opacity-50 transition-opacity flex items-center justify-center gap-2 z-10">
+                  {/* Hover controls - positioned without dark overlay */}
+                  <div className="absolute bottom-2 left-2 right-2 flex items-center justify-center gap-2 z-10">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         copyImageUrl(image.url);
                       }}
-                      className="opacity-0 group-hover:opacity-100 bg-white text-gray-900 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 bg-white text-gray-900 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-opacity shadow-lg"
                     >
                       Copier URL
                     </button>
@@ -290,7 +289,7 @@ export default function AdminImages() {
                         e.stopPropagation();
                         handleDelete(image.path);
                       }}
-                      className="opacity-0 group-hover:opacity-100 bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-opacity shadow-lg"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -310,7 +309,7 @@ export default function AdminImages() {
             ))}
           </div>
         )}
-      </main>
+      </div>
 
       {/* Upload Modal */}
       {showUploadModal && (
@@ -357,7 +356,7 @@ export default function AdminImages() {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }
 

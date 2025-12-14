@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { NewsItem } from "@/lib/homepage-storage";
+import { safeFetchJson } from "@/utils/api";
 
 export default function News() {
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
@@ -16,9 +17,12 @@ export default function News() {
 
   const loadContent = async () => {
     try {
-      const response = await fetch("/api/homepage");
-      const data = await response.json();
-      if (response.ok && data.content) {
+      const { data, error } = await safeFetchJson<{ content: any }>("/api/homepage");
+      if (error) {
+        console.error("Error loading news:", error);
+        return;
+      }
+      if (data?.content) {
         setNewsItems(data.content.news?.items || []);
         setEnabled(data.content.news?.enabled ?? true);
       }

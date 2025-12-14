@@ -1,0 +1,15 @@
+{
+  "articles": [
+    {
+      "id": 1,
+      "category": "News",
+      "title": "Formation",
+      "date": "2025-12-13",
+      "excerpt": "Bienvenue sur notre académie de formation, un lieu d’apprentissage dédié aux technologies durables et innovantes. Photon Solar, en collaboration avec des experts du secteur, propose des formations complètes et adaptées aux besoins des professionnels et des particuliers souhaitant se spécialiser dans les énergies renouvelables.",
+      "slug": "formation",
+      "link": "/blogs/news/formation",
+      "content": "<h2>Pourquoi choisir nos formations ?</h2><p>Nos programmes sont conçus pour fournir des compétences pratiques et théoriques dans trois domaines clés :</p><ul><li><p><strong>Photovoltaïque</strong> : Installation et maintenance de systèmes solaires photovoltaïques.</p></li><li><p><strong>Stockage d’énergie</strong> : Solutions de batteries et gestion intelligente de l’énergie.</p></li><li><p><strong>Pompes à chaleur hybrides</strong> : Intégration et optimisation de systèmes hybrides pour une efficacité énergétique maximale.</p></li></ul><h2>Points forts de nos formations</h2><ul><li><p><strong>Formateurs experts</strong> : Apprenez aux côtés de professionnels reconnus pour leur expertise.</p></li><li><p><strong>Formation pratique</strong> : Accédez à des équipements modernes pour des mises en situation réelles.</p></li><li><p><strong>Certification</strong> : Obtenez une attestation reconnue pour valoriser vos compétences.</p></li><li><p><strong>Adaptabilité</strong> : Que vous soyez débutant ou technicien confirmé, nos modules s’adaptent à votre niveau.</p></li></ul><h2>Modules disponibles</h2><ol><li><p><strong>Initiation au Photovoltaïque</strong> : Comprendre les bases, de la conception à l’installation des panneaux solaires.</p></li><li><p><strong>Systèmes de stockage</strong> : Formation sur les batteries lithium-ion et autres technologies avancées.</p></li><li><p><strong>Pompes à chaleur hybrides</strong> : Mécanismes, applications et maintenance.</p></li><li><p><strong>Optimisation des systèmes hybrides</strong> : Comment combiner photovoltaïque, stockage et pompes à chaleur pour une performance écologique optimale.</p></li></ol><h2>Qui peut participer ?</h2><ul><li><p><strong>Installateurs</strong> : Enrichissez votre savoir-faire pour répondre aux exigences du marché.</p></li><li><p><strong>Entreprises</strong> : Formez vos équipes pour rester compétitives.</p></li><li><p><strong>Particuliers</strong> : Devenez autonome dans la gestion de vos équipements énergétiques.</p></li></ul><hr><p><strong>Rejoignez-nous et devenez un acteur clé de la transition énergétique.</strong> Ensemble, construisons un avenir durable avec Photon Solar !</p><p></p>",
+      "image": "/images/products/1765633182090-0-2001.jpg"
+    }
+  ]
+}

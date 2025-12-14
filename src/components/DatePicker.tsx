@@ -64,7 +64,7 @@ export default function DatePicker({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-sm font-medium text-gray-700 mb-2">
         {label}
       </label>
       <div className="relative">
@@ -72,7 +72,8 @@ export default function DatePicker({
           type="date"
           value={formatDateForInput(value)}
           onChange={handleDateChange}
-          className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+          className="w-full px-3 py-2.5 pl-10 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors select-text"
+          style={{ userSelect: 'text' }}
         />
         <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
       </div>

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { SpecialOffer } from "@/lib/homepage-storage";
+import { safeFetchJson } from "@/utils/api";
 
 export default function SpecialOffers() {
   const [offers, setOffers] = useState<SpecialOffer[]>([]);
@@ -15,9 +16,12 @@ export default function SpecialOffers() {
 
   const loadContent = async () => {
     try {
-      const response = await fetch("/api/homepage");
-      const data = await response.json();
-      if (response.ok && data.content) {
+      const { data, error } = await safeFetchJson<{ content: any }>("/api/homepage");
+      if (error) {
+        console.error("Error loading special offers:", error);
+        return;
+      }
+      if (data?.content) {
         setOffers(data.content.specialOffers || []);
       }
     } catch (error) {

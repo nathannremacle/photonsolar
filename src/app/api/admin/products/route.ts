@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { Product } from '@/data/products';
-import { loadProducts, saveProducts } from '@/lib/products-storage';
+import { 
+  loadProducts, 
+  createProduct, 
+  updateProduct, 
+  deleteProduct 
+} from '@/lib/products-storage';
 
 export async function GET() {
   try {
-    const products = loadProducts();
+    const products = await loadProducts();
     return NextResponse.json({ products });
   } catch (error) {
     console.error('Error loading products:', error);
@@ -40,12 +45,11 @@ export async function POST(request: NextRequest) {
       product.link = `/products/${product.id}`;
     }
 
-    const products = loadProducts();
-    products.push(product);
-    saveProducts(products);
+    const createdProduct = await createProduct(product);
 
-    return NextResponse.json({ success: true, product });
+    return NextResponse.json({ success: true, product: createdProduct });
   } catch (error) {
+    console.error('Error adding product:', error);
     return NextResponse.json(
       { error: 'Erreur lors de l\'ajout du produit' },
       { status: 500 }
@@ -64,21 +68,20 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const products = loadProducts();
-    const index = products.findIndex(p => p.id === product.id);
+    const updatedProduct = await updateProduct(product);
+
+    return NextResponse.json({ success: true, product: updatedProduct });
+  } catch (error: any) {
+    console.error('Error updating product:', error);
     
-    if (index === -1) {
+    // Check if product not found
+    if (error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Produit non trouvé' },
         { status: 404 }
       );
     }
-
-    products[index] = product;
-    saveProducts(products);
-
-    return NextResponse.json({ success: true, product });
-  } catch (error) {
+    
     return NextResponse.json(
       { error: 'Erreur lors de la mise à jour du produit' },
       { status: 500 }
@@ -98,24 +101,23 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const products = loadProducts();
-    const filtered = products.filter(p => p.id !== id);
+    await deleteProduct(id);
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Error deleting product:', error);
     
-    if (filtered.length === products.length) {
+    // Check if product not found
+    if (error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Produit non trouvé' },
         { status: 404 }
       );
     }
-
-    saveProducts(filtered);
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
+    
     return NextResponse.json(
       { error: 'Erreur lors de la suppression du produit' },
       { status: 500 }
     );
   }
 }
-

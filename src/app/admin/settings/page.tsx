@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Save, 
-  ArrowLeft,
   Settings as SettingsIcon,
   Lock,
   Key
 } from 'lucide-react';
 import { checkAdminSession } from '@/lib/admin-auth';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 export default function AdminSettings() {
   const router = useRouter();
@@ -94,37 +94,22 @@ export default function AdminSettings() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.push('/admin/dashboard')}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
-                <p className="text-sm text-gray-600 mt-1">Configuration générale du site</p>
-              </div>
-            </div>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+    <AdminLayout
+      title="Paramètres"
+      description="Configuration générale du site"
+    >
+      <div className="mb-6 flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+              className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 font-medium"
             >
-              <Save className="w-4 h-4" />
+              <Save className="w-5 h-5" />
               {saving ? 'Sauvegarde...' : 'Sauvegarder'}
             </button>
-          </div>
-        </div>
-      </header>
+      </div>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow space-y-6 p-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 space-y-6 p-6">
           {/* Security */}
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -205,9 +190,8 @@ export default function AdminSettings() {
               En production, utilisez des variables d'environnement pour les paramètres sensibles.
             </p>
           </div>
-        </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }
 

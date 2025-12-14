@@ -1,6 +1,6 @@
 {
   "banner": {
-    "enabled": true,
+    "enabled": false,
     "title": "Bienvenue chez Photon Solar",
     "subtitle": "Votre spécialiste en énergie solaire depuis 2008",
     "ctaText": "Voir le catalogue",
@@ -14,7 +14,8 @@
       "description": "Depuis 2008, PhotonSolar s'impose comme un acteur incontournable dans le domaine de l'énergie solaire. Nous vous accompagnons dans votre transition énergétique grâce à une large gamme d'équipements de haute qualité.",
       "cta": "En savoir plus",
       "ctaLink": "/pages/a-propos",
-      "bgColor": "bg-gradient-to-br from-green-600 to-green-700"
+      "bgColor": "bg-gradient-to-br from-green-600 to-green-700",
+      "backgroundImage": "/images/products/1765632944307-0-Design-sans-titre-45-scaled.png"
     },
     {
       "id": 2,
@@ -23,82 +24,11 @@
       "description": "Découvrez nos panneaux solaires ELITEC SOLAR Xmax bifacial jusqu'à 560Wc et 600Wc. Technologie de pointe avec garantie 30 ans.",
       "cta": "Voir les produits",
       "ctaLink": "/collections/panneaux-solaires",
-      "bgColor": "bg-gradient-to-br from-blue-600 to-blue-700"
-    },
-    {
-      "id": 3,
-      "badge": "PROMO",
-      "title": "ELITEC SOLAR Xmax 460Wc - 34% de réduction",
-      "description": "Profitez de notre offre spéciale sur le panneau ELITEC SOLAR Xmax 460Wc. Prix réduit pour un produit de qualité premium.",
-      "cta": "Voir l'offre",
-      "ctaLink": "/promo",
-      "bgColor": "bg-gradient-to-br from-red-600 to-red-700"
-    },
-    {
-      "id": 4,
-      "badge": "Formation",
-      "title": "Besoin de conseils ?",
-      "description": "Demandez notre catalogue de produits et inscrivez-vous à nos formations. Notre équipe d'experts vous accompagne dans vos projets solaires.",
-      "cta": "Contactez-nous",
-      "ctaLink": "/contact",
-      "bgColor": "bg-gradient-to-br from-green-600 to-green-700"
-    },
-    {
-      "id": 5,
-      "badge": "Catalogue complet",
-      "title": "Tous nos produits en ligne",
-      "description": "Panneaux solaires, onduleurs, batteries, structures de montage, bornes de recharge et bien plus encore. Tout pour votre installation solaire.",
-      "cta": "Voir tous les produits",
-      "ctaLink": "/collections",
-      "bgColor": "bg-gradient-to-br from-gray-700 to-gray-800"
+      "bgColor": "bg-gradient-to-br from-blue-600 to-blue-700",
+      "backgroundImage": "/images/products/1765632314318-0-29-30-29.png"
     }
   ],
-  "promotions": [
-    {
-      "id": 1,
-      "badge": "PROMO",
-      "title": "Baisse de prix significative sur la gamme SMA Hybride",
-      "description": "Les performances SMA, désormais plus accessibles pour tous vos projets hybrides.",
-      "features": [
-        "Réduction permanente du prix des onduleurs hybrides SMA",
-        "Autoconsommation maximisée",
-        "Triphasé et monophasé",
-        "Garantie 5+5 ans"
-      ],
-      "cta": "J'en profite!",
-      "ctaLink": "/collections/onduleurs?subcategory=hybride",
-      "bgColor": "bg-gradient-to-br from-orange-500 to-orange-600"
-    },
-    {
-      "id": 2,
-      "badge": "Nouveau",
-      "title": "Panneau Jinko JKM460N - Full Black",
-      "description": "Un panneau noir intégral hautement performant et durable pour vos installations résidentielles.",
-      "features": [
-        "Destiné à un usage résidentiel : full black – esthétique parfaite",
-        "Garantie du produit : 25 ans",
-        "Rendement : jusqu'à 23,02 %",
-        "En stock"
-      ],
-      "cta": "En savoir plus",
-      "ctaLink": "/collections/panneaux-solaires?brands=Jinko",
-      "bgColor": "bg-gradient-to-br from-gray-800 to-gray-900"
-    },
-    {
-      "id": 3,
-      "badge": "NOUVEAU AU CATALOGUE",
-      "title": "Onduleurs hybrides et batteries SolaX",
-      "description": "Une solution hybride complète et intelligente pour optimiser chaque installation.",
-      "features": [
-        "Onduleurs hybrides avec écran – CT et dongle inclus",
-        "Fonctionnement de secours intégré avec ou sans batteries",
-        "Gestion intelligente de la charge"
-      ],
-      "cta": "Découvrir",
-      "ctaLink": "/collections?brands=SolaX",
-      "bgColor": "bg-gradient-to-br from-purple-600 to-purple-700"
-    }
-  ],
+  "promotions": [],
   "bestSellers": {
     "enabled": true,
     "productIds": [
@@ -119,55 +49,22 @@
       "elitec-xmax-460"
     ]
   },
-  "specialOffers": [
-    {
-      "id": 1,
-      "title": "Offre de cashback prolongée jusqu'au 31/12/2025 !",
-      "description": "Participer à la campagne est un jeu d'enfant pour les entreprises d'installation :",
-      "features": [
-        "Achetez et installez les appareils SMA éligibles",
-        "Enregistrez les appareils via les systèmes SMA",
-        "Recevez automatiquement votre montant de cashback"
-      ],
-      "note": "Inscription possible jusqu'au 30/11/2025. Après cette date, seules les entreprises déjà enregistrées pourront continuer à cumuler du cashback jusqu'au 31/12/2025.",
-      "cta": "Découvrir",
-      "ctaLink": "/pages/sma-offre",
-      "bgColor": "bg-gradient-to-br from-orange-500 to-orange-600"
-    },
-    {
-      "id": 2,
-      "title": "Kits de modernisation SMA – prêts pour l'avenir !",
-      "description": "Pourquoi choisir les kits de modernisation SMA ?",
-      "features": [
-        "Un package tout-en-un",
-        "Une offre attractive",
-        "Prêts pour une gestion intelligente de l'énergie",
-        "Une installation simplifiée",
-        "Une forte demande sur le marché"
-      ],
-      "cta": "Découvrir",
-      "ctaLink": "/pages/sma-offre",
-      "bgColor": "bg-gradient-to-br from-blue-600 to-blue-700"
-    }
-  ],
+  "specialOffers": [],
   "news": {
     "enabled": true,
+    "selectedIds": [
+      1,
+      2
+    ],
     "items": [
       {
         "id": 1,
         "category": "News",
-        "title": "Wallonie : un tournant énergétique décisif – Le rôle d'Ecostal dans cette transformation",
-        "date": "3 December 2025",
-        "image": "/placeholder-news.jpg",
-        "link": "/blogs/news/wallonia-energy-turning-point"
-      },
-      {
-        "id": 2,
-        "category": "News",
-        "title": "Vincent Maurice rejoint Ecostal pour piloter les activités de Distribution",
-        "date": "11 September 2025",
-        "image": "/placeholder-news.jpg",
-        "link": "/blogs/news/vincent-maurice-joins-ecostal"
+        "title": "Formation",
+        "date": "2025-12-13",
+        "image": "/images/products/1765633182090-0-2001.jpg",
+        "link": "/blogs/news/formation",
+        "excerpt": "Bienvenue sur notre académie de formation, un lieu d’apprentissage dédié aux technologies durables et innovantes. Photon Solar, en collaboration avec des experts du secteur, propose des formations complètes et adaptées aux besoins des professionnels et des particuliers souhaitant se spécialiser dans les énergies renouvelables."
       }
     ]
   },
@@ -175,69 +72,70 @@
     "enabled": true,
     "items": [
       {
-        "name": "Easee",
-        "link": "/collections?brands=Easee"
+        "name": "/images/products/1765646600096-0-deye_592.webp",
+        "link": "/"
       },
       {
-        "name": "Eurener",
-        "link": "/collections?brands=Eurener"
+        "name": "/images/products/1765646600102-2-68747470733a2f2f76326368617267652e636f6d2f77702d636f6e74656e742f75706c6f6164732f323032332f30342f726561646d652d5632432e706e67_1_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "Growatt",
-        "link": "/collections?brands=Growatt"
+        "name": "/images/products/1765646600106-3-logo-trina-solar_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "Jinko Solar",
-        "link": "/collections?brands=Jinko"
+        "name": "/images/products/1765646600108-4-SunPower_Logo_Black_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "Longi",
-        "link": "/collections?brands=Longi"
+        "name": "/images/products/1765646600110-5-logo-sunbeam_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "Peblar",
-        "link": "/collections?brands=Peblar"
+        "name": "/images/products/1765646600112-6-logo-staubli_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "Schletter",
-        "link": "/collections?brands=Schletter"
+        "name": "/images/products/1765646600113-10-Schletter_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "SMA",
-        "link": "/collections?brands=SMA"
+        "name": "/images/products/1765646600116-11-logo-peblar_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "Smappee",
-        "link": "/collections?brands=Smappee"
+        "name": "/images/products/1765646600118-12-logo-longi_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "Solaredge",
-        "link": "/collections?brands=Solaredge"
+        "name": "/images/products/1765646600121-13-logo-jinko-solar_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "Staubli",
-        "link": "/collections?brands=Staubli"
+        "name": "/images/products/1765646600124-14-logo-huawei_2_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "Sunbeam",
-        "link": "/collections?brands=Sunbeam"
+        "name": "/images/products/1765646600126-15-logo-growatt_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "Sunpower",
-        "link": "/collections?brands=Sunpower"
+        "name": "/images/products/1765646600129-16-logo-eurener_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "Trina Solar",
-        "link": "/collections?brands=Trina"
+        "name": "/images/products/1765646600132-17-logo-easee_600x600.webp",
+        "link": "/"
       },
       {
-        "name": "V2C",
-        "link": "/collections?brands=V2C"
-      },
-      {
-        "name": "Wallbox",
-        "link": "/collections?brands=Wallbox"
+        "name": "/images/products/1765651903367-0-cropped-Logo-Elitec-Solar-1.png",
+        "link": "/"
       }
     ]
+  },
+  "metadata": {
+    "title": "PhotonSolar",
+    "description": "PhotonSolar, expert en énergie solaire en Belgique depuis 2008.",
+    "keywords": "panneaux solaires, photovoltaïque, énergie solaire, Belgique, elitec solar"
   }
 }

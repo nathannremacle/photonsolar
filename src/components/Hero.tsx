@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import Link from "next/link";
 import type { HeroSlide } from "@/lib/homepage-storage";
+import { safeFetchJson } from "@/utils/api";
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -24,9 +25,24 @@ export default function Hero() {
 
   const loadContent = async () => {
     try {
-      const response = await fetch("/api/homepage");
-      const data = await response.json();
-      if (response.ok && data.content) {
+      const { data, error } = await safeFetchJson<{ content: any }>("/api/homepage");
+      if (error) {
+        console.error("Error loading homepage content:", error);
+        // Fallback to default slides
+        setSlides([
+          {
+            id: 1,
+            badge: "Depuis 2008",
+            title: "Pourquoi PhotonSolar ?",
+            description: "Depuis 2008, PhotonSolar s'impose comme un acteur incontournable dans le domaine de l'énergie solaire.",
+            cta: "En savoir plus",
+            ctaLink: "/pages/a-propos",
+            bgColor: "bg-gradient-to-br from-orange-500 to-orange-600",
+          },
+        ]);
+        return;
+      }
+      if (data?.content) {
         setSlides(data.content.heroSlides || []);
         setBanner(data.content.banner || { enabled: true, title: "", subtitle: "", ctaText: "", ctaLink: "" });
         setShowBanner(data.content.banner?.enabled ?? true);

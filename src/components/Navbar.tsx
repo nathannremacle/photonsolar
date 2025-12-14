@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, Search, ChevronDown, Globe } from "lucide-react";
+import { Menu, X, Search, ChevronDown, Globe, User, LogOut, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSession, signOut } from "next-auth/react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCategoryIcon } from "@/utils/productIcons";
+import { useCart } from "@/contexts/CartContext";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,8 +17,12 @@ export default function Navbar() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
   const languageDropdownRef = useRef<HTMLDivElement>(null);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
   const { language, setLanguage, t } = useLanguage();
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const { getTotalItems, openCart } = useCart();
 
   // Handle scroll effect pour l'ombre
   useEffect(() => {
@@ -37,10 +43,19 @@ export default function Navbar() {
       if (languageDropdownRef.current && !languageDropdownRef.current.contains(event.target as Node)) {
         setLanguageDropdownOpen(false);
       }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    router.push("/");
+    router.refresh();
+  };
 
   const topMenuItems = [
     { name: t("nav.home"), key: "nav.home", href: "/" },
@@ -240,12 +255,76 @@ export default function Navbar() {
 
             {/* Right Actions */}
             <div className="hidden md:flex items-center gap-6">
+              {/* Cart Button */}
+              <button
+                onClick={openCart}
+                className="relative p-2 text-gray-700 hover:text-[#E67E22] transition-colors"
+                aria-label={language === "fr" ? "Ouvrir le panier" : "Open cart"}
+              >
+                <ShoppingCart size={24} />
+                {getTotalItems() > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {getTotalItems()}
+                  </span>
+                )}
+              </button>
               <Link href="/contact" className="text-gray-700 hover:text-[#E67E22] transition-colors font-medium">
                 {t("nav.contactUs")}
               </Link>
-              <Link href="/login" className="text-gray-700 hover:text-[#E67E22] transition-colors font-medium">
-                {t("nav.login")}
-              </Link>
+              {status === "loading" ? (
+                <div className="w-8 h-8 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
+              ) : session ? (
+                <div className="relative" ref={userDropdownRef}>
+                  <button
+                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                    className="flex items-center gap-2 text-gray-700 hover:text-[#E67E22] transition-colors font-medium"
+                  >
+                    {session.user?.image ? (
+                      <Image
+                        src={session.user.image}
+                        alt={session.user?.name || "User"}
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-orange-600 flex items-center justify-center text-white font-semibold">
+                        {session.user?.name?.charAt(0).toUpperCase() || "U"}
+                      </div>
+                    )}
+                    <span className="hidden lg:inline">{session.user?.name || session.user?.email}</span>
+                    <ChevronDown size={16} className={`transition-transform ${userDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  {userDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                    >
+                      <Link
+                        href="/profile"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2"
+                        onClick={() => setUserDropdownOpen(false)}
+                      >
+                        <User size={16} />
+                        Mon profil
+                      </Link>
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2"
+                      >
+                        <LogOut size={16} />
+                        Déconnexion
+                      </button>
+                    </motion.div>
+                  )}
+                </div>
+              ) : (
+                <Link href="/login" className="text-gray-700 hover:text-[#E67E22] transition-colors font-medium">
+                  {t("nav.login")}
+                </Link>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -412,6 +491,65 @@ export default function Navbar() {
                 >
                   {t("nav.promo")}
                 </Link>
+                
+                {/* Mobile Auth Section */}
+                <div className="mt-8 pt-8 border-t border-gray-200">
+                  {status === "loading" ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : session ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 mb-4">
+                        {session.user?.image ? (
+                          <Image
+                            src={session.user.image}
+                            alt={session.user?.name || "User"}
+                            width={48}
+                            height={48}
+                            className="rounded-full"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-orange-600 flex items-center justify-center text-white font-semibold">
+                            {session.user?.name?.charAt(0).toUpperCase() || "U"}
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            {session.user?.name || "Utilisateur"}
+                          </p>
+                          <p className="text-sm text-gray-600">{session.user?.email}</p>
+                        </div>
+                      </div>
+                      <Link
+                        href="/profile"
+                        className="block text-lg font-semibold text-gray-800 hover:text-[#E67E22] transition-colors flex items-center gap-2"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <User size={20} />
+                        Mon profil
+                      </Link>
+                      <button
+                        onClick={() => {
+                          handleSignOut();
+                          setIsOpen(false);
+                        }}
+                        className="w-full text-left text-lg font-semibold text-gray-800 hover:text-[#E67E22] transition-colors flex items-center gap-2"
+                      >
+                        <LogOut size={20} />
+                        Déconnexion
+                      </button>
+                    </div>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="block text-xl font-bold text-gray-800 hover:text-[#E67E22] transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {t("nav.login")}
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           </motion.div>
