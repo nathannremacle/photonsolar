@@ -1870,36 +1870,13 @@ function HomepagePreview({ content }: { content: HomepageContent }) {
       )}
 
       {/* News Preview */}
-      {content.news.enabled && content.news.items.length > 0 && (
+      {content.news.enabled && content.news.selectedIds.length > 0 && (
         <div>
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Actualités</h3>
-          <div className="space-y-3">
-            {content.news.items.slice(0, 2).map((item) => (
-              <div key={item.id} className="bg-gray-50 rounded-lg p-3">
-                <div className="aspect-video bg-gray-200 rounded mb-2 relative overflow-hidden">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <ImageIcon className="w-8 h-8 text-gray-400" />
-                    </div>
-                  )}
-                  <span className="absolute top-2 left-2 bg-orange-600 text-white px-2 py-0.5 rounded text-xs font-bold">
-                    {item.category}
-                  </span>
-                </div>
-                <h4 className="font-semibold text-sm text-gray-900 line-clamp-2">{item.title}</h4>
-                <p className="text-xs text-gray-500">{item.date}</p>
-              </div>
-            ))}
+          <div className="bg-gray-50 rounded-lg p-3">
+            <p className="text-sm text-gray-600">
+              {content.news.selectedIds.length} article{content.news.selectedIds.length > 1 ? 's' : ''} sélectionné{content.news.selectedIds.length > 1 ? 's' : ''}
+            </p>
           </div>
         </div>
       )}
