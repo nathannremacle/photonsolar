@@ -381,8 +381,16 @@ export default function AdminProducts() {
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.price || ''}
-                    onChange={(e) => updateFormField('price', parseFloat(e.target.value) || 0)}
+                    value={formData.price ?? ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '') {
+                        updateFormField('price', null);
+                      } else {
+                        const numValue = parseFloat(value);
+                        updateFormField('price', isNaN(numValue) ? null : numValue);
+                      }
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
@@ -393,8 +401,16 @@ export default function AdminProducts() {
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.originalPrice || ''}
-                    onChange={(e) => updateFormField('originalPrice', parseFloat(e.target.value) || 0)}
+                    value={formData.originalPrice ?? ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '') {
+                        updateFormField('originalPrice', null);
+                      } else {
+                        const numValue = parseFloat(value);
+                        updateFormField('originalPrice', isNaN(numValue) ? null : numValue);
+                      }
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                   />
                 </div>

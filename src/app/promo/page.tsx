@@ -4,21 +4,38 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
-import { products, type Product } from "@/data/products";
+import type { Product } from "@/data/products";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Tag } from "lucide-react";
 
 export default function PromoPage() {
   const { language } = useLanguage();
   const [promoProducts, setPromoProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Filtrer les produits en promotion (ceux avec originalPrice > price)
-    const filtered = products.filter(
-      (p) => p.originalPrice && p.price && p.originalPrice > p.price
-    );
-    setPromoProducts(filtered);
+    loadPromoProducts();
   }, []);
+
+  const loadPromoProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/products');
+      const data = await response.json();
+      
+      if (data.products) {
+        // Filtrer les produits en promotion (ceux avec originalPrice > price)
+        const filtered = data.products.filter(
+          (p: Product) => p.originalPrice && p.price && p.originalPrice > p.price
+        );
+        setPromoProducts(filtered);
+      }
+    } catch (error) {
+      console.error('Error loading promo products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen">
@@ -40,7 +57,13 @@ export default function PromoPage() {
             </p>
           </div>
 
-          {promoProducts.length === 0 ? (
+          {loading ? (
+            <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+              <p className="text-gray-600 text-lg">
+                {language === "fr" ? "Chargement..." : "Loading..."}
+              </p>
+            </div>
+          ) : promoProducts.length === 0 ? (
             <div className="bg-white rounded-lg shadow-sm p-12 text-center">
               <p className="text-gray-600 text-lg">
                 {language === "fr"

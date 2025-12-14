@@ -58,11 +58,6 @@ export async function POST(request: NextRequest) {
         redirect: false,
       });
 
-      // If sign in successful, reset rate limit
-      if (result) {
-        await authRateLimiter.reset(clientIP);
-      }
-
       return NextResponse.json(
         {
           success: true,
