@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
 import ProductFilters from "@/components/ProductFilters";
-import { getProductsByCategory, type Product } from "@/data/products";
+import type { Product } from "@/data/products";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 function CategoryContent() {
@@ -16,6 +16,7 @@ function CategoryContent() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [category, setCategory] = useState<string>("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const categoryParam = params?.category as string;
@@ -23,11 +24,30 @@ function CategoryContent() {
     
     if (categoryParam) {
       setCategory(categoryParam);
-      const products = getProductsByCategory(categoryParam, subcategory);
-      setAllProducts(products);
-      setFilteredProducts(products);
+      loadProducts(categoryParam, subcategory);
     }
   }, [params, searchParams]);
+
+  const loadProducts = async (categoryParam: string, subcategory?: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/products');
+      const data = await response.json();
+      
+      if (data.products) {
+        let filtered = data.products.filter((p: Product) => p.category === categoryParam);
+        if (subcategory) {
+          filtered = filtered.filter((p: Product) => p.subcategory === subcategory);
+        }
+        setAllProducts(filtered);
+        setFilteredProducts(filtered);
+      }
+    } catch (error) {
+      console.error('Error loading products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const categoryNames: Record<string, { fr: string; en: string }> = {
     "onduleurs": { fr: "Onduleurs", en: "Inverters" },
@@ -51,13 +71,15 @@ function CategoryContent() {
   const categoryName = category ? (categoryNames[category]?.[language] || category) : "";
   const subcategoryName = subcategory ? subcategoryNames[subcategory]?.[language] || subcategory : null;
 
-  if (!category) {
+  if (!category || loading) {
     return (
       <main className="min-h-screen">
         <Navbar />
         <div className="pt-24 pb-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-gray-600">Chargement...</p>
+            <p className="text-gray-600">
+              {language === "fr" ? "Chargement..." : "Loading..."}
+            </p>
           </div>
         </div>
         <Footer />

@@ -6,7 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getProductById, type Product } from "@/data/products";
+import type { Product } from "@/data/products";
 import { ChevronDown, Mail, Share2, CheckCircle2, ShoppingCart, Plus, Minus, Check } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,6 +17,7 @@ export default function ProductPage() {
   const { t, language } = useLanguage();
   const { addItem, openCart } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("description");
   const [imageIndex, setImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -26,10 +27,43 @@ export default function ProductPage() {
   useEffect(() => {
     const productId = params?.id as string;
     if (productId) {
-      const foundProduct = getProductById(productId);
-      setProduct(foundProduct || null);
+      loadProduct(productId);
     }
   }, [params]);
+
+  const loadProduct = async (productId: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/products');
+      const data = await response.json();
+      
+      if (data.products) {
+        const foundProduct = data.products.find((p: Product) => p.id === productId);
+        setProduct(foundProduct || null);
+      }
+    } catch (error) {
+      console.error('Error loading product:', error);
+      setProduct(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <main className="min-h-screen">
+        <Navbar />
+        <div className="pt-24 pb-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p className="text-gray-600">
+              {language === "fr" ? "Chargement..." : "Loading..."}
+            </p>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    );
+  }
 
   if (!product) {
     return (

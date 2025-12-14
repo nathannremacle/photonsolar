@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
-import { products, type Product } from "@/data/products";
+import type { Product } from "@/data/products";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Search, Filter, X, ChevronDown, SlidersHorizontal, ChevronUp } from "lucide-react";
 
@@ -46,8 +46,9 @@ function FilterSection({
 function CatalogContent() {
   const { t, language } = useLanguage();
   const searchParams = useSearchParams();
-  const [allProducts] = useState<Product[]>(products);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<string>("name");
@@ -58,6 +59,28 @@ function CatalogContent() {
     batteries: false,
     pompes: false,
   });
+
+  // Load products from API
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/products');
+      const data = await response.json();
+      
+      if (data.products) {
+        setAllProducts(data.products);
+        setFilteredProducts(data.products);
+      }
+    } catch (error) {
+      console.error('Error loading products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Initialize filters from URL params
   useEffect(() => {
@@ -78,7 +101,7 @@ function CatalogContent() {
   }, [searchParams]);
 
   // Calculate max price from products
-  const maxPrice = Math.max(...products.map(p => p.price || 0), 10000);
+  const maxPrice = Math.max(...allProducts.map(p => p.price || 0), 10000);
 
   // Filters state
   const [filters, setFilters] = useState({
@@ -111,23 +134,23 @@ function CatalogContent() {
   });
 
   // Get unique values for filters
-  const categories = [...new Set(products.map(p => p.category))].sort();
-  const brands = [...new Set(products.map(p => p.brand).filter((p): p is string => Boolean(p)))].sort();
-  const warranties = [...new Set(products.map(p => p.warranty).filter((p): p is string => Boolean(p)))].sort();
-  const types = [...new Set(products.map(p => p.type).filter((p): p is string => Boolean(p)))].sort();
-  const mpptCounts = [...new Set(products.map(p => p.mpptCount).filter((v): v is number => v !== undefined))].sort((a, b) => a - b);
-  const cellTypes = [...new Set(products.map(p => p.cellType).filter((p): p is string => Boolean(p)))].sort();
-  const efficiencies = [...new Set(products.map(p => p.efficiency).filter((p): p is string => Boolean(p)))].sort();
-  const maxPowers = [...new Set(products.map(p => p.maxPower).filter((p): p is string => Boolean(p)))].sort();
-  const capacities = [...new Set(products.map(p => p.capacity).filter((p): p is string => Boolean(p)))].sort();
-  const batteryTypes = [...new Set(products.map(p => p.batteryType).filter((p): p is string => Boolean(p)))].sort();
-  const cops = [...new Set(products.map(p => p.cop).filter((p): p is string => Boolean(p)))].sort();
-  const heatingPowers = [...new Set(products.map(p => p.heatingPower).filter((p): p is string => Boolean(p)))].sort();
-  const apparentPowers = [...new Set(products.map(p => p.apparentPower).filter((p): p is string => Boolean(p)))].sort();
-  const nominalPowers = [...new Set(products.map(p => p.nominalPower).filter((p): p is string => Boolean(p)))].sort();
-  const networkConnections = [...new Set(products.map(p => p.networkConnection).filter((p): p is string => Boolean(p)))].sort();
-  const voltages = [...new Set(products.map(p => p.voltage).filter((p): p is string => Boolean(p)))].sort();
-  const powers = [...new Set(products.map(p => p.power).filter((p): p is string => Boolean(p)))].sort();
+  const categories = [...new Set(allProducts.map(p => p.category))].sort();
+  const brands = [...new Set(allProducts.map(p => p.brand).filter((p): p is string => Boolean(p)))].sort();
+  const warranties = [...new Set(allProducts.map(p => p.warranty).filter((p): p is string => Boolean(p)))].sort();
+  const types = [...new Set(allProducts.map(p => p.type).filter((p): p is string => Boolean(p)))].sort();
+  const mpptCounts = [...new Set(allProducts.map(p => p.mpptCount).filter((v): v is number => v !== undefined))].sort((a, b) => a - b);
+  const cellTypes = [...new Set(allProducts.map(p => p.cellType).filter((p): p is string => Boolean(p)))].sort();
+  const efficiencies = [...new Set(allProducts.map(p => p.efficiency).filter((p): p is string => Boolean(p)))].sort();
+  const maxPowers = [...new Set(allProducts.map(p => p.maxPower).filter((p): p is string => Boolean(p)))].sort();
+  const capacities = [...new Set(allProducts.map(p => p.capacity).filter((p): p is string => Boolean(p)))].sort();
+  const batteryTypes = [...new Set(allProducts.map(p => p.batteryType).filter((p): p is string => Boolean(p)))].sort();
+  const cops = [...new Set(allProducts.map(p => p.cop).filter((p): p is string => Boolean(p)))].sort();
+  const heatingPowers = [...new Set(allProducts.map(p => p.heatingPower).filter((p): p is string => Boolean(p)))].sort();
+  const apparentPowers = [...new Set(allProducts.map(p => p.apparentPower).filter((p): p is string => Boolean(p)))].sort();
+  const nominalPowers = [...new Set(allProducts.map(p => p.nominalPower).filter((p): p is string => Boolean(p)))].sort();
+  const networkConnections = [...new Set(allProducts.map(p => p.networkConnection).filter((p): p is string => Boolean(p)))].sort();
+  const voltages = [...new Set(allProducts.map(p => p.voltage).filter((p): p is string => Boolean(p)))].sort();
+  const powers = [...new Set(allProducts.map(p => p.power).filter((p): p is string => Boolean(p)))].sort();
 
   // Apply filters and search
   useEffect(() => {
@@ -789,7 +812,13 @@ function CatalogContent() {
 
             {/* Products Grid */}
             <div className="flex-1">
-              {filteredProducts.length === 0 ? (
+              {loading ? (
+                <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+                  <p className="text-gray-600 text-lg">
+                    {language === "fr" ? "Chargement..." : "Loading..."}
+                  </p>
+                </div>
+              ) : filteredProducts.length === 0 ? (
                 <div className="bg-white rounded-lg shadow-sm p-12 text-center">
                   <p className="text-gray-600 text-lg mb-4">
                     {language === "fr" ? "Aucun produit trouvé" : "No products found"}
