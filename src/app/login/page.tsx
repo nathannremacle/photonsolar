@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +13,7 @@ import Footer from "@/components/Footer";
 import { ToastContainer, useToast } from "@/components/Toast";
 import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toasts, success, error, removeToast } = useToast();
@@ -235,6 +235,31 @@ export default function LoginPage() {
       <Footer />
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="pt-24 pb-16">
+          <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-lg shadow-md p-8">
+              <div className="text-center">
+                <div className="animate-pulse">
+                  <div className="h-8 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }
 
