@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -222,8 +222,8 @@ async function seedProducts() {
         type: p.type || null,
         voltage: p.voltage || null,
         features: p.features || [],
-        specifications: p.specifications || null,
-        documentation: p.documentation || null,
+        specifications: (p.specifications ?? Prisma.DbNull) as Prisma.InputJsonValue,
+        documentation: (p.documentation ?? Prisma.DbNull) as Prisma.InputJsonValue,
         mpptCount: p.mpptCount || null,
         apparentPower: p.apparentPower || null,
         nominalPower: p.nominalPower || null,
