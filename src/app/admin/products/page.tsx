@@ -464,11 +464,20 @@ export default function AdminProducts() {
                     body: uploadFormData,
                   });
 
-                  if (response.ok) {
-                    const data = await response.json();
+                  const data = await response.json();
+
+                  if (response.ok && data.success) {
+                    if (data.warnings && data.warnings.length > 0) {
+                      console.warn('Upload warnings:', data.warnings);
+                    }
                     return data.files || [];
                   } else {
-                    throw new Error('Erreur lors de l\'upload');
+                    const errorMessage = data.error || 'Erreur lors de l\'upload';
+                    const errorDetails = data.details 
+                      ? (Array.isArray(data.details) ? data.details.join('\n') : data.details)
+                      : '';
+                    const fullMessage = errorDetails ? `${errorMessage}\n\nDétails:\n${errorDetails}` : errorMessage;
+                    throw new Error(fullMessage);
                   }
                 }}
               />

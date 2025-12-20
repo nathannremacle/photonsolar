@@ -71,13 +71,18 @@ export async function POST(request: NextRequest) {
   try {
     // Verify that the public/images directory exists and is writable
     try {
+      if (!existsSync(PUBLIC_IMAGES_DIR)) {
+        // Try to create it
+        await mkdir(PUBLIC_IMAGES_DIR, { recursive: true });
+      }
+      // Verify we can access it
       await access(PUBLIC_IMAGES_DIR);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Public images directory not accessible:', PUBLIC_IMAGES_DIR, error);
       return NextResponse.json(
         { 
           error: 'Le répertoire d\'images n\'est pas accessible',
-          details: `Répertoire: ${PUBLIC_IMAGES_DIR}`
+          details: `Répertoire: ${PUBLIC_IMAGES_DIR}\nErreur: ${error?.message || 'Erreur inconnue'}`
         },
         { status: 500 }
       );
@@ -87,6 +92,13 @@ export async function POST(request: NextRequest) {
     const files = formData.getAll('images') as File[];
     const productId = formData.get('productId') as string | null;
     const category = formData.get('category') as string | null;
+
+    console.log('Upload request received:', {
+      filesCount: files.length,
+      productId,
+      category,
+      publicImagesDir: PUBLIC_IMAGES_DIR
+    });
 
     if (files.length === 0) {
       return NextResponse.json(

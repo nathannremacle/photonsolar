@@ -86,9 +86,10 @@ export default function ImageGallerySelector({
       const newImages = [...images, ...uploadedUrls];
       onChange(newImages);
       await loadAvailableImages();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading images:', error);
-      alert('Erreur lors de l\'upload des images');
+      const errorMessage = error?.message || 'Erreur lors de l\'upload des images';
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
