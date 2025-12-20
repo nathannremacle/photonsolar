@@ -247,6 +247,9 @@ export default function MarkdownEditor({
       const data = await response.json();
       if (response.ok && data.success && data.files.length > 0) {
         const imageUrl = data.files[0];
+        if (data.warnings && data.warnings.length > 0) {
+          console.warn('Upload warnings:', data.warnings);
+        }
         const alt = prompt('Texte alternatif pour l\'image (optionnel):', '');
         const textarea = textareaRef.current;
         if (textarea) {
@@ -265,11 +268,16 @@ export default function MarkdownEditor({
           onChange(value + `\n\n![${alt || ''}](${imageUrl})`);
         }
       } else {
-        throw new Error(data.error || 'Erreur lors de l\'upload');
+        const errorMessage = data.error || 'Erreur lors de l\'upload';
+        const errorDetails = data.details 
+          ? (Array.isArray(data.details) ? data.details.join('\n') : data.details)
+          : '';
+        throw new Error(errorDetails ? `${errorMessage}\n\n${errorDetails}` : errorMessage);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading image:', error);
-      alert('Erreur lors de l\'upload de l\'image');
+      const errorMessage = error?.message || 'Erreur lors de l\'upload de l\'image';
+      alert(errorMessage);
     } finally {
       setUploading(false);
       setUploadProgress(0);

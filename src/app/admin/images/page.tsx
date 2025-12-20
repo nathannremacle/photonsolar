@@ -68,17 +68,29 @@ export default function AdminImages() {
         body: formData,
       });
 
+      const data = await response.json();
+      
       if (response.ok) {
         loadImages();
         setShowUploadModal(false);
-        alert('Images uploadées avec succès!');
+        const successMessage = data.message || 'Images uploadées avec succès!';
+        if (data.warnings && data.warnings.length > 0) {
+          alert(`${successMessage}\n\nAvertissements:\n${data.warnings.join('\n')}`);
+        } else {
+          alert(successMessage);
+        }
       } else {
-        const data = await response.json();
-        alert(data.error || 'Erreur lors de l\'upload');
+        const errorMessage = data.error || 'Erreur lors de l\'upload';
+        const errorDetails = data.details 
+          ? (Array.isArray(data.details) ? data.details.join('\n') : data.details)
+          : '';
+        const fullMessage = errorDetails ? `${errorMessage}\n\nDétails:\n${errorDetails}` : errorMessage;
+        alert(fullMessage);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading images:', error);
-      alert('Erreur lors de l\'upload');
+      const errorMessage = error?.message || 'Erreur lors de l\'upload';
+      alert(errorMessage);
     } finally {
       setUploading(false);
     }

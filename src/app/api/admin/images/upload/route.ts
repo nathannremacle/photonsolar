@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, access } from 'fs/promises';
 import { join } from 'path';
-import { existsSync, readdirSync } from 'fs';
+import { existsSync, readdirSync, mkdirSync } from 'fs';
 
-const PUBLIC_IMAGES_DIR = join(process.cwd(), 'public/images');
+// Get the correct path to public/images directory
+function getPublicImagesDir(): string {
+  const cwd = process.cwd();
+  const publicDir = join(cwd, 'public', 'images');
+  
+  // Ensure the directory exists
+  if (!existsSync(publicDir)) {
+    // Try to create it
+    try {
+      mkdirSync(publicDir, { recursive: true });
+    } catch (error) {
+      console.error('Failed to create public/images directory:', error);
+    }
+  }
+  
+  return publicDir;
+}
+
+const PUBLIC_IMAGES_DIR = getPublicImagesDir();
 
 /**
  * Find the next available image number for a product
@@ -51,6 +69,20 @@ function findNextImageNumber(uploadDir: string, productId: string, ext: string):
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify that the public/images directory exists and is writable
+    try {
+      await access(PUBLIC_IMAGES_DIR);
+    } catch (error) {
+      console.error('Public images directory not accessible:', PUBLIC_IMAGES_DIR, error);
+      return NextResponse.json(
+        { 
+          error: 'Le répertoire d\'images n\'est pas accessible',
+          details: `Répertoire: ${PUBLIC_IMAGES_DIR}`
+        },
+        { status: 500 }
+      );
+    }
+
     const formData = await request.formData();
     const files = formData.getAll('images') as File[];
     const productId = formData.get('productId') as string | null;
@@ -64,14 +96,27 @@ export async function POST(request: NextRequest) {
     }
 
     const uploadedFiles: string[] = [];
+    const errors: string[] = [];
     
     // Determine subdirectory
     const subdir = category ? `products/${category}` : 'products';
     const uploadDir = join(PUBLIC_IMAGES_DIR, subdir);
     
     // Create directory if it doesn't exist
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
+    try {
+      if (!existsSync(uploadDir)) {
+        await mkdir(uploadDir, { recursive: true });
+      }
+    } catch (error: any) {
+      console.error('Failed to create upload directory:', uploadDir, error);
+      return NextResponse.json(
+        { 
+          error: 'Impossible de créer le répertoire d\'upload',
+          details: error?.message || 'Erreur inconnue',
+          path: uploadDir
+        },
+        { status: 500 }
+      );
     }
 
     // Pre-calculate starting number for product images (only once)
@@ -98,11 +143,13 @@ export async function POST(request: NextRequest) {
       // Validate file type
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
       if (!validTypes.includes(file.type)) {
+        errors.push(`Fichier "${file.name}": type non supporté (${file.type})`);
         continue;
       }
 
       // Validate file size (10MB max)
       if (file.size > 10 * 1024 * 1024) {
+        errors.push(`Fichier "${file.name}": trop volumineux (${(file.size / 1024 / 1024).toFixed(2)}MB, max 10MB)`);
         continue;
       }
 
@@ -157,17 +204,25 @@ export async function POST(request: NextRequest) {
       }
 
       // Save file
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const filePath = join(uploadDir, finalFilename);
-      
-      await writeFile(filePath, buffer);
-      uploadedFiles.push(`/images/${subdir}/${finalFilename}`);
+      try {
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const filePath = join(uploadDir, finalFilename);
+        
+        await writeFile(filePath, buffer);
+        uploadedFiles.push(`/images/${subdir}/${finalFilename}`);
+      } catch (error: any) {
+        console.error(`Error saving file ${file.name}:`, error);
+        errors.push(`Erreur lors de l'enregistrement de "${file.name}": ${error?.message || 'Erreur inconnue'}`);
+      }
     }
 
     if (uploadedFiles.length === 0) {
       return NextResponse.json(
-        { error: 'Aucune image valide n\'a pu être uploadée' },
+        { 
+          error: 'Aucune image valide n\'a pu être uploadée',
+          details: errors.length > 0 ? errors : ['Aucun fichier valide fourni']
+        },
         { status: 400 }
       );
     }
@@ -175,12 +230,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       files: uploadedFiles,
-      message: `${uploadedFiles.length} image(s) uploadée(s) avec succès`
+      message: `${uploadedFiles.length} image(s) uploadée(s) avec succès`,
+      warnings: errors.length > 0 ? errors : undefined
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error uploading images:', error);
+    const errorMessage = error?.message || 'Erreur inconnue';
+    const errorStack = process.env.NODE_ENV === 'development' ? error?.stack : undefined;
+    
     return NextResponse.json(
-      { error: 'Erreur lors de l\'upload des images' },
+      { 
+        error: 'Erreur lors de l\'upload des images',
+        details: errorMessage,
+        stack: errorStack
+      },
       { status: 500 }
     );
   }
