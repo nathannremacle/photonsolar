@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readdirSync, statSync, unlinkSync, existsSync } from 'fs';
 import { join } from 'path';
+import { isSpacesConfigured, listSpacesImages } from '@/lib/spaces';
 
 const PUBLIC_IMAGES_DIR = join(process.cwd(), 'public/images');
 
@@ -49,6 +50,10 @@ function scanImages(dir: string, basePath: string = ''): ImageFile[] {
 
 export async function GET() {
   try {
+    if (isSpacesConfigured()) {
+      const images = await listSpacesImages('images/');
+      return NextResponse.json({ images });
+    }
     const images = scanImages(PUBLIC_IMAGES_DIR);
     return NextResponse.json({ images });
   } catch (error) {

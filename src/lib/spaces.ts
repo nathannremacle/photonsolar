@@ -96,4 +96,52 @@ export function getSpacesCdnUrl(key: string): string {
   return `${base}/${normalizedKey}`;
 }
 
+export interface SpacesImageFile {
+  name: string;
+  path: string;
+  url: string;
+  size?: number;
+}
+
+/**
+ * List images in Spaces under prefix "images/" (or optional prefix).
+ * Returns the same shape as the legacy filesystem scan for GET /api/admin/images.
+ */
+export async function listSpacesImages(prefix: string = "images/"): Promise<SpacesImageFile[]> {
+  const s3 = getSpacesClient();
+  if (!s3 || !BUCKET || !CDN_BASE) return [];
+
+  const normalizedPrefix = prefix.startsWith("/") ? prefix.slice(1) : prefix;
+  const out = await s3.send(
+    new ListObjectsV2Command({
+      Bucket: BUCKET,
+      Prefix: normalizedPrefix,
+      MaxKeys: 1000,
+    })
+  );
+
+  const base = CDN_BASE.replace(/\/$/, "");
+  const files: SpacesImageFile[] = [];
+
+  for (const obj of out.Contents ?? []) {
+    const key = obj.Key;
+    if (!key || key.endsWith("/")) continue;
+    const ext = key.toLowerCase().split(".").pop();
+    if (!["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext ?? "")) continue;
+
+    const name = key.split("/").pop() ?? key;
+    const path = key.startsWith("images/") ? key.replace(/^images\//, "") : key;
+    const url = `${base}/${key}`;
+
+    files.push({
+      name,
+      path,
+      url,
+      size: obj.Size,
+    });
+  }
+
+  return files;
+}
+
 export { isSpacesConfigured, BUCKET as SPACES_BUCKET };

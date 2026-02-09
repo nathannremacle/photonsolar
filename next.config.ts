@@ -5,7 +5,14 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   images: {
     unoptimized: false,
-    remotePatterns: [],
+    remotePatterns: [
+      // DigitalOcean Spaces CDN (images uploadées depuis l’admin)
+      {
+        protocol: "https",
+        hostname: "**.cdn.digitaloceanspaces.com",
+        pathname: "/**",
+      },
+    ],
   },
 };
 
