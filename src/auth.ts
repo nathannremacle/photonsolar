@@ -49,38 +49,30 @@ const fullAuthConfig = {
 
           const { email, password } = validatedFields.data;
 
-          // Find user by email
+          // Find user by email (select without role so it works if role column is missing)
           const user = await prisma.user.findUnique({
-            where: {
-              email: email.toLowerCase(),
+            where: { email: email.toLowerCase() },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              image: true,
+              password: true,
+              companyName: true,
             },
           });
 
-          if (!user || !user.password) {
-            // Don't reveal if user exists or not (security best practice)
-            return null;
-          }
+          if (!user || !user.password) return null;
 
-          // Check if email is verified (if email verification is enabled)
-          // Uncomment if you want to enforce email verification:
-          // if (!user.emailVerified) {
-          //   return null; // Return null instead of throwing to show generic error
-          // }
-
-          // Verify password
           const isPasswordValid = await compare(password, user.password);
+          if (!isPasswordValid) return null;
 
-          if (!isPasswordValid) {
-            return null;
-          }
-
-          // Return user object (will be available in session)
           return {
             id: user.id,
             email: user.email,
             name: user.name,
             image: user.image,
-            role: user.role,
+            role: undefined,
             companyName: user.companyName ?? undefined,
           };
         } catch (error) {

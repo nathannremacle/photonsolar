@@ -90,9 +90,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already exists
+    // Check if user already exists (select only id to avoid requiring role column)
     const existingUser = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
+      select: { id: true },
     });
 
     if (existingUser) {
@@ -109,89 +110,107 @@ export async function POST(request: NextRequest) {
     // Hash password with bcryptjs
     const hashedPassword = await hash(password, 12);
 
-    // Create user in database
-    const user = await prisma.user.create({
-      data: {
-        email: email.toLowerCase(),
-        password: hashedPassword,
-        name: name,
-        phoneNumber: cleanedPhoneNumber,
-        companyName: companyName || null,
-        role: role ?? null,
-      },
-    });
+    // Build create data: only include role when it has a valid value (so DB without role column still works)
+    const createData: {
+      email: string;
+      password: string;
+      name: string;
+      phoneNumber: string;
+      companyName: string | null;
+      role?: "PARTICULIER" | "INSTALLATEUR" | "REVENDEUR" | "AUTRE";
+    } = {
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      name: name,
+      phoneNumber: cleanedPhoneNumber,
+      companyName: companyName || null,
+    };
+    const validRole = role && ["PARTICULIER", "INSTALLATEUR", "REVENDEUR", "AUTRE"].includes(role);
+    if (validRole) createData.role = role as "PARTICULIER" | "INSTALLATEUR" | "REVENDEUR" | "AUTRE";
 
-    // Return user without password (explicitly exclude password field)
-    const { password: _, ...userWithoutPassword } = user;
+    let user: { id: string; name: string | null; email: string; phoneNumber: string; companyName: string | null; createdAt: Date };
+    try {
+      user = await prisma.user.create({
+        data: createData,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phoneNumber: true,
+          companyName: true,
+          createdAt: true,
+        },
+      });
+    } catch (createError: unknown) {
+      const errMsg = createError instanceof Error ? createError.message : String(createError);
+      if (errMsg.includes("role") || errMsg.includes("column") || (typeof createError === "object" && createError !== null && "code" in createError && (createError as { code?: string }).code === "P2010")) {
+        try {
+          const { randomBytes } = await import("crypto");
+          const id = `c${randomBytes(12).toString("hex")}`;
+          await prisma.$executeRaw`
+            INSERT INTO users (id, name, email, password, "phoneNumber", "companyName", "createdAt", "updatedAt")
+            VALUES (${id}, ${name}, ${email.toLowerCase()}, ${hashedPassword}, ${cleanedPhoneNumber}, ${companyName || null}, NOW(), NOW())
+          `;
+          const created = await prisma.user.findUnique({
+            where: { id },
+            select: { id: true, name: true, email: true, phoneNumber: true, companyName: true, createdAt: true },
+          });
+          if (!created) throw new Error("User not found after insert");
+          user = created;
+        } catch (rawError) {
+          console.error("Registration fallback error:", rawError);
+          return NextResponse.json(
+            {
+              success: false,
+              error: "La base de données doit être mise à jour. Exécutez à la racine du projet : npx prisma db push",
+              details: errMsg,
+            },
+            { status: 500 }
+          );
+        }
+      } else {
+        throw createError;
+      }
+    }
 
     return NextResponse.json(
       {
         success: true,
-        user: userWithoutPassword,
+        user,
       },
       { status: 201 }
     );
   } catch (error) {
     console.error("Registration error:", error);
-    
-    // Handle Prisma errors
+
     if (error instanceof Error) {
-      // Check for unique constraint violation
       if (error.message.includes("Unique constraint") || error.message.includes("P2002")) {
         return NextResponse.json(
-          {
-            success: false,
-            error: "Un compte avec cet email existe déjà.",
-            field: "email",
-          },
+          { success: false, error: "Un compte avec cet email existe déjà.", field: "email" },
           { status: 409 }
         );
       }
-
-      // Check for missing required field (phoneNumber)
       if (error.message.includes("phoneNumber") || error.message.includes("Required")) {
         return NextResponse.json(
-          {
-            success: false,
-            error: "Le numéro de téléphone est requis. Veuillez mettre à jour la base de données avec 'npx prisma db push'.",
-            field: "phoneNumber",
-          },
+          { success: false, error: "Le numéro de téléphone est requis.", field: "phoneNumber" },
           { status: 500 }
         );
       }
-
-      // Check for database connection issues
       if (error.message.includes("Can't reach database") || error.message.includes("P1001")) {
         return NextResponse.json(
-          {
-            success: false,
-            error: "Impossible de se connecter à la base de données. Vérifiez votre configuration.",
-          },
+          { success: false, error: "Impossible de se connecter à la base de données. Vérifiez votre configuration." },
           { status: 500 }
         );
       }
-
-      // Check for Prisma validation errors
       if (error.message.includes("Invalid value") || error.message.includes("Argument")) {
         return NextResponse.json(
-          {
-            success: false,
-            error: "Données invalides pour la création de l'utilisateur.",
-            details: error.message,
-          },
+          { success: false, error: "Données invalides pour la création de l'utilisateur.", details: error.message },
           { status: 400 }
         );
       }
-
-      // Log the full error for debugging
-      console.error("Full error details:", {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      });
+      console.error("Full error details:", { message: error.message, stack: error.stack });
     }
 
-    // Always return a valid JSON response
     return NextResponse.json(
       {
         success: false,

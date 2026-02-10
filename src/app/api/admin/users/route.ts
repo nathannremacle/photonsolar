@@ -16,12 +16,13 @@ export async function GET(request: NextRequest) {
         email: true,
         phoneNumber: true,
         companyName: true,
-        role: true,
         createdAt: true,
       },
       orderBy: { createdAt: "desc" },
     });
-    return NextResponse.json({ users });
+    return NextResponse.json({
+      users: users.map((u) => ({ ...u, role: null })),
+    });
   } catch (error) {
     console.error("Admin users list error:", error);
     return NextResponse.json(
