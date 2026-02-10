@@ -15,6 +15,13 @@ datasource db {
 // NextAuth.js Models
 // ============================================
 
+enum UserRole {
+  PARTICULIER
+  INSTALLATEUR
+  REVENDEUR
+  AUTRE
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -24,12 +31,14 @@ model User {
   image         String?
   phoneNumber   String    // Phone number (required for B2B)
   companyName   String?   // Company name (optional for B2B)
+  role          UserRole? // Role: installateur, revendeur, particulier, etc.
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
-  orders   Order[]  // Orders placed by this user
+  accounts       Account[]
+  sessions       Session[]
+  orders         Order[]  // Orders placed by this user
+  pricingRules   PricingRule[] // User-specific price overrides
 
   @@map("users")
 }
@@ -346,4 +355,41 @@ model Download {
   @@index([category])
   @@index([order])
   @@map("downloads")
+}
+
+// ============================================
+// Pricing rules (per role, per user, per company)
+// ============================================
+
+enum PricingScope {
+  ROLE    // Applies to all users with this role
+  USER    // Applies to a specific user
+  COMPANY // Applies to all users of this company name
+}
+
+enum PricingType {
+  PERCENT_DISCOUNT // value = percentage off (e.g. 10 = 10% off)
+  FIXED_PRICE      // value = price in euros
+}
+
+model PricingRule {
+  id          String       @id @default(cuid())
+  scope       PricingScope
+  role        UserRole?    // When scope = ROLE
+  userId      String?      // When scope = USER
+  companyName String?      // When scope = COMPANY
+  productId   String       // Product ID
+  type        PricingType
+  value       Float        // Percent (0-100) or fixed price in euros
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([scope, role, userId, companyName, productId])
+  @@index([productId])
+  @@index([userId])
+  @@index([scope])
+  @@map("pricing_rules")
 }

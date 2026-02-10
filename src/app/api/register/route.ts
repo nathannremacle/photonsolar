@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, password, phoneNumber, companyName } = validationResult.data;
+    const { name, email, password, phoneNumber, companyName, role } = validationResult.data;
 
     // Verify phoneNumber is present
     if (!phoneNumber || phoneNumber.trim().length === 0) {
@@ -117,6 +117,7 @@ export async function POST(request: NextRequest) {
         name: name,
         phoneNumber: cleanedPhoneNumber,
         companyName: companyName || null,
+        role: role ?? null,
       },
     });
 

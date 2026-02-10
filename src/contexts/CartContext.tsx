@@ -97,7 +97,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const getTotalPrice = () => {
     return items.reduce((total, item) => {
-      const price = item.product.price || 0;
+      const price = item.product.effectivePrice ?? item.product.price ?? 0;
       return total + price * item.quantity;
     }, 0);
   };

@@ -5,6 +5,8 @@ export interface Product {
   category: string;
   subcategory?: string;
   price?: number;
+  /** Price after role/user/company rules (when user is logged in) */
+  effectivePrice?: number | null;
   originalPrice?: number;
   power?: string;
   type?: string;

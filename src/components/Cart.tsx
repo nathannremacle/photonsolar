@@ -185,8 +185,8 @@ export default function Cart() {
                     {/* Price */}
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-bold text-gray-900">
-                        {item.product.price
-                          ? `€ ${(item.product.price * item.quantity).toFixed(2)}`
+                        {(item.product.effectivePrice ?? item.product.price) != null && (item.product.effectivePrice ?? item.product.price)! > 0
+                          ? `€ ${(((item.product.effectivePrice ?? item.product.price)!) * item.quantity).toFixed(2)}`
                           : language === "fr"
                           ? "Prix sur demande"
                           : "Price on request"}

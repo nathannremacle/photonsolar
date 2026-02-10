@@ -79,6 +79,10 @@ export const signUpSchema = z.object({
     .max(200, "Le nom de l'entreprise ne peut pas dépasser 200 caractères")
     .optional()
     .nullable(),
+  role: z
+    .enum(["PARTICULIER", "INSTALLATEUR", "REVENDEUR", "AUTRE"])
+    .optional()
+    .nullable(),
   password: z
     .string()
     .min(8, "Le mot de passe doit contenir au moins 8 caractères")

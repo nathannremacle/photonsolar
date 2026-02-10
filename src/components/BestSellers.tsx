@@ -118,32 +118,35 @@ export default function BestSellers() {
                   </Link>
                   <div className="px-4 pb-4">
                     {/* Price */}
-                    {product.price ? (
-                      <div className="flex items-baseline gap-2">
-                        {product.originalPrice && product.originalPrice > product.price && (
-                          <>
-                            <span className="text-lg font-bold text-gray-900">
-                              € {product.price.toFixed(2)}
+                    {(() => {
+                      const displayPrice = product.effectivePrice ?? product.price;
+                      return displayPrice != null && displayPrice > 0 ? (
+                        <div className="flex items-baseline gap-2">
+                          {product.originalPrice && product.originalPrice > displayPrice && (
+                            <>
+                              <span className="text-lg font-bold text-gray-900">
+                                € {displayPrice.toFixed(2)}
+                              </span>
+                              <span className="text-sm text-gray-500 line-through">
+                                € {product.originalPrice.toFixed(2)}
+                              </span>
+                              <span className="bg-red-600 text-white px-1.5 py-0.5 rounded text-xs font-bold">
+                                -{Math.round(((product.originalPrice - displayPrice) / product.originalPrice) * 100)}%
+                              </span>
+                            </>
+                          )}
+                          {(!product.originalPrice || product.originalPrice <= displayPrice) && (
+                            <span className="text-xl font-bold text-gray-900">
+                              € {displayPrice.toFixed(2)}
                             </span>
-                            <span className="text-sm text-gray-500 line-through">
-                              € {product.originalPrice.toFixed(2)}
-                            </span>
-                            <span className="bg-red-600 text-white px-1.5 py-0.5 rounded text-xs font-bold">
-                              -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-                            </span>
-                          </>
-                        )}
-                        {(!product.originalPrice || product.originalPrice <= product.price) && (
-                          <span className="text-xl font-bold text-gray-900">
-                            € {product.price.toFixed(2)}
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-sm text-gray-600">
-                        {language === "fr" ? "Prix sur demande" : "Price on request"}
-                      </div>
-                    )}
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-sm text-gray-600">
+                          {language === "fr" ? "Prix sur demande" : "Price on request"}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </article>
               </motion.div>

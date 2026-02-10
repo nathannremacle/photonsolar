@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Sun, Facebook } from "lucide-react";
+import Image from "next/image";
+import { Facebook } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Footer() {
@@ -17,9 +18,14 @@ export default function Footer() {
           
           {/* Brand Column */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-6">
-              <Sun size={24} className="text-orange-500" />
-              <span className="text-2xl font-bold">Photon<span className="text-orange-500">Solar</span></span>
+            <Link href="/" className="inline-block mb-6">
+              <Image
+                src="/images/logo.jpg"
+                alt="Photon Solar"
+                width={180}
+                height={48}
+                className="h-12 w-auto object-contain"
+              />
             </Link>
             <div className="space-y-2 text-gray-300 text-sm mb-6">
               <p><strong>{t("footer.hours")} :</strong></p>
@@ -110,7 +116,7 @@ export default function Footer() {
           {/* Social Links Column */}
           <div>
             <h4 className="font-bold text-lg mb-6 text-white">{t("footer.follow")}</h4>
-            <div className="flex gap-4 mb-6">
+            <div className="flex gap-4">
               <a
                 href="https://www.instagram.com/photonsolar"
                 target="_blank"
@@ -138,11 +144,6 @@ export default function Footer() {
               >
                 <span className="text-white text-sm">YT</span>
               </a>
-            </div>
-            <div className="text-gray-300 text-sm space-y-2">
-              <p><strong>{t("footer.hours")} :</strong></p>
-              <p>{t("footer.hoursWeek")}</p>
-              <p>{t("footer.hoursWeekend")}</p>
             </div>
           </div>
         </div>

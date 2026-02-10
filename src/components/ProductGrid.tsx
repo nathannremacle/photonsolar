@@ -104,58 +104,68 @@ export default function ProductGrid({ products }: ProductGridProps) {
                     )}
                   </div>
                   {/* Price */}
-                  <div className="mb-3">
-                    {product.price ? (
-                      <div className="flex items-baseline gap-2">
-                        {product.originalPrice && product.originalPrice > product.price && (
-                          <>
-                            <span className="text-lg font-bold text-gray-900">
-                              € {product.price.toFixed(2)}
-                            </span>
-                            <span className="text-sm text-gray-500 line-through">
-                              € {product.originalPrice.toFixed(2)}
-                            </span>
-                            <span className="bg-red-600 text-white px-1.5 py-0.5 rounded text-xs font-bold">
-                              -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-                            </span>
-                          </>
-                        )}
-                        {(!product.originalPrice || product.originalPrice <= product.price) && (
-                          <span className="text-xl font-bold text-gray-900">
-                            € {product.price.toFixed(2)}
-                          </span>
+                  {(() => {
+                    const displayPrice = product.effectivePrice ?? product.price;
+                    return (
+                      <div className="mb-3">
+                        {displayPrice != null && displayPrice > 0 ? (
+                          <div className="flex items-baseline gap-2">
+                            {product.originalPrice && product.originalPrice > (displayPrice as number) && (
+                              <>
+                                <span className="text-lg font-bold text-gray-900">
+                                  € {(displayPrice as number).toFixed(2)}
+                                </span>
+                                <span className="text-sm text-gray-500 line-through">
+                                  € {product.originalPrice.toFixed(2)}
+                                </span>
+                                <span className="bg-red-600 text-white px-1.5 py-0.5 rounded text-xs font-bold">
+                                  -{Math.round(((product.originalPrice - (displayPrice as number)) / product.originalPrice) * 100)}%
+                                </span>
+                              </>
+                            )}
+                            {(!product.originalPrice || product.originalPrice <= (displayPrice as number)) && (
+                              <span className="text-xl font-bold text-gray-900">
+                                € {(displayPrice as number).toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-gray-600">
+                            {language === "fr" ? "Prix sur demande" : "Price on request"}
+                          </div>
                         )}
                       </div>
-                    ) : (
-                      <div className="text-sm text-gray-600">
-                        {language === "fr" ? "Prix sur demande" : "Price on request"}
-                      </div>
-                    )}
-                  </div>
+                    );
+                  })()}
                   
                   {/* Add to Cart Button */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      addItem(product, 1);
-                      openCart();
-                    }}
-                    className={`
-                      w-full py-2.5 px-4 rounded-lg font-semibold 
-                      flex items-center justify-center gap-2
-                      transition-all duration-300 ease-out
-                      transform hover:scale-[1.02] active:scale-[0.98]
-                      ${product.price 
-                        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 hover:from-orange-600 hover:to-orange-700' 
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      }
-                    `}
-                    disabled={!product.price}
-                  >
-                    <ShoppingCart size={18} className={product.price ? 'group-hover:animate-bounce' : ''} />
-                    <span>{language === "fr" ? "Ajouter au panier" : "Add to cart"}</span>
-                  </button>
+                  {(() => {
+                    const displayPrice = product.effectivePrice ?? product.price;
+                    return (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          addItem(product, 1);
+                          openCart();
+                        }}
+                        className={`
+                          w-full py-2.5 px-4 rounded-lg font-semibold 
+                          flex items-center justify-center gap-2
+                          transition-all duration-300 ease-out
+                          transform hover:scale-[1.02] active:scale-[0.98]
+                          ${displayPrice != null && displayPrice > 0
+                            ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 hover:from-orange-600 hover:to-orange-700' 
+                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          }
+                        `}
+                        disabled={!(displayPrice != null && displayPrice > 0)}
+                      >
+                        <ShoppingCart size={18} className={displayPrice != null && displayPrice > 0 ? 'group-hover:animate-bounce' : ''} />
+                        <span>{language === "fr" ? "Ajouter au panier" : "Add to cart"}</span>
+                      </button>
+                    );
+                  })()}
                 </div>
               </article>
             </Link>

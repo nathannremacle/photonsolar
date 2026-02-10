@@ -80,6 +80,8 @@ const fullAuthConfig = {
             email: user.email,
             name: user.name,
             image: user.image,
+            role: user.role,
+            companyName: user.companyName ?? undefined,
           };
         } catch (error) {
           console.error("Auth error:", error);

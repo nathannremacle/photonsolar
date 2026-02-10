@@ -12,6 +12,8 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string;
+      role?: string | null;
+      companyName?: string | null;
     } & {
       name?: string | null;
       email?: string | null;
@@ -76,6 +78,8 @@ export const authConfig: NextAuthConfig = {
         token.email = user.email;
         token.name = user.name;
         token.picture = user.image;
+        token.role = (user as { role?: string }).role;
+        token.companyName = (user as { companyName?: string }).companyName;
       }
 
       // Handle session update (for profile updates, etc.)
@@ -83,6 +87,8 @@ export const authConfig: NextAuthConfig = {
         if (session.name) token.name = session.name;
         if (session.email) token.email = session.email;
         if (session.image) token.picture = session.image;
+        if ((session as { role?: string }).role !== undefined) token.role = (session as { role?: string }).role;
+        if ((session as { companyName?: string }).companyName !== undefined) token.companyName = (session as { companyName?: string }).companyName;
       }
 
       return token;
@@ -93,6 +99,8 @@ export const authConfig: NextAuthConfig = {
         session.user.email = token.email as string;
         session.user.name = token.name as string;
         session.user.image = token.picture as string;
+        session.user.role = token.role as string | null;
+        session.user.companyName = token.companyName as string | null;
       }
       return session;
     },

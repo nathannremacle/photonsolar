@@ -10,7 +10,7 @@ import type { SignUpInput } from "@/lib/validations/auth";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ToastContainer, useToast } from "@/components/Toast";
-import { Mail, Lock, User, Eye, EyeOff, Loader2, CheckCircle2, Phone, Building2 } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, Loader2, CheckCircle2, Phone, Building2, Briefcase } from "lucide-react";
 import { safeFetchJson } from "@/utils/api";
 
 export default function RegisterPage() {
@@ -282,6 +282,35 @@ export default function RegisterPage() {
                   <p className="mt-1 text-sm text-red-600">
                     {errors.companyName.message}
                   </p>
+                )}
+              </div>
+
+              {/* Role Field */}
+              <div>
+                <label
+                  htmlFor="role"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Profil / Rôle <span className="text-gray-400">(optionnel)</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Briefcase className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <select
+                    id="role"
+                    {...register("role")}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  >
+                    <option value="">Choisir un profil...</option>
+                    <option value="PARTICULIER">Particulier</option>
+                    <option value="INSTALLATEUR">Installateur</option>
+                    <option value="REVENDEUR">Revendeur</option>
+                    <option value="AUTRE">Autre</option>
+                  </select>
+                </div>
+                {errors.role && (
+                  <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
                 )}
               </div>
 

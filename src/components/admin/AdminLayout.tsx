@@ -18,6 +18,8 @@ import {
   ChevronLeft,
   Newspaper,
   ShoppingCart,
+  Users,
+  BadgeDollarSign,
 } from 'lucide-react';
 import { clearAdminSession } from '@/lib/admin-auth';
 
@@ -58,6 +60,18 @@ const navItems: NavItem[] = [
     href: '/admin/orders',
     icon: ShoppingCart,
     description: 'Gérer les commandes',
+  },
+  {
+    title: 'Utilisateurs',
+    href: '/admin/users',
+    icon: Users,
+    description: 'Inscrits et rôles',
+  },
+  {
+    title: 'Tarification',
+    href: '/admin/pricing',
+    icon: BadgeDollarSign,
+    description: 'Prix par rôle / utilisateur / entreprise',
   },
   {
     title: 'Images',

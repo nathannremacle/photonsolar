@@ -288,37 +288,42 @@ export default function ProductPage() {
               </div>
 
               {/* Price */}
-              <div className="mb-6">
-                {product.price ? (
-                  <div className="flex items-baseline gap-3">
-                    {product.originalPrice && product.originalPrice > product.price && (
-                      <>
-                        <span className="text-2xl font-bold text-gray-900">
-                          € {product.price.toFixed(2)}
-                        </span>
-                        <span className="text-lg text-gray-500 line-through">
-                          € {product.originalPrice.toFixed(2)}
-                        </span>
-                        <span className="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">
-                          -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-                        </span>
-                      </>
-                    )}
-                    {(!product.originalPrice || product.originalPrice <= product.price) && (
-                      <span className="text-3xl font-bold text-gray-900">
-                        € {product.price.toFixed(2)}
-                      </span>
+              {(() => {
+                const displayPrice = product.effectivePrice ?? product.price;
+                return (
+                  <div className="mb-6">
+                    {displayPrice != null && displayPrice > 0 ? (
+                      <div className="flex items-baseline gap-3">
+                        {product.originalPrice && product.originalPrice > displayPrice && (
+                          <>
+                            <span className="text-2xl font-bold text-gray-900">
+                              € {displayPrice.toFixed(2)}
+                            </span>
+                            <span className="text-lg text-gray-500 line-through">
+                              € {product.originalPrice.toFixed(2)}
+                            </span>
+                            <span className="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">
+                              -{Math.round(((product.originalPrice - displayPrice) / product.originalPrice) * 100)}%
+                            </span>
+                          </>
+                        )}
+                        {(!product.originalPrice || product.originalPrice <= displayPrice) && (
+                          <span className="text-3xl font-bold text-gray-900">
+                            € {displayPrice.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-lg text-gray-600">
+                        {language === "fr" ? "Prix sur demande" : "Price on request"}
+                      </div>
                     )}
                   </div>
-                ) : (
-                  <div className="text-lg text-gray-600">
-                    {language === "fr" ? "Prix sur demande" : "Price on request"}
-                  </div>
-                )}
-              </div>
+                );
+              })()}
 
               {/* Add to Cart Section */}
-              {product.price ? (
+              {((product.effectivePrice ?? product.price) != null && (product.effectivePrice ?? product.price)! > 0) ? (
                 <div className="mb-8 p-6 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-100">
                   {/* Quantity Selector */}
                   <div className="flex items-center gap-4 mb-4">
@@ -348,7 +353,7 @@ export default function ProductPage() {
                       </button>
                     </div>
                     <span className="text-sm text-gray-500">
-                      = <strong className="text-gray-900">€ {(product.price * quantity).toFixed(2)}</strong>
+                      = <strong className="text-gray-900">€ {(((product.effectivePrice ?? product.price) ?? 0) * quantity).toFixed(2)}</strong>
                     </span>
                   </div>
 
