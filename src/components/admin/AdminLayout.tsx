@@ -17,6 +17,7 @@ import {
   ChevronRight,
   ChevronLeft,
   Newspaper,
+  GraduationCap,
   ShoppingCart,
   Users,
   BadgeDollarSign,
@@ -84,6 +85,12 @@ const navItems: NavItem[] = [
     href: '/admin/news',
     icon: Newspaper,
     description: 'Gérer les actualités',
+  },
+  {
+    title: 'Formations (Photon Académie)',
+    href: '/admin/formations',
+    icon: GraduationCap,
+    description: 'Gérer les formations',
   },
   {
     title: 'Téléchargements',

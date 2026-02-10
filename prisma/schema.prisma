@@ -322,6 +322,31 @@ model NewsArticle {
 }
 
 // ============================================
+// CMS - Formations (Photon Académie)
+// ============================================
+
+model Formation {
+  id        Int      @id @default(autoincrement())
+  order     Int      @default(0)
+  title     String
+  slug      String   @unique
+  date      DateTime
+  excerpt   String   @db.Text
+  content   String   @db.Text
+  image     String?
+  published Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([published])
+  @@index([date])
+  @@index([order])
+  @@map("formations")
+}
+
+// ============================================
 // CMS - Brands (Partner logos)
 // ============================================
 

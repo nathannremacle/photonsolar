@@ -112,20 +112,31 @@ function productToPrismaData(product: Product) {
  * Load products from database.
  * By default returns only visible (non-hidden) products for the public site.
  * Pass { includeHidden: true } to include hidden products (admin).
+ * If the DB has no "hidden" column yet (migration not run), falls back to returning all products.
  */
 export async function loadProducts(options?: { includeHidden?: boolean }): Promise<Product[]> {
+  const orderBy = [
+    { category: 'asc' as const },
+    { brand: 'asc' as const },
+    { name: 'asc' as const },
+  ];
   try {
     const where = options?.includeHidden ? {} : { hidden: false };
     const products = await prisma.product.findMany({
       where,
-      orderBy: [
-        { category: 'asc' },
-        { brand: 'asc' },
-        { name: 'asc' },
-      ],
+      orderBy,
     });
     return products.map(prismaToProduct);
   } catch (error) {
+    // Column "hidden" may not exist yet if migration was not run after deploy
+    if (!options?.includeHidden && error) {
+      try {
+        const products = await prisma.product.findMany({ orderBy });
+        return products.map(prismaToProduct);
+      } catch (fallbackError) {
+        console.error('Error loading products (fallback):', fallbackError);
+      }
+    }
     console.error('Error loading products from database:', error);
     return [];
   }
@@ -142,7 +153,7 @@ export async function getProduct(id: string, options?: { includeHidden?: boolean
       where: { id },
     });
     if (!product) return null;
-    if (!options?.includeHidden && product.hidden) return null;
+    if (!options?.includeHidden && (product as { hidden?: boolean }).hidden) return null;
     return prismaToProduct(product);
   } catch (error) {
     console.error('Error getting product:', error);
@@ -161,8 +172,16 @@ export async function getProductsByCategory(category: string): Promise<Product[]
     });
     return products.map(prismaToProduct);
   } catch (error) {
-    console.error('Error getting products by category:', error);
-    return [];
+    try {
+      const products = await prisma.product.findMany({
+        where: { category },
+        orderBy: { name: 'asc' },
+      });
+      return products.map(prismaToProduct);
+    } catch {
+      console.error('Error getting products by category:', error);
+      return [];
+    }
   }
 }
 
@@ -174,16 +193,25 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
     const products = await prisma.product.findMany({
       where: { id: { in: ids }, hidden: false },
     });
-    
-    // Maintain the order of the input IDs
     const productMap = new Map(products.map(p => [p.id, p]));
     return ids
       .map(id => productMap.get(id))
       .filter((p): p is PrismaProduct => p !== undefined)
       .map(prismaToProduct);
   } catch (error) {
-    console.error('Error getting products by IDs:', error);
-    return [];
+    try {
+      const products = await prisma.product.findMany({
+        where: { id: { in: ids } },
+      });
+      const productMap = new Map(products.map(p => [p.id, p]));
+      return ids
+        .map(id => productMap.get(id))
+        .filter((p): p is PrismaProduct => p !== undefined)
+        .map(prismaToProduct);
+    } catch {
+      console.error('Error getting products by IDs:', error);
+      return [];
+    }
   }
 }
 
@@ -191,24 +219,35 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
  * Search products (only visible)
  */
 export async function searchProducts(query: string): Promise<Product[]> {
+  const searchTerm = query.toLowerCase();
+  const searchWhere = {
+    OR: [
+      { name: { contains: searchTerm, mode: 'insensitive' as const } },
+      { brand: { contains: searchTerm, mode: 'insensitive' as const } },
+      { category: { contains: searchTerm, mode: 'insensitive' as const } },
+      { description: { contains: searchTerm, mode: 'insensitive' as const } },
+    ],
+  };
   try {
-    const searchTerm = query.toLowerCase();
     const products = await prisma.product.findMany({
       where: {
         hidden: false,
-        OR: [
-          { name: { contains: searchTerm, mode: 'insensitive' } },
-          { brand: { contains: searchTerm, mode: 'insensitive' } },
-          { category: { contains: searchTerm, mode: 'insensitive' } },
-          { description: { contains: searchTerm, mode: 'insensitive' } },
-        ],
+        ...searchWhere,
       },
       orderBy: { name: 'asc' },
     });
     return products.map(prismaToProduct);
   } catch (error) {
-    console.error('Error searching products:', error);
-    return [];
+    try {
+      const products = await prisma.product.findMany({
+        where: searchWhere,
+        orderBy: { name: 'asc' },
+      });
+      return products.map(prismaToProduct);
+    } catch {
+      console.error('Error searching products:', error);
+      return [];
+    }
   }
 }
 
@@ -372,7 +411,33 @@ export async function getProductsPaginated(
       pages: Math.ceil(total / pageSize),
     };
   } catch (error) {
-    console.error('Error getting paginated products:', error);
-    return { products: [], total: 0, pages: 0 };
+    try {
+      const whereFallback: any = {};
+      if (filters?.category) whereFallback.category = filters.category;
+      if (filters?.brand) whereFallback.brand = filters.brand;
+      if (filters?.search) {
+        whereFallback.OR = [
+          { name: { contains: filters.search, mode: 'insensitive' } },
+          { brand: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      }
+      const [products, total] = await Promise.all([
+        prisma.product.findMany({
+          where: whereFallback,
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+          orderBy: { name: 'asc' },
+        }),
+        prisma.product.count({ where: whereFallback }),
+      ]);
+      return {
+        products: products.map(prismaToProduct),
+        total,
+        pages: Math.ceil(total / pageSize),
+      };
+    } catch {
+      console.error('Error getting paginated products:', error);
+      return { products: [], total: 0, pages: 0 };
+    }
   }
 }
