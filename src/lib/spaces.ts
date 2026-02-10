@@ -2,6 +2,7 @@ import {
   S3Client,
   PutObjectCommand,
   ListObjectsV2Command,
+  DeleteObjectCommand,
   type PutObjectCommandInput,
 } from "@aws-sdk/client-s3";
 
@@ -142,6 +143,23 @@ export async function listSpacesImages(prefix: string = "images/"): Promise<Spac
   }
 
   return files;
+}
+
+/**
+ * Delete an object from Spaces by key (e.g. "images/products/onduleurs/file.png").
+ */
+export async function deleteFromSpaces(key: string): Promise<void> {
+  const s3 = getSpacesClient();
+  if (!s3 || !BUCKET) {
+    throw new Error("DigitalOcean Spaces is not configured (DO_SPACES_* env vars).");
+  }
+  const normalizedKey = key.startsWith("/") ? key.slice(1) : key;
+  await s3.send(
+    new DeleteObjectCommand({
+      Bucket: BUCKET,
+      Key: normalizedKey,
+    })
+  );
 }
 
 export { isSpacesConfigured, BUCKET as SPACES_BUCKET };

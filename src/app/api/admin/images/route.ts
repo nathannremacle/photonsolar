@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readdirSync, statSync, unlinkSync, existsSync } from 'fs';
 import { join } from 'path';
-import { isSpacesConfigured, listSpacesImages } from '@/lib/spaces';
+import { isSpacesConfigured, listSpacesImages, deleteFromSpaces } from '@/lib/spaces';
 
 const PUBLIC_IMAGES_DIR = join(process.cwd(), 'public/images');
 
@@ -77,15 +77,19 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    if (isSpacesConfigured()) {
+      const key = imagePath.startsWith('images/') ? imagePath : `images/${imagePath}`;
+      await deleteFromSpaces(key);
+      return NextResponse.json({ success: true });
+    }
+
     const fullPath = join(PUBLIC_IMAGES_DIR, imagePath);
-    
     if (!existsSync(fullPath)) {
       return NextResponse.json(
         { error: 'Image non trouvée' },
         { status: 404 }
       );
     }
-
     unlinkSync(fullPath);
     return NextResponse.json({ success: true });
   } catch (error) {
