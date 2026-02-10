@@ -115,6 +115,39 @@ export default function AdminUsersPage() {
     }
   };
 
+  const deleteUser = async (user: User) => {
+    if (
+      !window.confirm(
+        `Supprimer l'utilisateur "${user.name || user.email}" ? Cette action est irréversible (commandes et données liées seront supprimées).`
+      )
+    ) {
+      return;
+    }
+    try {
+      setDeletingId(user.id);
+      const { data, error } = await safeFetchJson<{ success: boolean }>(
+        `/api/admin/users/${user.id}`,
+        { method: "DELETE", credentials: "include" }
+      );
+      if (error || !data?.success) {
+        toast.error(error || "Erreur lors de la suppression");
+        return;
+      }
+      setUsers((prev) => prev.filter((u) => u.id !== user.id));
+      setRoleEdits((prev) => {
+        const next = { ...prev };
+        delete next[user.id];
+        return next;
+      });
+      toast.success("Utilisateur supprimé");
+    } catch (e) {
+      console.error("Delete user error:", e);
+      toast.error("Erreur lors de la suppression");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   if (!authenticated) return null;
 
   return (
