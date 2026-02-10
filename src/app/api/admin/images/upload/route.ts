@@ -4,6 +4,7 @@ import {
   uploadToSpaces,
   listSpacesKeys,
 } from '@/lib/spaces';
+import { requireAdminSession } from '@/lib/admin-auth';
 
 const VALID_MIME_TYPES = [
   'image/jpeg',
@@ -54,6 +55,8 @@ async function findNextImageNumber(
 }
 
 export async function POST(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     if (!isSpacesConfigured()) {
       return NextResponse.json(

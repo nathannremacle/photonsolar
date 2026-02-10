@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import { requireAdminSession } from '@/lib/admin-auth';
 
 const CONTENT_FILE = join(process.cwd(), 'data/site-content.json');
 
@@ -30,7 +31,9 @@ function saveContent(content: any) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const content = loadContent();
     return NextResponse.json({ content });
@@ -43,6 +46,8 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const { content } = await request.json();
     

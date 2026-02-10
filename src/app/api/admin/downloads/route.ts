@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadDownloadsContent, saveDownloadsContent, type DownloadsContent } from '@/lib/downloads-storage';
+import { requireAdminSession } from '@/lib/admin-auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const content = loadDownloadsContent();
     return NextResponse.json({ content });
@@ -15,6 +18,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const content: DownloadsContent = await request.json();
     saveDownloadsContent(content);

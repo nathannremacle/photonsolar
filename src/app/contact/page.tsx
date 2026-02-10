@@ -4,10 +4,12 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useToastContext } from "@/contexts/ToastContext";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 
 export default function ContactPage() {
   const { language } = useLanguage();
+  const toast = useToastContext();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,13 +18,31 @@ export default function ContactPage() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Ici, vous pouvez ajouter la logique d'envoi du formulaire
-    console.log("Form submitted:", formData);
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
+    setSending(true);
+    setSubmitted(false);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSubmitted(true);
+        setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+        toast.success(language === "fr" ? "Message envoyé avec succès." : "Message sent successfully.");
+      } else {
+        toast.error(data.error || (language === "fr" ? "Erreur lors de l'envoi." : "Error sending message."));
+      }
+    } catch {
+      toast.error(language === "fr" ? "Erreur de connexion." : "Connection error.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -181,10 +201,15 @@ export default function ContactPage() {
 
                   <button
                     type="submit"
-                    className="w-full bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
+                    disabled={sending}
+                    className="w-full bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Send className="w-5 h-5" />
-                    {language === "fr" ? "Envoyer le message" : "Send Message"}
+                    {sending
+                      ? (language === "fr" ? "Envoi en cours..." : "Sending...")
+                      : language === "fr"
+                        ? "Envoyer le message"
+                        : "Send Message"}
                   </button>
                 </form>
               </div>

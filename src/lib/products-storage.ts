@@ -11,9 +11,6 @@ import { Prisma } from '@prisma/client';
  * Convert Prisma Product to frontend Product type
  */
 function prismaToProduct(p: PrismaProduct): Product {
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/8c389881-52ef-4ac5-9288-d85afd18b471',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'products-storage.ts:12',message:'Converting Prisma product',data:{id:p.id,price:p.price,originalPrice:p.originalPrice,priceType:typeof p.price,originalPriceType:typeof p.originalPrice},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-  // #endregion
   return {
     id: p.id,
     name: p.name,

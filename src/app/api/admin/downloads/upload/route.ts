@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { requireAdminSession } from '@/lib/admin-auth';
+import { isSpacesConfigured, uploadDownloadToSpaces } from '@/lib/spaces';
 
 const PUBLIC_DOWNLOADS_DIR = join(process.cwd(), 'public/downloads');
 
 export async function POST(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -19,7 +23,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file type (only PDF)
     if (file.type !== 'application/pdf') {
       return NextResponse.json(
         { error: 'Seuls les fichiers PDF sont acceptés' },
@@ -27,7 +30,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file size (50MB max)
     if (file.size > 50 * 1024 * 1024) {
       return NextResponse.json(
         { error: 'Le fichier est trop volumineux (max 50MB)' },
@@ -35,22 +37,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create downloads directory if it doesn't exist
+    const sanitizedFileName = fileName || file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+
+    if (isSpacesConfigured()) {
+      const url = await uploadDownloadToSpaces(sanitizedFileName, buffer, 'application/pdf');
+      return NextResponse.json({
+        success: true,
+        file: {
+          name: sanitizedFileName,
+          path: url,
+          size: `${fileSizeMB} MB`,
+          format: 'PDF',
+        },
+      });
+    }
+
     if (!existsSync(PUBLIC_DOWNLOADS_DIR)) {
       await mkdir(PUBLIC_DOWNLOADS_DIR, { recursive: true });
     }
-
-    // Generate filename
-    const sanitizedFileName = fileName || file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const filePath = join(PUBLIC_DOWNLOADS_DIR, sanitizedFileName);
-
-    // Save file
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
     await writeFile(filePath, buffer);
-
-    // Calculate file size for display
-    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
 
     return NextResponse.json({
       success: true,
@@ -64,9 +73,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error uploading file:', error);
     return NextResponse.json(
-      { error: 'Erreur lors de l\'upload du fichier' },
+      { error: "Erreur lors de l'upload du fichier" },
       { status: 500 }
     );
   }
 }
-

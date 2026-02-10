@@ -8,12 +8,14 @@ import {
   deleteProduct,
 } from '@/lib/products-storage';
 import { moveImageToCategory } from '@/lib/spaces';
+import { requireAdminSession } from '@/lib/admin-auth';
 
 async function ensureProductImagesInCategory(product: Product): Promise<Product> {
-  if (!product.category) return product;
+  const category: string = product.category ?? '';
+  if (!category) return product;
   const out = { ...product };
 
-  const urlsToProcess: (string | null)[] = [
+  const urlsToProcess: string[] = [
     product.image ?? null,
     ...(product.images ?? []),
   ].filter((u): u is string => !!u && typeof u === 'string');
@@ -21,7 +23,7 @@ async function ensureProductImagesInCategory(product: Product): Promise<Product>
   if (urlsToProcess.length === 0) return product;
 
   const updatedUrls = await Promise.all(
-    urlsToProcess.map((url) => moveImageToCategory(url, product.category!))
+    urlsToProcess.map((url) => moveImageToCategory(url, category))
   );
 
   let i = 0;
@@ -36,7 +38,9 @@ async function ensureProductImagesInCategory(product: Product): Promise<Product>
   return out;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const products = await loadProducts();
     return NextResponse.json({ products });
@@ -50,6 +54,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     let product: Product = await request.json();
 
@@ -99,6 +105,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     let product: Product = await request.json();
 
@@ -143,6 +151,8 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

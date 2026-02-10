@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readdirSync, statSync, unlinkSync, existsSync } from 'fs';
 import { join } from 'path';
 import { isSpacesConfigured, listSpacesImages, deleteFromSpaces } from '@/lib/spaces';
+import { requireAdminSession } from '@/lib/admin-auth';
 
 const PUBLIC_IMAGES_DIR = join(process.cwd(), 'public/images');
 
@@ -48,7 +49,9 @@ function scanImages(dir: string, basePath: string = ''): ImageFile[] {
   return images;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     if (isSpacesConfigured()) {
       const images = await listSpacesImages('images/');
@@ -66,6 +69,8 @@ export async function GET() {
 }
 
 export async function DELETE(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const { searchParams } = new URL(request.url);
     const imagePath = searchParams.get('path');

@@ -6,14 +6,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getProductById } from "@/data/products";
 import { safeFetchJson } from "@/utils/api";
+import type { Product } from "@/data/products";
 
 export default function BestSellers() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const itemsPerView = 4;
-  const { t, language } = useLanguage();
-  const [productIds, setProductIds] = useState<string[]>([]);
+  const { language } = useLanguage();
+  const [products, setProducts] = useState<Product[]>([]);
   const [enabled, setEnabled] = useState(true);
 
   useEffect(() => {
@@ -22,21 +22,21 @@ export default function BestSellers() {
 
   const loadContent = async () => {
     try {
-      const { data, error } = await safeFetchJson<{ content: any }>("/api/homepage");
-      if (error) {
-        console.error("Error loading best sellers:", error);
-        return;
-      }
-      if (data?.content) {
-        setProductIds(data.content.bestSellers?.productIds || []);
-        setEnabled(data.content.bestSellers?.enabled ?? true);
+      const [homeRes, productsRes] = await Promise.all([
+        safeFetchJson<{ content: any }>("/api/homepage"),
+        safeFetchJson<{ products: Product[] }>("/api/products"),
+      ]);
+      if (homeRes.error || !homeRes.data?.content) return;
+      const productIds: string[] = homeRes.data.content.bestSellers?.productIds || [];
+      setEnabled(homeRes.data.content.bestSellers?.enabled ?? true);
+      if (productsRes.data?.products && productIds.length > 0) {
+        const byId = new Map(productsRes.data.products.map((p) => [p.id, p]));
+        setProducts(productIds.map((id) => byId.get(id)).filter(Boolean) as Product[]);
       }
     } catch (error) {
       console.error("Error loading best sellers:", error);
     }
   };
-
-  const products = productIds.map(id => getProductById(id)).filter(Boolean) as any[];
 
   const nextSlide = () => {
     setCurrentIndex((prev) => 
@@ -94,25 +94,13 @@ export default function BestSellers() {
                                   target.style.display = 'none';
                                 }}
                               />
-                              {product.badge && (
-                                <span className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">
-                                  {product.badge}
-                                </span>
-                              )}
                             </>
                           );
                         }
                         return (
-                          <>
-                            <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                              <span className="text-gray-400 text-sm">Image produit</span>
-                            </div>
-                            {product.badge && (
-                              <span className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">
-                                {product.badge}
-                              </span>
-                            )}
-                          </>
+                          <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                            <span className="text-gray-400 text-sm">Image produit</span>
+                          </div>
                         );
                       })()}
                     </div>

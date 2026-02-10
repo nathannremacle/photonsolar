@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useToastContext } from '@/contexts/ToastContext';
 import { useRouter } from 'next/navigation';
 import { 
   Plus, 
@@ -25,6 +26,7 @@ export default function AdminProducts() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<Product>>({});
+  const toast = useToastContext();
 
   useEffect(() => {
     if (!checkAdminSession()) {
@@ -59,12 +61,13 @@ export default function AdminProducts() {
 
       if (response.ok) {
         loadProducts();
+        toast.success('Produit supprimé');
       } else {
-        alert('Erreur lors de la suppression');
+        toast.error('Erreur lors de la suppression');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Erreur lors de la suppression');
+      toast.error('Erreur lors de la suppression');
     }
   };
 
@@ -100,13 +103,14 @@ export default function AdminProducts() {
         setEditingProduct(null);
         setFormData({});
         loadProducts();
+        toast.success(editingProduct ? 'Produit mis à jour' : 'Produit créé');
       } else {
         const data = await response.json();
-        alert(data.error || 'Erreur lors de la sauvegarde');
+        toast.error(data.error || 'Erreur lors de la sauvegarde');
       }
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Erreur lors de la sauvegarde');
+      toast.error('Erreur lors de la sauvegarde');
     }
   };
 

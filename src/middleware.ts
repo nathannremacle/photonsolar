@@ -46,6 +46,14 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
+    // Admin: protect /admin/* (except /admin login page)
+    if (pathname.startsWith("/admin") && pathname !== "/admin") {
+      const adminCookie = request.cookies.get("admin_session");
+      if (!adminCookie?.value) {
+        return NextResponse.redirect(new URL("/admin", request.url));
+      }
+    }
+
     return NextResponse.next();
   } catch (error) {
     // If auth fails (e.g., database connection issue), allow request to proceed

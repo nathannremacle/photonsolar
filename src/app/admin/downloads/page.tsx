@@ -152,11 +152,11 @@ export default function AdminDownloads() {
     if (!confirm(`Supprimer le fichier "${file.name}" ?`)) return;
 
     try {
-      const fileName = file.filePath.replace("/downloads/", "");
-      const response = await fetch(
-        `/api/admin/downloads/delete?fileName=${encodeURIComponent(fileName)}`,
-        { method: "DELETE" }
-      );
+      const isUrl = file.filePath.startsWith("http");
+      const url = isUrl
+        ? `/api/admin/downloads/delete?path=${encodeURIComponent(file.filePath)}`
+        : `/api/admin/downloads/delete?fileName=${encodeURIComponent(file.filePath.replace("/downloads/", ""))}`;
+      const response = await fetch(url, { method: "DELETE" });
 
       if (response.ok) {
         setContent((prev) => {

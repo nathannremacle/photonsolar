@@ -34,12 +34,12 @@ export default function ProductPage() {
   const loadProduct = async (productId: string) => {
     try {
       setLoading(true);
-      const response = await fetch('/api/products');
+      const response = await fetch(`/api/products/${productId}`);
       const data = await response.json();
-      
-      if (data.products) {
-        const foundProduct = data.products.find((p: Product) => p.id === productId);
-        setProduct(foundProduct || null);
+      if (response.ok && data.product) {
+        setProduct(data.product);
+      } else {
+        setProduct(null);
       }
     } catch (error) {
       console.error('Error loading product:', error);

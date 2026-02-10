@@ -62,15 +62,6 @@ export default function AdminLogin() {
           <p className="text-gray-600 mt-2">Connectez-vous pour accéder au panneau d'administration</p>
         </div>
 
-        <div className="mb-6 text-center">
-          <button
-            onClick={() => router.push('/admin/dashboard')}
-            className="text-primary-600 hover:text-primary-700 text-sm font-medium underline"
-          >
-            Accéder au panneau d'administration →
-          </button>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">

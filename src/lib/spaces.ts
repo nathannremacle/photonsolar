@@ -176,6 +176,19 @@ export function getKeyFromSpacesUrl(url: string): string | null {
 }
 
 /**
+ * Upload a PDF (or any file) to Spaces under prefix "downloads/".
+ * Returns the CDN URL. Use for admin download uploads.
+ */
+export async function uploadDownloadToSpaces(
+  filename: string,
+  body: Buffer,
+  contentType: string = "application/pdf"
+): Promise<string> {
+  const key = `downloads/${filename}`;
+  return uploadToSpaces(key, body, contentType);
+}
+
+/**
  * If the image URL points to an object under images/products/ without a category
  * subfolder (e.g. images/products/file.png), copy it to images/products/{category}/filename
  * and delete the original. Returns the new CDN URL. Otherwise returns the URL unchanged.

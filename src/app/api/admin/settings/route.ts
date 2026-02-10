@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import { requireAdminSession } from '@/lib/admin-auth';
 
 const SETTINGS_FILE = join(process.cwd(), 'data/admin-settings.json');
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     // In production, use environment variables instead
     return NextResponse.json({
       settings: {
-        adminPassword: process.env.ADMIN_PASSWORD || 'admin123',
+        adminPassword: process.env.ADMIN_PASSWORD_HASH ? '(défini)' : (process.env.ADMIN_PASSWORD ? '(défini)' : 'admin123'),
         siteName: 'Photon Solar',
         siteUrl: process.env.SITE_URL || 'https://www.photonsolar.be',
       },
@@ -23,6 +26,8 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const { adminPassword, siteName, siteUrl } = await request.json();
 

@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getProductById } from "@/data/products";
 
+import { requireAdminSession } from "@/lib/admin-auth";
+
 /**
  * GET /api/admin/orders
  * 
  * Get all orders with user information
  */
 export async function GET(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const orders = await prisma.order.findMany({
       include: {
@@ -68,6 +72,8 @@ export async function GET(request: NextRequest) {
  * Update order status
  */
 export async function PUT(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const body = await request.json();
     const { orderId, status } = body;

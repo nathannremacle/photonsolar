@@ -69,6 +69,16 @@ export const emailVerificationRateLimiter = new Ratelimit({
 });
 
 /**
+ * Rate limiter for admin login (same as auth: 5 per 15 min per IP)
+ */
+export const adminLoginRateLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "15 m"),
+  analytics: true,
+  prefix: "@upstash/ratelimit/admin-login",
+});
+
+/**
  * Helper function to get client IP from request
  */
 export function getClientIP(request: Request): string {

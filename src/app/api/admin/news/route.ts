@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadNewsContent, saveNewsContent, type NewsArticle } from '@/lib/news-storage';
+import { requireAdminSession } from '@/lib/admin-auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const articles = await loadNewsContent();
     return NextResponse.json({ articles });
@@ -15,6 +18,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
   try {
     const body = await request.json();
     const { articles } = body;
