@@ -10,9 +10,11 @@ import {
 } from 'lucide-react';
 import { checkAdminSession } from '@/lib/admin-auth';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { useToastContext } from '@/contexts/ToastContext';
 
 export default function AdminSettings() {
   const router = useRouter();
+  const toast = useToastContext();
   const [authenticated, setAuthenticated] = useState(false);
   const [settings, setSettings] = useState({
     adminPassword: '',
@@ -33,12 +35,12 @@ export default function AdminSettings() {
 
   const handleValidatePassword = async () => {
     if (!passwordField) {
-      alert('Veuillez entrer un nouveau mot de passe');
+      toast.warning('Veuillez entrer un nouveau mot de passe');
       return;
     }
 
     if (passwordField.length < 6) {
-      alert('Le mot de passe doit contenir au moins 6 caractères');
+      toast.warning('Le mot de passe doit contenir au moins 6 caractères');
       return;
     }
 
@@ -51,16 +53,16 @@ export default function AdminSettings() {
       });
 
       if (response.ok) {
-        alert('Mot de passe changé avec succès! Vous devrez vous reconnecter.');
+        toast.success('Mot de passe changé avec succès. Vous devrez vous reconnecter.');
         setPasswordField('');
         setSettings({ ...settings, adminPassword: '' });
       } else {
         const data = await response.json();
-        alert(data.error || 'Erreur lors du changement de mot de passe');
+        toast.error(data.error || 'Erreur lors du changement de mot de passe');
       }
     } catch (error) {
       console.error('Error changing password:', error);
-      alert('Erreur lors du changement de mot de passe');
+      toast.error('Erreur lors du changement de mot de passe');
     } finally {
       setValidatingPassword(false);
     }
@@ -76,14 +78,14 @@ export default function AdminSettings() {
       });
 
       if (response.ok) {
-        alert('Paramètres sauvegardés avec succès!');
+        toast.success('Paramètres sauvegardés avec succès !');
       } else {
         const data = await response.json();
-        alert(data.error || 'Erreur lors de la sauvegarde');
+        toast.error(data.error || 'Erreur lors de la sauvegarde');
       }
     } catch (error) {
       console.error('Error saving settings:', error);
-      alert('Erreur lors de la sauvegarde');
+      toast.error('Erreur lors de la sauvegarde');
     } finally {
       setSaving(false);
     }

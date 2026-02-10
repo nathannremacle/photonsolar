@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { checkAdminSession } from "@/lib/admin-auth";
 import AdminLayout from "@/components/admin/AdminLayout";
+import ConfirmModal from "@/components/admin/ConfirmModal";
 import {
   BadgeDollarSign,
   Plus,
@@ -16,6 +17,7 @@ import {
   Shield,
 } from "lucide-react";
 import { safeFetchJson } from "@/utils/api";
+import { useToastContext } from "@/contexts/ToastContext";
 
 type Scope = "ROLE" | "USER" | "COMPANY";
 type PricingType = "PERCENT_DISCOUNT" | "FIXED_PRICE";
@@ -57,6 +59,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function AdminPricingPage() {
   const router = useRouter();
+  const toast = useToastContext();
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [rules, setRules] = useState<PricingRuleRow[]>([]);
@@ -64,6 +67,7 @@ export default function AdminPricingPage() {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState({
     scope: "ROLE" as Scope,
     role: "INSTALLATEUR" as UserRole,
@@ -167,29 +171,37 @@ export default function AdminPricingPage() {
         ]);
       }
       setForm({ ...form, value: "10", productId: "", userId: "", companyName: "" });
+      toast.success("Règle ajoutée");
     } catch (e) {
       console.error("Submit pricing rule error:", e);
       setError("Erreur lors de l'ajout de la règle.");
+      toast.error("Erreur lors de l'ajout de la règle.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Supprimer cette règle de tarification ?")) return;
+  const handleDeleteRequest = (id: string) => setConfirmDeleteId(id);
+
+  const handleDeleteConfirm = async () => {
+    const id = confirmDeleteId;
+    if (!id) return;
     try {
       setDeletingId(id);
       const { error: err } = await safeFetchJson(`/api/admin/pricing/${id}`, {
         method: "DELETE",
       });
+      setConfirmDeleteId(null);
       if (err) {
-        alert(err);
+        toast.error(err);
         return;
       }
       setRules((prev) => prev.filter((r) => r.id !== id));
+      toast.success("Règle supprimée");
     } catch (e) {
       console.error("Delete rule error:", e);
-      alert("Erreur lors de la suppression.");
+      toast.error("Erreur lors de la suppression.");
+      setConfirmDeleteId(null);
     } finally {
       setDeletingId(null);
     }
@@ -445,7 +457,7 @@ export default function AdminPricingPage() {
                       <td className="px-4 py-3 text-right">
                         <button
                           type="button"
-                          onClick={() => handleDelete(r.id)}
+                          onClick={() => handleDeleteRequest(r.id)}
                           disabled={deletingId === r.id}
                           className="text-red-600 hover:text-red-800 disabled:opacity-50 inline-flex items-center gap-1"
                         >
@@ -467,6 +479,16 @@ export default function AdminPricingPage() {
           )}
         </div>
       </div>
+      <ConfirmModal
+        open={confirmDeleteId !== null}
+        title="Supprimer la règle"
+        message="Voulez-vous vraiment supprimer cette règle de tarification ?"
+        confirmLabel="Supprimer"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmDeleteId(null)}
+        loading={deletingId !== null}
+      />
     </AdminLayout>
   );
 }

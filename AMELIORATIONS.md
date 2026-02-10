@@ -154,3 +154,62 @@ Revue du site et du code. Les points sont classés par priorité (sécurité > p
 | 13 | Rate limit admin avec Redis | Sécurité / cohérence |
 
 Si vous indiquez par quoi vous voulez commencer (sécurité admin, contact, SEO, ou PDF/Spaces), on peut détailler les changements fichier par fichier.
+
+---
+
+## Panneau admin – Améliorations proposées
+
+Scan du panneau admin (pages, layout, APIs) – propositions par thème.
+
+### UX et feedback utilisateur
+
+| Amélioration | Détail |
+|--------------|--------|
+| **Toasts à la place des `alert()`** | Les pages **Produits** utilisent déjà le toast (ToastContext). Les autres (Commandes, Utilisateurs, Tarification, Images, Téléchargements, Actualités, Page d'accueil, Paramètres) utilisent `alert()` pour succès/erreur. **Piste** : utiliser `useToastContext()` partout et remplacer `alert(message)` par `toast.success(message)` / `toast.error(message)` pour un feedback cohérent et non bloquant. |
+| **Confirmations modales** | Les `confirm()` (suppression produit, image, commande, etc.) sont natifs et peu élégants. **Piste** : créer un composant `ConfirmModal` (titre, message, annuler / confirmer) et l’utiliser à la place de `confirm()`. |
+| **États de chargement cohérents** | Certaines pages ont un spinner "Chargement...", d’autres rien. **Piste** : un même pattern (skeleton ou spinner centré) sur toutes les listes admin. |
+| **Messages "liste vide"** | Vérifier que chaque liste (produits, commandes, utilisateurs, règles de tarification, images, actualités) affiche un message clair quand il n’y a aucun élément (déjà en place sur plusieurs pages, à uniformiser). |
+
+### Navigation et contexte
+
+| Amélioration | Détail |
+|--------------|--------|
+| **Filtre commandes depuis l’URL** | Le dashboard a un lien "En attente" vers `/admin/orders?filter=PENDING`, mais la page Commandes ne lit pas `searchParams`. **Piste** : utiliser `useSearchParams()` et initialiser `filterStatus` avec `searchParams.get('filter')` (ex. `PENDING`) pour ouvrir directement l’onglet voulu. |
+| **Lien "Voir le site"** | **Piste** : ajouter dans la sidebar ou le header un lien "Voir le site" (icône ExternalLink) vers la homepage en `target="_blank"` pour passer rapidement du back-office au site public. |
+| **Breadcrumbs** | Le layout calcule déjà des breadcrumbs ; vérifier qu’ils s’affichent et sont cliquables (Admin → page courante). |
+
+### Données et listes
+
+| Amélioration | Détail |
+|--------------|--------|
+| **Pagination des grandes listes** | Produits et Utilisateurs peuvent devenir longs. **Piste** : pagination côté client (ex. 25 ou 50 par page) ou indicateur "X–Y sur Z" comme sur la page collections. Déjà partiellement en place sur Produits (filtres). |
+| **Tri des colonnes (optionnel)** | Sur Commandes, Produits, Utilisateurs : permettre de trier par date, nom, statut, etc. en cliquant sur l’en-tête de colonne. |
+| **Export commandes (optionnel)** | **Piste** : bouton "Exporter en CSV" sur la page Commandes pour télécharger la liste (date, client, total, statut). |
+
+### Sécurité et robustesse
+
+| Amélioration | Détail |
+|--------------|--------|
+| **Session admin** | Déjà en place (cookie signé + vérification API). Rien à ajouter ici. |
+| **Suppression du code de debug** | Un `useEffect` dans `AdminLayout.tsx` envoyait des mesures de layout vers une URL externe ; il a été supprimé. Vérifier qu’il n’en reste pas ailleurs (ex. `products-storage.ts` selon point 12 ci‑dessus). |
+
+### Pages spécifiques
+
+| Page | Idée |
+|------|------|
+| **Tableau de bord** | Les stats "Page d'accueil" affichent "Configurée" sans nombre. **Piste** : afficher le nombre de slides hero / blocs ou un indicateur plus parlant. |
+| **Paramètres** | La page permet de changer le mot de passe admin ; les champs "Site name" / "Site URL" ne sont peut‑être pas utilisés. **Piste** : documenter ou masquer ces champs s’ils ne sont pas branchés. |
+| **Images** | **Piste** : filtre par préfixe/dossier (ex. `products/`, `homepage/`) si l’API renvoie un chemin ou un dossier. |
+| **Actualités** | La sauvegarde affiche une notification custom (élément DOM) au lieu d’un toast. **Piste** : utiliser le ToastContext comme ailleurs. |
+| **Login admin** | **Piste** : après X échecs, afficher un message du type "Compte temporairement verrouillé" si le rate limit renvoie 429 (déjà partiellement fait). |
+
+### Résumé actions recommandées (admin)
+
+| Priorité | Action |
+|----------|--------|
+| Haute | Remplacer `alert()` par toasts sur toutes les pages admin (sauf confirmations). |
+| Haute | Lire `?filter=PENDING` sur la page Commandes pour le lien depuis le dashboard. |
+| Moyenne | Ajouter un lien "Voir le site" dans le layout admin. |
+| Moyenne | Remplacer `confirm()` par un composant ConfirmModal réutilisable. |
+| Basse | Pagination ou "X–Y sur Z" sur Utilisateurs / Commandes si les listes grossissent. |
+| Basse | Tri des colonnes sur Commandes / Produits. |

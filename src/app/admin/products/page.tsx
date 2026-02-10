@@ -10,10 +10,15 @@ import {
   Search, 
   X,
   Save,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Filter,
+  RotateCcw,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import { checkAdminSession } from '@/lib/admin-auth';
 import AdminLayout from '@/components/admin/AdminLayout';
+import ConfirmModal from '@/components/admin/ConfirmModal';
 import type { Product } from '@/data/products';
 import ImageGallerySelector from '@/components/ImageGallerySelector';
 
@@ -23,6 +28,11 @@ export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterBrand, setFilterBrand] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [productSortKey, setProductSortKey] = useState<'name' | 'brand' | 'category' | 'price'>('name');
+  const [productSortDir, setProductSortDir] = useState<'asc' | 'desc'>('asc');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<Product>>({});
@@ -49,16 +59,14 @@ export default function AdminProducts() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      return;
-    }
+  const handleDeleteRequest = (id: string) => setConfirmDeleteId(id);
 
+  const handleDeleteConfirm = async () => {
+    const id = confirmDeleteId;
+    if (!id) return;
     try {
-      const response = await fetch(`/api/admin/products?id=${id}`, {
-        method: 'DELETE',
-      });
-
+      const response = await fetch(`/api/admin/products?id=${id}`, { method: 'DELETE' });
+      setConfirmDeleteId(null);
       if (response.ok) {
         loadProducts();
         toast.success('Produit supprimé');
@@ -68,6 +76,7 @@ export default function AdminProducts() {
     } catch (error) {
       console.error('Error deleting product:', error);
       toast.error('Erreur lors de la suppression');
+      setConfirmDeleteId(null);
     }
   };
 
@@ -148,11 +157,43 @@ export default function AdminProducts() {
     });
   };
 
-  const filteredProducts = products.filter(p =>
-    p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const uniqueCategories = [...new Set(products.map(p => p.category).filter(Boolean))].sort() as string[];
+  const uniqueBrands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort() as string[];
+
+  const filteredProducts = products.filter(p => {
+    if (filterCategory && p.category !== filterCategory) return false;
+    if (filterBrand && p.brand !== filterBrand) return false;
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      const matchName = p.name?.toLowerCase().includes(term);
+      const matchBrand = p.brand?.toLowerCase().includes(term);
+      const matchCategory = p.category?.toLowerCase().includes(term);
+      const matchSku = p.sku?.toLowerCase().includes(term);
+      if (!matchName && !matchBrand && !matchCategory && !matchSku) return false;
+    }
+    return true;
+  });
+
+  const hasActiveFilters = searchTerm.trim() !== '' || filterCategory !== '' || filterBrand !== '';
+  const resetFilters = () => {
+    setSearchTerm('');
+    setFilterCategory('');
+    setFilterBrand('');
+  };
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    let cmp = 0;
+    if (productSortKey === 'name') cmp = (a.name || '').localeCompare(b.name || '');
+    else if (productSortKey === 'brand') cmp = (a.brand || '').localeCompare(b.brand || '');
+    else if (productSortKey === 'category') cmp = (a.category || '').localeCompare(b.category || '');
+    else if (productSortKey === 'price') cmp = (a.price ?? 0) - (b.price ?? 0);
+    return productSortDir === 'asc' ? cmp : -cmp;
+  });
+
+  const toggleProductSort = (key: 'name' | 'brand' | 'category' | 'price') => {
+    if (productSortKey === key) setProductSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setProductSortKey(key); setProductSortDir('asc'); }
+  };
 
   if (!authenticated) {
     return null;
@@ -176,27 +217,73 @@ export default function AdminProducts() {
       title="Produits"
       description={`${products.length} produit${products.length > 1 ? 's' : ''} au catalogue`}
     >
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Rechercher un produit..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+      <div className="mb-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Rechercher par nom, marque, catégorie ou SKU..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
           </div>
+          <button
+            onClick={handleAdd}
+            className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium shrink-0"
+          >
+            <Plus className="w-5 h-5" />
+            <span className="hidden sm:inline">Ajouter un produit</span>
+            <span className="sm:hidden">Ajouter</span>
+          </button>
         </div>
-        <button
-          onClick={handleAdd}
-          className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-        >
-          <Plus className="w-5 h-5" />
-          <span className="hidden sm:inline">Ajouter un produit</span>
-          <span className="sm:hidden">Ajouter</span>
-        </button>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+            <Filter className="w-4 h-4 text-gray-500" />
+            Filtres
+          </span>
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            title="Catégorie"
+          >
+            <option value="">Toutes les catégories</option>
+            {uniqueCategories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+          <select
+            value={filterBrand}
+            onChange={(e) => setFilterBrand(e.target.value)}
+            className="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            title="Marque"
+          >
+            <option value="">Toutes les marques</option>
+            {uniqueBrands.map(brand => (
+              <option key={brand} value={brand}>{brand}</option>
+            ))}
+          </select>
+          {hasActiveFilters && (
+            <>
+              <span className="text-sm text-gray-500">
+                {filteredProducts.length} résultat{filteredProducts.length !== 1 ? 's' : ''}
+              </span>
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Réinitialiser
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       <div>
@@ -210,16 +297,24 @@ export default function AdminProducts() {
                     Image
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nom
+                    <button type="button" onClick={() => toggleProductSort('name')} className="flex items-center gap-1 hover:text-gray-700">
+                      Nom {productSortKey === 'name' && (productSortDir === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Marque
+                    <button type="button" onClick={() => toggleProductSort('brand')} className="flex items-center gap-1 hover:text-gray-700">
+                      Marque {productSortKey === 'brand' && (productSortDir === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Catégorie
+                    <button type="button" onClick={() => toggleProductSort('category')} className="flex items-center gap-1 hover:text-gray-700">
+                      Catégorie {productSortKey === 'category' && (productSortDir === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Prix
+                    <button type="button" onClick={() => toggleProductSort('price')} className="flex items-center gap-1 hover:text-gray-700">
+                      Prix {productSortKey === 'price' && (productSortDir === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -227,7 +322,7 @@ export default function AdminProducts() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredProducts.map((product) => (
+                {sortedProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       {product.image || product.images?.[0] ? (
@@ -278,7 +373,7 @@ export default function AdminProducts() {
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(product.id!)}
+                          onClick={() => handleDeleteRequest(product.id!)}
                           className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -643,6 +738,15 @@ export default function AdminProducts() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        open={confirmDeleteId !== null}
+        title="Supprimer le produit"
+        message="Voulez-vous vraiment supprimer ce produit ?"
+        confirmLabel="Supprimer"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </AdminLayout>
   );
 }

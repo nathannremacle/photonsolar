@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { checkAdminSession } from "@/lib/admin-auth";
 import AdminLayout from "@/components/admin/AdminLayout";
+import ConfirmModal from "@/components/admin/ConfirmModal";
+import { useToastContext } from "@/contexts/ToastContext";
 import type {
   DownloadsContent,
   DownloadCategory,
@@ -33,6 +35,7 @@ const iconMap: Record<string, any> = {
 
 export default function AdminDownloads() {
   const router = useRouter();
+  const toast = useToastContext();
   const [authenticated, setAuthenticated] = useState(false);
   const [content, setContent] = useState<DownloadsContent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,6 +43,8 @@ export default function AdminDownloads() {
   const [activeSection, setActiveSection] = useState<number | null>(null);
   const [uploading, setUploading] = useState<Record<number, boolean>>({});
   const [showUploadModal, setShowUploadModal] = useState<number | null>(null);
+  const [confirmDeleteFile, setConfirmDeleteFile] = useState<{ categoryId: number; file: DownloadFile } | null>(null);
+  const [deletingFile, setDeletingFile] = useState(false);
 
   useEffect(() => {
     if (!checkAdminSession()) {
@@ -74,13 +79,13 @@ export default function AdminDownloads() {
         body: JSON.stringify(content),
       });
       if (response.ok) {
-        alert("Contenu sauvegardé avec succès !");
+        toast.success("Contenu sauvegardé avec succès !");
       } else {
-        alert("Erreur lors de la sauvegarde");
+        toast.error("Erreur lors de la sauvegarde");
       }
     } catch (error) {
       console.error("Error saving content:", error);
-      alert("Erreur lors de la sauvegarde");
+      toast.error("Erreur lors de la sauvegarde");
     } finally {
       setSaving(false);
     }
@@ -136,57 +141,60 @@ export default function AdminDownloads() {
         });
 
         setShowUploadModal(null);
-        alert("Fichier uploadé avec succès !");
+        toast.success("Fichier uploadé avec succès !");
       } else {
-        alert(data.error || "Erreur lors de l'upload");
+        toast.error(data.error || "Erreur lors de l'upload");
       }
     } catch (error) {
       console.error("Error uploading file:", error);
-      alert("Erreur lors de l'upload");
+      toast.error("Erreur lors de l'upload");
     } finally {
       setUploading({ ...uploading, [categoryId]: false });
     }
   };
 
-  const handleDeleteFile = async (categoryId: number, file: DownloadFile) => {
-    if (!confirm(`Supprimer le fichier "${file.name}" ?`)) return;
+  const handleDeleteFileRequest = (categoryId: number, file: DownloadFile) => {
+    setConfirmDeleteFile({ categoryId, file });
+  };
 
+  const handleDeleteFileConfirm = async () => {
+    const payload = confirmDeleteFile;
+    if (!payload) return;
+    const { categoryId, file } = payload;
+    setDeletingFile(true);
     try {
       const isUrl = file.filePath.startsWith("http");
       const url = isUrl
         ? `/api/admin/downloads/delete?path=${encodeURIComponent(file.filePath)}`
         : `/api/admin/downloads/delete?fileName=${encodeURIComponent(file.filePath.replace("/downloads/", ""))}`;
       const response = await fetch(url, { method: "DELETE" });
-
+      setConfirmDeleteFile(null);
       if (response.ok) {
         setContent((prev) => {
           if (!prev) return null;
           const newCategories = prev.categories.map((cat) =>
             cat.id === categoryId
-              ? {
-                  ...cat,
-                  files: cat.files.filter((f) => f.id !== file.id),
-                }
+              ? { ...cat, files: cat.files.filter((f) => f.id !== file.id) }
               : cat
           );
           const newContent = { ...prev, categories: newCategories };
-          
-          // Auto-save after delete
           fetch("/api/admin/downloads", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newContent),
           }).catch(console.error);
-          
           return newContent;
         });
-        alert("Fichier supprimé avec succès !");
+        toast.success("Fichier supprimé avec succès !");
       } else {
-        alert("Erreur lors de la suppression");
+        toast.error("Erreur lors de la suppression");
       }
     } catch (error) {
       console.error("Error deleting file:", error);
-      alert("Erreur lors de la suppression");
+      toast.error("Erreur lors de la suppression");
+      setConfirmDeleteFile(null);
+    } finally {
+      setDeletingFile(false);
     }
   };
 
@@ -292,7 +300,7 @@ export default function AdminDownloads() {
                                   <Download className="w-4 h-4" />
                                 </a>
                                 <button
-                                  onClick={() => handleDeleteFile(category.id, file)}
+                                  onClick={() => handleDeleteFileRequest(category.id, file)}
                                   className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                   title="Supprimer"
                                 >
@@ -345,6 +353,16 @@ export default function AdminDownloads() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        open={confirmDeleteFile !== null}
+        title="Supprimer le fichier"
+        message={confirmDeleteFile ? `Voulez-vous vraiment supprimer "${confirmDeleteFile.file.name}" ?` : ""}
+        confirmLabel="Supprimer"
+        variant="danger"
+        onConfirm={handleDeleteFileConfirm}
+        onCancel={() => setConfirmDeleteFile(null)}
+        loading={deletingFile}
+      />
     </AdminLayout>
   );
 }

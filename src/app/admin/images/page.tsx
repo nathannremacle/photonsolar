@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { checkAdminSession } from '@/lib/admin-auth';
 import AdminLayout from '@/components/admin/AdminLayout';
+import ConfirmModal from '@/components/admin/ConfirmModal';
+import { useToastContext } from '@/contexts/ToastContext';
 
 interface ImageFile {
   name: string;
@@ -22,6 +24,7 @@ interface ImageFile {
 
 export default function AdminImages() {
   const router = useRouter();
+  const toast = useToastContext();
   const [authenticated, setAuthenticated] = useState(false);
   const [images, setImages] = useState<ImageFile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +32,9 @@ export default function AdminImages() {
   const [uploading, setUploading] = useState(false);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [confirmDeletePath, setConfirmDeletePath] = useState<string | null>(null);
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!checkAdminSession()) {
@@ -73,69 +79,69 @@ export default function AdminImages() {
       if (response.ok) {
         loadImages();
         setShowUploadModal(false);
-        const successMessage = data.message || 'Images uploadées avec succès!';
+        const successMessage = data.message || 'Images uploadées avec succès !';
         if (data.warnings && data.warnings.length > 0) {
-          alert(`${successMessage}\n\nAvertissements:\n${data.warnings.join('\n')}`);
+          toast.warning(`${successMessage} Avertissements: ${data.warnings.join(' ; ')}`);
         } else {
-          alert(successMessage);
+          toast.success(successMessage);
         }
       } else {
         const errorMessage = data.error || 'Erreur lors de l\'upload';
-        const errorDetails = data.details 
-          ? (Array.isArray(data.details) ? data.details.join('\n') : data.details)
-          : '';
-        const fullMessage = errorDetails ? `${errorMessage}\n\nDétails:\n${errorDetails}` : errorMessage;
-        alert(fullMessage);
+        toast.error(data.details ? `${errorMessage} ${Array.isArray(data.details) ? data.details.join(' ') : data.details}` : errorMessage);
       }
     } catch (error: any) {
       console.error('Error uploading images:', error);
-      const errorMessage = error?.message || 'Erreur lors de l\'upload';
-      alert(errorMessage);
+      toast.error(error?.message || 'Erreur lors de l\'upload');
     } finally {
       setUploading(false);
     }
   };
 
-  const handleDelete = async (path: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) {
-      return;
-    }
+  const handleDeleteRequest = (path: string) => setConfirmDeletePath(path);
+  const handleBulkDeleteRequest = () => { if (selectedImages.size > 0) setConfirmBulkDelete(true); };
 
+  const handleDeleteConfirm = async () => {
+    const path = confirmDeletePath;
+    if (!path) return;
+    setDeleting(true);
     try {
-      const response = await fetch(`/api/admin/images?path=${encodeURIComponent(path)}`, {
-        method: 'DELETE',
-      });
-
+      const response = await fetch(`/api/admin/images?path=${encodeURIComponent(path)}`, { method: 'DELETE' });
+      setConfirmDeletePath(null);
       if (response.ok) {
         loadImages();
+        toast.success('Image supprimée');
       } else {
-        alert('Erreur lors de la suppression');
+        toast.error('Erreur lors de la suppression');
       }
     } catch (error) {
       console.error('Error deleting image:', error);
-      alert('Erreur lors de la suppression');
+      toast.error('Erreur lors de la suppression');
+      setConfirmDeletePath(null);
+    } finally {
+      setDeleting(false);
     }
   };
 
-  const handleBulkDelete = async () => {
+  const handleBulkDeleteConfirm = async () => {
     if (selectedImages.size === 0) return;
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedImages.size} image(s) ?`)) {
-      return;
-    }
-
+    const count = selectedImages.size;
+    const paths = Array.from(selectedImages);
+    setDeleting(true);
     try {
-      const deletePromises = Array.from(selectedImages).map(path =>
-        fetch(`/api/admin/images?path=${encodeURIComponent(path)}`, {
-          method: 'DELETE',
-        })
+      const deletePromises = paths.map(path =>
+        fetch(`/api/admin/images?path=${encodeURIComponent(path)}`, { method: 'DELETE' })
       );
-
       await Promise.all(deletePromises);
       setSelectedImages(new Set());
+      setConfirmBulkDelete(false);
       loadImages();
+      toast.success(`${count} image(s) supprimée(s)`);
     } catch (error) {
       console.error('Error deleting images:', error);
-      alert('Erreur lors de la suppression');
+      toast.error('Erreur lors de la suppression');
+      setConfirmBulkDelete(false);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -151,7 +157,7 @@ export default function AdminImages() {
 
   const copyImageUrl = (url: string) => {
     navigator.clipboard.writeText(url);
-    alert('URL copiée dans le presse-papier!');
+    toast.success('URL copiée dans le presse-papier');
   };
 
   const filteredImages = images.filter(img =>
@@ -184,7 +190,7 @@ export default function AdminImages() {
             <div className="flex items-center gap-4">
               {selectedImages.size > 0 && (
                 <button
-                  onClick={handleBulkDelete}
+                  onClick={handleBulkDeleteRequest}
                   className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -208,7 +214,7 @@ export default function AdminImages() {
         <div className="flex items-center gap-3">
           {selectedImages.size > 0 && (
             <button
-              onClick={handleBulkDelete}
+              onClick={handleBulkDeleteRequest}
               className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               <Trash2 className="w-4 h-4" />
@@ -299,7 +305,7 @@ export default function AdminImages() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(image.path);
+                        handleDeleteRequest(image.path);
                       }}
                       className="opacity-0 group-hover:opacity-100 bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-opacity shadow-lg"
                     >
@@ -368,6 +374,26 @@ export default function AdminImages() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        open={confirmDeletePath !== null}
+        title="Supprimer l'image"
+        message="Voulez-vous vraiment supprimer cette image ?"
+        confirmLabel="Supprimer"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmDeletePath(null)}
+        loading={deleting}
+      />
+      <ConfirmModal
+        open={confirmBulkDelete}
+        title="Supprimer les images"
+        message={`Voulez-vous vraiment supprimer ${selectedImages.size} image(s) ?`}
+        confirmLabel="Supprimer"
+        variant="danger"
+        onConfirm={handleBulkDeleteConfirm}
+        onCancel={() => setConfirmBulkDelete(false)}
+        loading={deleting}
+      />
     </AdminLayout>
   );
 }

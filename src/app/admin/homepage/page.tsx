@@ -38,6 +38,7 @@ import LinkSelector from "@/components/LinkSelector";
 import DatePicker from "@/components/DatePicker";
 import CategorySelector from "@/components/CategorySelector";
 import ColorPicker from "@/components/ColorPicker";
+import { useToastContext } from "@/contexts/ToastContext";
 
 // Types (duplicated to avoid importing server-side code)
 export interface HeroSlide {
@@ -125,6 +126,7 @@ export interface HomepageContent {
 
 export default function AdminHomepage() {
   const router = useRouter();
+  const toast = useToastContext();
   const [authenticated, setAuthenticated] = useState(false);
   const [content, setContent] = useState<HomepageContent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -247,21 +249,13 @@ export default function AdminHomepage() {
         body: JSON.stringify(content),
       });
       if (response.ok) {
-        // Show success notification
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-20 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-slide-in';
-        notification.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span>Contenu sauvegardé avec succès !</span>';
-        document.body.appendChild(notification);
-        setTimeout(() => {
-          notification.classList.add('animate-slide-out');
-          setTimeout(() => notification.remove(), 300);
-        }, 3000);
+        toast.success("Contenu sauvegardé avec succès !");
       } else {
-        alert("Erreur lors de la sauvegarde");
+        toast.error("Erreur lors de la sauvegarde");
       }
     } catch (error) {
       console.error("Error saving content:", error);
-      alert("Erreur lors de la sauvegarde");
+      toast.error("Erreur lors de la sauvegarde");
     } finally {
       setSaving(false);
     }
@@ -643,7 +637,7 @@ function HeroRepeaterEditor({
 
   const handleDelete = (index: number) => {
     if (slides.length <= 1) {
-      alert("Vous devez avoir au moins un slide");
+      toast.warning("Vous devez avoir au moins un slide");
       return;
     }
     const newSlides = slides.filter((_, i) => i !== index);
@@ -1391,7 +1385,7 @@ function BrandsGridEditor({
       }
     } catch (error) {
       console.error('Error uploading images:', error);
-      alert('Erreur lors de l\'upload des images');
+      toast.error('Erreur lors de l\'upload des images');
     } finally {
       setUploading(false);
     }
@@ -1421,7 +1415,7 @@ function BrandsGridEditor({
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Erreur lors de l\'upload de l\'image');
+      toast.error('Erreur lors de l\'upload de l\'image');
     } finally {
       setUploading(false);
     }
@@ -2023,7 +2017,7 @@ function HeroCarouselEditor({
 
   const handleDelete = () => {
     if (slides.length <= 1) {
-      alert("Vous devez avoir au moins un slide");
+      toast.warning("Vous devez avoir au moins un slide");
       return;
     }
     const newSlides = slides.filter((_, i) => i !== currentIndex);

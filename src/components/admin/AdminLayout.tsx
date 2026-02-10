@@ -120,26 +120,6 @@ export default function AdminLayout({ children, title, description }: AdminLayou
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  useEffect(() => {
-    // #region agent log
-    const measureLayout = () => {
-      const sidebar = document.querySelector('aside');
-      const mainContent = document.querySelector('main')?.parentElement?.parentElement;
-      const container = document.querySelector('.min-h-screen.bg-gray-50');
-      
-      if (sidebar && mainContent && container) {
-        const sidebarRect = sidebar.getBoundingClientRect();
-        const mainRect = mainContent.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        
-        fetch('http://127.0.0.1:7242/ingest/8c389881-52ef-4ac5-9288-d85afd18b471',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminLayout.tsx:measureLayout',message:'Layout dimensions',data:{sidebar:{top:sidebarRect.top,left:sidebarRect.left,width:sidebarRect.width,height:sidebarRect.height},main:{top:mainRect.top,left:mainRect.left,width:mainRect.width,height:mainRect.height},container:{top:containerRect.top,left:containerRect.left,width:containerRect.width,height:containerRect.height},windowHeight:window.innerHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'layout-fix-v2',hypothesisId:'B'})}).catch(()=>{});
-      }
-    };
-    
-    setTimeout(measureLayout, 100);
-    // #endregion
-  }, []);
-
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' }).catch(() => {});
     clearAdminSession();

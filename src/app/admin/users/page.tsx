@@ -6,6 +6,7 @@ import { checkAdminSession } from "@/lib/admin-auth";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { User as UserIcon, Mail, Phone, Building2, RefreshCw, Save } from "lucide-react";
 import { safeFetchJson } from "@/utils/api";
+import { useToastContext } from "@/contexts/ToastContext";
 
 type UserRole = "PARTICULIER" | "INSTALLATEUR" | "REVENDEUR" | "AUTRE" | null;
 
@@ -19,6 +20,8 @@ interface User {
   createdAt: string;
 }
 
+const USERS_PER_PAGE = 25;
+
 const ROLE_LABELS: Record<string, string> = {
   PARTICULIER: "Particulier",
   INSTALLATEUR: "Installateur",
@@ -28,11 +31,13 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function AdminUsersPage() {
   const router = useRouter();
+  const toast = useToastContext();
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [roleEdits, setRoleEdits] = useState<Record<string, UserRole>>({});
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     if (!checkAdminSession()) {
@@ -78,7 +83,7 @@ export default function AdminUsersPage() {
         }
       );
       if (error || !data?.user) {
-        alert(error || "Erreur lors de la mise à jour du rôle");
+        toast.error(error || "Erreur lors de la mise à jour du rôle");
         return;
       }
       setUsers((prev) =>
@@ -89,9 +94,10 @@ export default function AdminUsersPage() {
         delete next[user.id];
         return next;
       });
+      toast.success("Rôle mis à jour");
     } catch (e) {
       console.error("Save role error:", e);
-      alert("Erreur lors de la mise à jour du rôle");
+      toast.error("Erreur lors de la mise à jour du rôle");
     } finally {
       setUpdatingId(null);
     }
@@ -119,8 +125,12 @@ export default function AdminUsersPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-gray-500">Chargement...</div>
+          <div className="text-center py-12">
+            <div className="inline-block w-8 h-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin" />
+            <p className="mt-4 text-gray-600">Chargement des utilisateurs...</p>
+          </div>
         ) : (
+          <>
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -144,7 +154,7 @@ export default function AdminUsersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {users.map((user) => {
+                  {users.slice((page - 1) * USERS_PER_PAGE, page * USERS_PER_PAGE).map((user) => {
                     const currentRole = roleEdits[user.id] ?? user.role;
                     const hasChange = currentRole !== user.role;
                     return (
@@ -223,6 +233,32 @@ export default function AdminUsersPage() {
               </div>
             )}
           </div>
+          {users.length > USERS_PER_PAGE && (
+            <div className="flex items-center justify-between px-4 py-3 bg-white border border-t-0 border-gray-200 rounded-b-lg">
+              <p className="text-sm text-gray-600">
+                {((page - 1) * USERS_PER_PAGE) + 1}–{Math.min(page * USERS_PER_PAGE, users.length)} sur {users.length}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Précédent
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(Math.ceil(users.length / USERS_PER_PAGE), p + 1))}
+                  disabled={page >= Math.ceil(users.length / USERS_PER_PAGE)}
+                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Suivant
+                </button>
+              </div>
+            </div>
+          )}
+          </>
         )}
       </div>
     </AdminLayout>

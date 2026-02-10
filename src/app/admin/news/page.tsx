@@ -15,10 +15,12 @@ import {
 } from 'lucide-react';
 import { checkAdminSession } from '@/lib/admin-auth';
 import AdminLayout from '@/components/admin/AdminLayout';
+import ConfirmModal from '@/components/admin/ConfirmModal';
 import ImageSelector from '@/components/ImageSelector';
 import LinkSelector from '@/components/LinkSelector';
 import DatePicker from '@/components/DatePicker';
 import RichTextEditor from '@/components/admin/RichTextEditor';
+import { useToastContext } from '@/contexts/ToastContext';
 
 export interface NewsArticle {
   id: number;
@@ -34,6 +36,7 @@ export interface NewsArticle {
 
 export default function AdminNews() {
   const router = useRouter();
+  const toast = useToastContext();
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -41,6 +44,7 @@ export default function AdminNews() {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!checkAdminSession()) {
@@ -74,20 +78,13 @@ export default function AdminNews() {
         body: JSON.stringify({ articles }),
       });
       if (response.ok) {
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-20 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-slide-in';
-        notification.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span>Actualités sauvegardées avec succès !</span>';
-        document.body.appendChild(notification);
-        setTimeout(() => {
-          notification.classList.add('animate-slide-out');
-          setTimeout(() => notification.remove(), 300);
-        }, 3000);
+        toast.success('Actualités sauvegardées avec succès !');
       } else {
-        alert('Erreur lors de la sauvegarde');
+        toast.error('Erreur lors de la sauvegarde');
       }
     } catch (error) {
       console.error('Error saving articles:', error);
-      alert('Erreur lors de la sauvegarde');
+      toast.error('Erreur lors de la sauvegarde');
     } finally {
       setSaving(false);
     }
@@ -122,14 +119,16 @@ export default function AdminNews() {
     setEditingIndex(articles.length);
   };
 
-  const handleDelete = (index: number) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette actualité ?')) {
-      const newArticles = articles.filter((_, i) => i !== index);
-      setArticles(newArticles);
-      if (editingIndex === index) {
-        setEditingIndex(null);
-      }
-    }
+  const handleDeleteRequest = (index: number) => setConfirmDeleteIndex(index);
+
+  const handleDeleteConfirm = () => {
+    const index = confirmDeleteIndex;
+    if (index === null) return;
+    const newArticles = articles.filter((_, i) => i !== index);
+    setArticles(newArticles);
+    if (editingIndex === index) setEditingIndex(null);
+    setConfirmDeleteIndex(null);
+    toast.success('Actualité supprimée');
   };
 
   const handleDragStart = (index: number) => {
@@ -297,7 +296,7 @@ export default function AdminNews() {
                                   <FileText className="w-4 h-4" />
                                 </button>
                                 <button
-                                  onClick={() => handleDelete(index)}
+                                  onClick={() => handleDeleteRequest(index)}
                                   className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                   title="Supprimer"
                                 >
@@ -316,6 +315,15 @@ export default function AdminNews() {
           })}
         </div>
       )}
+      <ConfirmModal
+        open={confirmDeleteIndex !== null}
+        title="Supprimer l'actualité"
+        message="Voulez-vous vraiment supprimer cette actualité ?"
+        confirmLabel="Supprimer"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmDeleteIndex(null)}
+      />
     </AdminLayout>
   );
 }

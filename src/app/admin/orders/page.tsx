@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { checkAdminSession } from "@/lib/admin-auth";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Package, Eye, CheckCircle2, XCircle, Clock, User, Building2, Phone, Mail, X, RefreshCw } from "lucide-react";
+import { Package, Eye, CheckCircle2, XCircle, Clock, User, Building2, Phone, Mail, X, RefreshCw, ChevronUp, ChevronDown } from "lucide-react";
 import { safeFetchJson } from "@/utils/api";
+import { useToastContext } from "@/contexts/ToastContext";
 
 interface OrderItem {
   id: string;
@@ -39,8 +40,14 @@ interface Order {
   items: OrderItem[];
 }
 
-export default function AdminOrders() {
+const ORDERS_PER_PAGE = 25;
+type SortKey = "date" | "total" | "status" | "client";
+type SortDir = "asc" | "desc";
+
+function AdminOrdersContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const toast = useToastContext();
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -50,6 +57,16 @@ export default function AdminOrders() {
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>("date");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    const filter = searchParams.get("filter");
+    if (filter === "PENDING" || filter === "COMPLETED" || filter === "CANCELLED") {
+      setFilterStatus(filter);
+    }
+  }, [searchParams]);
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
@@ -116,7 +133,7 @@ export default function AdminOrders() {
       });
 
       if (error || !data?.order) {
-        alert(error || "Erreur lors de la mise à jour de la commande");
+        toast.error(error || "Erreur lors de la mise à jour de la commande");
         return;
       }
 
@@ -130,10 +147,10 @@ export default function AdminOrders() {
         setSelectedOrder(data.order);
       }
 
-      alert("Statut de la commande mis à jour avec succès");
+      toast.success("Statut de la commande mis à jour avec succès");
     } catch (error) {
       console.error("Error updating order:", error);
-      alert("Erreur lors de la mise à jour de la commande");
+      toast.error("Erreur lors de la mise à jour de la commande");
     } finally {
       setUpdating(null);
     }
@@ -172,10 +189,36 @@ export default function AdminOrders() {
     }
   };
 
-  const filteredOrders = orders.filter((order) => {
-    if (filterStatus === "all") return true;
-    return order.status === filterStatus;
-  });
+  const filteredOrders = useMemo(() => {
+    let list = orders.filter((order) => {
+      if (filterStatus === "all") return true;
+      return order.status === filterStatus;
+    });
+    list = [...list].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === "date") cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      else if (sortKey === "total") cmp = a.total - b.total;
+      else if (sortKey === "status") cmp = (a.status || "").localeCompare(b.status || "");
+      else if (sortKey === "client") cmp = (a.user?.name || a.user?.email || "").localeCompare(b.user?.name || b.user?.email || "");
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+    return list;
+  }, [orders, filterStatus, sortKey, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / ORDERS_PER_PAGE));
+  const paginatedOrders = useMemo(
+    () => filteredOrders.slice((page - 1) * ORDERS_PER_PAGE, page * ORDERS_PER_PAGE),
+    [filteredOrders, page]
+  );
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+    setPage(1);
+  };
 
   const stats = {
     total: orders.length,
@@ -285,33 +328,42 @@ export default function AdminOrders() {
             <p className="text-gray-600 text-lg">Aucune commande trouvée</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Commande
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Client
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Statut
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredOrders.map((order) => (
+          <>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Commande
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button type="button" onClick={() => toggleSort("client")} className="flex items-center gap-1 hover:text-gray-700">
+                          Client {sortKey === "client" && (sortDir === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                        </button>
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button type="button" onClick={() => toggleSort("date")} className="flex items-center gap-1 hover:text-gray-700">
+                          Date {sortKey === "date" && (sortDir === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                        </button>
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button type="button" onClick={() => toggleSort("total")} className="flex items-center gap-1 hover:text-gray-700">
+                          Total {sortKey === "total" && (sortDir === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                        </button>
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button type="button" onClick={() => toggleSort("status")} className="flex items-center gap-1 hover:text-gray-700">
+                          Statut {sortKey === "status" && (sortDir === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                        </button>
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {paginatedOrders.map((order) => (
                     <tr key={order.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
@@ -361,11 +413,37 @@ export default function AdminOrders() {
                         </button>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-2 py-3 bg-white border border-t-0 border-gray-200 rounded-b-lg">
+                <p className="text-sm text-gray-600">
+                  {((page - 1) * ORDERS_PER_PAGE) + 1}–{Math.min(page * ORDERS_PER_PAGE, filteredOrders.length)} sur {filteredOrders.length}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Précédent
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Suivant
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -502,3 +580,19 @@ export default function AdminOrders() {
   );
 }
 
+export default function AdminOrders() {
+  return (
+    <Suspense
+      fallback={
+        <AdminLayout title="Commandes" description="Chargement...">
+          <div className="flex items-center justify-center py-12">
+            <div className="inline-block w-8 h-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin" />
+            <p className="mt-4 text-gray-600">Chargement des commandes...</p>
+          </div>
+        </AdminLayout>
+      }
+    >
+      <AdminOrdersContent />
+    </Suspense>
+  );
+}
