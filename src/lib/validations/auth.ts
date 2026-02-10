@@ -80,9 +80,10 @@ export const signUpSchema = z.object({
     .optional()
     .nullable(),
   role: z
-    .enum(["PARTICULIER", "INSTALLATEUR", "REVENDEUR", "AUTRE"])
-    .optional()
-    .nullable(),
+    .preprocess(
+      (val) => (val === "" ? undefined : val),
+      z.enum(["PARTICULIER", "INSTALLATEUR", "REVENDEUR", "AUTRE"]).optional().nullable()
+    ),
   password: z
     .string()
     .min(8, "Le mot de passe doit contenir au moins 8 caractères")

@@ -38,6 +38,7 @@ export default function AdminUsersPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [roleEdits, setRoleEdits] = useState<Record<string, UserRole>>({});
   const [page, setPage] = useState(1);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!checkAdminSession()) {
@@ -51,15 +52,24 @@ export default function AdminUsersPage() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await safeFetchJson<{ users: User[] }>("/api/admin/users");
+      setLoadError(null);
+      const { data, error } = await safeFetchJson<{ users: User[] }>("/api/admin/users", {
+        credentials: "include",
+      });
       if (error || !data?.users) {
-        console.error("Load users error:", error);
+        const msg = error || "Réponse invalide du serveur";
+        setLoadError(msg);
+        console.error("Load users error:", msg);
+        setUsers([]);
         return;
       }
       setUsers(data.users);
       setRoleEdits({});
     } catch (e) {
+      const msg = e instanceof Error ? e.message : "Erreur lors du chargement";
+      setLoadError(msg);
       console.error("Load users error:", e);
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -108,6 +118,12 @@ export default function AdminUsersPage() {
   return (
     <AdminLayout title="Utilisateurs" description="Liste des inscrits et gestion des rôles">
       <div className="space-y-6">
+        {loadError && (
+          <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700 text-sm">
+            Impossible de charger la liste : {loadError}
+            {loadError.includes("401") || loadError.toLowerCase().includes("autorisé") ? " Vérifiez que vous êtes bien connecté à l'admin." : ""}
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <p className="text-gray-600">
             {users.length} utilisateur{users.length !== 1 ? "s" : ""} inscrit
