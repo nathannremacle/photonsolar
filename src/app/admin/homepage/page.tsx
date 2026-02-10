@@ -589,6 +589,7 @@ function HeroRepeaterEditor({
   slides: HeroSlide[];
   onSlidesChange: (slides: HeroSlide[]) => void;
 }) {
+  const toast = useToastContext();
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -1993,6 +1994,7 @@ function HeroCarouselEditor({
   slides: HeroSlide[];
   onSlidesChange: (slides: HeroSlide[]) => void;
 }) {
+  const toast = useToastContext();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showPreview, setShowPreview] = useState(true);
 
