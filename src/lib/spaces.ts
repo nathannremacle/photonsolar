@@ -3,6 +3,7 @@ import {
   PutObjectCommand,
   ListObjectsV2Command,
   DeleteObjectCommand,
+  CopyObjectCommand,
   type PutObjectCommandInput,
 } from "@aws-sdk/client-s3";
 
@@ -160,6 +161,55 @@ export async function deleteFromSpaces(key: string): Promise<void> {
       Key: normalizedKey,
     })
   );
+}
+
+/**
+ * Extract the object key from a Spaces CDN URL, or null if not our CDN.
+ */
+export function getKeyFromSpacesUrl(url: string): string | null {
+  if (!url || typeof url !== "string") return null;
+  const base = CDN_BASE.replace(/\/$/, "");
+  const u = url.trim();
+  if (!u.startsWith(base + "/") && u !== base) return null;
+  const key = u.slice(base.length).replace(/^\//, "");
+  return key || null;
+}
+
+/**
+ * If the image URL points to an object under images/products/ without a category
+ * subfolder (e.g. images/products/file.png), copy it to images/products/{category}/filename
+ * and delete the original. Returns the new CDN URL. Otherwise returns the URL unchanged.
+ */
+export async function moveImageToCategory(imageUrl: string, category: string): Promise<string> {
+  if (!isSpacesConfigured() || !category) return imageUrl;
+
+  const key = getKeyFromSpacesUrl(imageUrl);
+  if (!key) return imageUrl;
+
+  const parts = key.split("/");
+  // Only move if key is exactly "images/products/filename" (no category subfolder)
+  if (parts[0] !== "images" || parts[1] !== "products" || parts.length !== 3) {
+    return imageUrl;
+  }
+
+  const filename = parts[2];
+  const newKey = `images/products/${category}/${filename}`;
+  if (newKey === key) return imageUrl;
+
+  const s3 = getSpacesClient();
+  if (!s3 || !BUCKET) return imageUrl;
+
+  const copySource = `${BUCKET}/${key}`;
+  await s3.send(
+    new CopyObjectCommand({
+      Bucket: BUCKET,
+      CopySource: copySource,
+      Key: newKey,
+      ACL: "public-read",
+    })
+  );
+  await deleteFromSpaces(key);
+  return getSpacesCdnUrl(newKey);
 }
 
 export { isSpacesConfigured, BUCKET as SPACES_BUCKET };

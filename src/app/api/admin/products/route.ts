@@ -1,12 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import type { Product } from '@/data/products';
-import { 
-  loadProducts, 
-  createProduct, 
-  updateProduct, 
-  deleteProduct 
+import {
+  loadProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
 } from '@/lib/products-storage';
+import { moveImageToCategory } from '@/lib/spaces';
+
+async function ensureProductImagesInCategory(product: Product): Promise<Product> {
+  if (!product.category) return product;
+  const out = { ...product };
+
+  const urlsToProcess: (string | null)[] = [
+    product.image ?? null,
+    ...(product.images ?? []),
+  ].filter((u): u is string => !!u && typeof u === 'string');
+
+  if (urlsToProcess.length === 0) return product;
+
+  const updatedUrls = await Promise.all(
+    urlsToProcess.map((url) => moveImageToCategory(url, product.category!))
+  );
+
+  let i = 0;
+  if (out.image && typeof out.image === 'string') {
+    out.image = updatedUrls[i++];
+  }
+  if (out.images?.length) {
+    out.images = out.images.map((url) =>
+      typeof url === 'string' ? updatedUrls[i++] : url
+    );
+  }
+  return out;
+}
 
 export async function GET() {
   try {
@@ -23,8 +51,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const product: Product = await request.json();
-    
+    let product: Product = await request.json();
+
     // Validate required fields
     if (!product.name || !product.category) {
       return NextResponse.json(
@@ -46,6 +74,7 @@ export async function POST(request: NextRequest) {
       product.link = `/products/${product.id}`;
     }
 
+    product = await ensureProductImagesInCategory(product);
     const createdProduct = await createProduct(product);
 
     // Revalidate cache for product pages
@@ -71,8 +100,8 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const product: Product = await request.json();
-    
+    let product: Product = await request.json();
+
     if (!product.id) {
       return NextResponse.json(
         { error: 'ID du produit requis' },
@@ -80,6 +109,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    product = await ensureProductImagesInCategory(product);
     const updatedProduct = await updateProduct(product);
 
     // Revalidate cache for product pages
