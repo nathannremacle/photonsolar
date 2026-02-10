@@ -1344,6 +1344,7 @@ function BrandsGridEditor({
   onBrandsChange: (brands: Brand[]) => void;
   onEnabledChange: (enabled: boolean) => void;
 }) {
+  const toast = useToastContext();
   const [uploading, setUploading] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
