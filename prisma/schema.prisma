@@ -180,6 +180,9 @@ model Product {
   color                String?
   material             String?
   
+  outOfStock           Boolean  @default(false)
+  hidden               Boolean  @default(false)
+  
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 

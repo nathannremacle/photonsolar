@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
   const authErr = requireAdminSession(request);
   if (authErr) return authErr;
   try {
-    const products = await loadProducts();
+    const products = await loadProducts({ includeHidden: true });
     return NextResponse.json({ products });
   } catch (error) {
     console.error('Error loading products:', error);
@@ -166,7 +166,7 @@ export async function DELETE(request: NextRequest) {
 
     // Get product before deletion to know its category
     const { getProduct } = await import('@/lib/products-storage');
-    const productToDelete = await getProduct(id);
+    const productToDelete = await getProduct(id, { includeHidden: true });
     const category = productToDelete?.category;
 
     await deleteProduct(id);

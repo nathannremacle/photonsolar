@@ -166,21 +166,26 @@ interface NewsContentJson {
 async function seedProducts() {
   console.log('📦 Seeding products...');
   
-  // Try JSON file first, then TS file
+  // Priority: products-photonsolar-be.json (catalog from photonsolar.be), then products.json, then TS
   let products: ProductJson[] = [];
   
-  const jsonProducts = readJsonFile<ProductJson[]>('data/products.json');
-  if (jsonProducts && jsonProducts.length > 0) {
-    products = jsonProducts;
-    console.log(`   Found ${products.length} products in data/products.json`);
+  const photonsolarProducts = readJsonFile<ProductJson[]>('data/products-photonsolar-be.json');
+  if (photonsolarProducts && photonsolarProducts.length > 0) {
+    products = photonsolarProducts;
+    console.log(`   Found ${products.length} products in data/products-photonsolar-be.json (photonsolar.be)`);
   } else {
-    // Try importing from TS file
-    try {
-      const productsModule = await import('../src/data/products');
-      products = productsModule.products || [];
-      console.log(`   Found ${products.length} products in src/data/products.ts`);
-    } catch (error) {
-      console.log('   No products found in either location');
+    const jsonProducts = readJsonFile<ProductJson[]>('data/products.json');
+    if (jsonProducts && jsonProducts.length > 0) {
+      products = jsonProducts;
+      console.log(`   Found ${products.length} products in data/products.json`);
+    } else {
+      try {
+        const productsModule = await import('../src/data/products');
+        products = productsModule.products || [];
+        console.log(`   Found ${products.length} products in src/data/products.ts`);
+      } catch (error) {
+        console.log('   No products found in either location');
+      }
     }
   }
   

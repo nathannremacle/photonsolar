@@ -1347,8 +1347,34 @@ function BrandsGridEditor({
   const toast = useToastContext();
   const [uploading, setUploading] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [productBrands, setProductBrands] = useState<string[]>([]);
+  const [selectedProductBrand, setSelectedProductBrand] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+
+  useEffect(() => {
+    fetch("/api/products/brands")
+      .then((r) => r.json())
+      .then((data) => setProductBrands(data.brands || []))
+      .catch(() => setProductBrands([]));
+  }, []);
+
+  const marqueLink = (b: string) => `/marque/${encodeURIComponent(b)}`;
+  const alreadyAdded = new Set(brands.map((b) => b.link).filter(Boolean));
+  const availableProductBrands = productBrands.filter((b) => !alreadyAdded.has(marqueLink(b)));
+
+  const handleAddProductBrand = () => {
+    if (!selectedProductBrand.trim()) {
+      toast.warning("Choisissez une marque dans la liste (marques des produits).");
+      return;
+    }
+    onBrandsChange([
+      ...brands,
+      { name: selectedProductBrand.trim(), link: marqueLink(selectedProductBrand.trim()) },
+    ]);
+    setSelectedProductBrand("");
+    toast.success("Marque ajoutée. Cliquez dessus pour ajouter un logo.");
+  };
 
   const isImageUrl = (url: string): boolean => {
     if (!url) return false;
@@ -1380,10 +1406,11 @@ function BrandsGridEditor({
       const data = await response.json();
       if (response.ok && data.success && data.files.length > 0) {
         const newBrands = data.files.map((url: string) => ({
-          name: url, // Store image URL in name field
+          name: url,
           link: "/",
         }));
         onBrandsChange([...brands, ...newBrands]);
+        toast.success("Image(s) ajoutée(s). Pensez à définir le lien (ex: /marque/NomMarque) pour afficher les produits au clic.");
       }
     } catch (error) {
       console.error('Error uploading images:', error);
@@ -1437,6 +1464,24 @@ function BrandsGridEditor({
     onBrandsChange(newBrands);
   };
 
+  const handleMoveUp = (index: number) => {
+    if (index <= 0) return;
+    const newBrands = [...brands];
+    [newBrands[index - 1], newBrands[index]] = [newBrands[index], newBrands[index - 1]];
+    onBrandsChange(newBrands);
+    if (editingIndex === index) setEditingIndex(index - 1);
+    else if (editingIndex === index - 1) setEditingIndex(index);
+  };
+
+  const handleMoveDown = (index: number) => {
+    if (index >= brands.length - 1) return;
+    const newBrands = [...brands];
+    [newBrands[index], newBrands[index + 1]] = [newBrands[index + 1], newBrands[index]];
+    onBrandsChange(newBrands);
+    if (editingIndex === index) setEditingIndex(index + 1);
+    else if (editingIndex === index + 1) setEditingIndex(index);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -1456,22 +1501,63 @@ function BrandsGridEditor({
 
       {enabled && (
         <>
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-600">{brands.length} marque{brands.length > 1 ? 's' : ''}</p>
+          <div className="rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 p-5 mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Building2 className="w-5 h-5 text-orange-600" />
+              <p className="text-sm font-semibold text-gray-800">Associer une marque (depuis les produits)</p>
+            </div>
+            <p className="text-xs text-gray-600 mb-3">
+              Les marques listées ci-dessous sont celles renseignées sur vos produits. En les ajoutant ici, un logo pourra pointer vers la page des produits de cette marque (<code className="text-orange-700 bg-orange-100/80 px-1 rounded">/marque/NomMarque</code>).
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={selectedProductBrand}
+                onChange={(e) => setSelectedProductBrand(e.target.value)}
+                className="rounded-lg border border-orange-200 bg-white py-2 px-3 text-sm min-w-[200px] focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              >
+                <option value="">— Choisir une marque —</option>
+                {availableProductBrands.map((b) => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={handleAddProductBrand}
+                disabled={!selectedProductBrand || availableProductBrands.length === 0}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 font-medium shadow-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Ajouter cette marque
+              </button>
+            </div>
+            {productBrands.length === 0 && (
+              <p className="text-xs text-amber-700 mt-3 flex items-center gap-1">
+                Aucune marque trouvée dans les produits. Renseignez le champ « marque » sur vos produits pour les voir apparaître ici.
+              </p>
+            )}
+            {availableProductBrands.length === 0 && productBrands.length > 0 && (
+              <p className="text-xs text-green-700 mt-2">Toutes les marques de vos produits sont déjà ajoutées.</p>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+            <p className="text-sm text-gray-600">
+              <span className="font-medium text-gray-800">{brands.length}</span> marque{brands.length > 1 ? 's' : ''} affichée{brands.length > 1 ? 's' : ''}
+            </p>
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium shadow-sm hover:shadow-md disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 border border-orange-600 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors font-medium disabled:opacity-50"
             >
               {uploading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
                   Upload...
                 </>
               ) : (
                 <>
                   <Plus className="w-5 h-5" />
-                  Ajouter des images
+                  Ajouter des logos (images)
                 </>
               )}
             </button>
@@ -1489,28 +1575,48 @@ function BrandsGridEditor({
             <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
               <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-3" />
               <p className="text-gray-600 mb-4">Aucune marque</p>
+              <p className="text-sm text-gray-500 mb-4">Choisissez une marque dans la liste ci-dessus (marques des produits), puis ajoutez un logo en cliquant sur la carte.</p>
+              <select
+                value={selectedProductBrand}
+                onChange={(e) => setSelectedProductBrand(e.target.value)}
+                className="rounded-lg border border-gray-300 py-2 px-3 text-sm mb-2 min-w-[200px]"
+              >
+                <option value="">— Choisir une marque —</option>
+                {availableProductBrands.map((b) => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
               <button
-                onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"
+                type="button"
+                onClick={handleAddProductBrand}
+                disabled={!selectedProductBrand || availableProductBrands.length === 0}
+                className="block mx-auto mt-2 inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 font-medium"
               >
                 <Plus className="w-5 h-5" />
-                Ajouter des images
+                Ajouter cette marque
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {brands.map((brand, index) => {
-                const isEditing = editingIndex === index;
-                const brandIsImageUrl = isImageUrl(brand.name || '');
-                
-                return (
-                  <div
-                    key={index}
-                    className="relative group bg-white rounded-xl border-2 border-gray-200 hover:border-orange-300 transition-all overflow-hidden"
-                  >
-                    {isEditing ? (
-                      <div className="p-4 space-y-3">
-                        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3">
+            <>
+              <p className="text-xs text-gray-500 mb-2">
+                L’ordre des cartes ci-dessous est celui affiché sur le site. Utilisez les flèches pour réordonner.
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {brands.map((brand, index) => {
+                  const isEditing = editingIndex === index;
+                  const brandIsImageUrl = isImageUrl(brand.name || '');
+                  
+                  return (
+                    <div
+                      key={index}
+                      className="relative group bg-white rounded-xl border-2 border-gray-200 hover:border-orange-300 transition-all overflow-hidden"
+                    >
+                      {isEditing ? (
+                        <div className="p-4 space-y-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-medium text-gray-500">Position {index + 1} / {brands.length}</span>
+                          </div>
+                          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3">
                           {brandIsImageUrl ? (
                             <img 
                               src={brand.name} 
@@ -1550,7 +1656,7 @@ function BrandsGridEditor({
                           type="text"
                           value={brand.link}
                           onChange={(e) => handleUpdate(index, { ...brand, link: e.target.value })}
-                          placeholder="Lien (optionnel)"
+                          placeholder="/marque/NomMarque (produits de la marque)"
                           className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                         />
                         <div className="flex gap-2">
@@ -1592,6 +1698,27 @@ function BrandsGridEditor({
                             <span className="text-sm font-medium text-gray-600">{brand.name || `Marque ${index + 1}`}</span>
                           )}
                         </div>
+                        <div className="absolute top-2 left-2 flex items-center gap-1">
+                          <span className="px-2 py-0.5 text-xs font-medium bg-gray-200 text-gray-700 rounded" title="Ordre d'affichage">
+                            {index + 1}
+                          </span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleMoveUp(index); }}
+                            disabled={index === 0}
+                            className="p-1.5 bg-gray-100 text-gray-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                            title="Monter"
+                          >
+                            <ChevronUp className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleMoveDown(index); }}
+                            disabled={index === brands.length - 1}
+                            className="p-1.5 bg-gray-100 text-gray-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                            title="Descendre"
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </button>
+                        </div>
                         <div className="absolute top-2 right-2 flex gap-2">
                           <button
                             onClick={(e) => {
@@ -1614,12 +1741,20 @@ function BrandsGridEditor({
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
+                        {brand.link ? (
+                          <div className="px-3 py-2 bg-gray-50 border-t border-gray-100">
+                            <p className="text-xs text-gray-500 truncate" title={brand.link}>
+                              Lien : {brand.link}
+                            </p>
+                          </div>
+                        ) : null}
                       </>
                     )}
                   </div>
                 );
               })}
-            </div>
+              </div>
+            </>
           )}
         </>
       )}

@@ -53,6 +53,7 @@ function prismaToProduct(p: PrismaProduct): Product {
     heatingPower: p.heatingPower || undefined,
     color: p.color || undefined,
     material: p.material || undefined,
+    outOfStock: p.outOfStock ?? undefined,
   };
 }
 
@@ -98,6 +99,8 @@ function productToPrismaData(product: Product) {
     heatingPower: product.heatingPower || null,
     color: product.color || null,
     material: product.material || null,
+    outOfStock: product.outOfStock ?? false,
+    hidden: product.hidden ?? false,
   };
 }
 
@@ -106,11 +109,15 @@ function productToPrismaData(product: Product) {
 // ==============================================
 
 /**
- * Load all products from database
+ * Load products from database.
+ * By default returns only visible (non-hidden) products for the public site.
+ * Pass { includeHidden: true } to include hidden products (admin).
  */
-export async function loadProducts(): Promise<Product[]> {
+export async function loadProducts(options?: { includeHidden?: boolean }): Promise<Product[]> {
   try {
+    const where = options?.includeHidden ? {} : { hidden: false };
     const products = await prisma.product.findMany({
+      where,
       orderBy: [
         { category: 'asc' },
         { brand: 'asc' },
@@ -125,14 +132,18 @@ export async function loadProducts(): Promise<Product[]> {
 }
 
 /**
- * Get a single product by ID
+ * Get a single product by ID.
+ * By default returns null if the product is hidden (public).
+ * Pass { includeHidden: true } to get the product even when hidden (admin).
  */
-export async function getProduct(id: string): Promise<Product | null> {
+export async function getProduct(id: string, options?: { includeHidden?: boolean }): Promise<Product | null> {
   try {
     const product = await prisma.product.findUnique({
       where: { id },
     });
-    return product ? prismaToProduct(product) : null;
+    if (!product) return null;
+    if (!options?.includeHidden && product.hidden) return null;
+    return prismaToProduct(product);
   } catch (error) {
     console.error('Error getting product:', error);
     return null;
@@ -145,7 +156,7 @@ export async function getProduct(id: string): Promise<Product | null> {
 export async function getProductsByCategory(category: string): Promise<Product[]> {
   try {
     const products = await prisma.product.findMany({
-      where: { category },
+      where: { category, hidden: false },
       orderBy: { name: 'asc' },
     });
     return products.map(prismaToProduct);
@@ -156,12 +167,12 @@ export async function getProductsByCategory(category: string): Promise<Product[]
 }
 
 /**
- * Get products by IDs (for best sellers, clearance, etc.)
+ * Get products by IDs (for best sellers, clearance, etc.). Only visible products.
  */
 export async function getProductsByIds(ids: string[]): Promise<Product[]> {
   try {
     const products = await prisma.product.findMany({
-      where: { id: { in: ids } },
+      where: { id: { in: ids }, hidden: false },
     });
     
     // Maintain the order of the input IDs
@@ -177,13 +188,14 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
 }
 
 /**
- * Search products
+ * Search products (only visible)
  */
 export async function searchProducts(query: string): Promise<Product[]> {
   try {
     const searchTerm = query.toLowerCase();
     const products = await prisma.product.findMany({
       where: {
+        hidden: false,
         OR: [
           { name: { contains: searchTerm, mode: 'insensitive' } },
           { brand: { contains: searchTerm, mode: 'insensitive' } },
@@ -329,7 +341,7 @@ export async function getProductsPaginated(
   }
 ): Promise<{ products: Product[]; total: number; pages: number }> {
   try {
-    const where: any = {};
+    const where: any = { hidden: false };
     
     if (filters?.category) {
       where.category = filters.category;

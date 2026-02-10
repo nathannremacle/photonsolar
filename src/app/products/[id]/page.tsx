@@ -322,8 +322,26 @@ export default function ProductPage() {
                 );
               })()}
 
-              {/* Add to Cart Section */}
-              {((product.effectivePrice ?? product.price) != null && (product.effectivePrice ?? product.price)! > 0) ? (
+              {/* Add to Cart Section / Rupture de stock */}
+              {product.outOfStock ? (
+                <div className="mb-8 p-6 bg-amber-50 rounded-xl border border-amber-200">
+                  <p className="text-amber-800 font-semibold mb-2">
+                    {language === "fr" ? "Rupture de stock" : "Out of stock"}
+                  </p>
+                  <p className="text-amber-700 text-sm mb-4">
+                    {language === "fr"
+                      ? "Ce produit est temporairement indisponible. Contactez-nous pour être informé du retour en stock."
+                      : "This product is temporarily unavailable. Contact us to be notified when it is back in stock."}
+                  </p>
+                  <a
+                    href={`mailto:info@photonsolar.be?subject=${encodeURIComponent((language === "fr" ? "Alerte stock: " : "Stock alert: ") + product.name)}`}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 transition-colors"
+                  >
+                    <Mail size={18} />
+                    {language === "fr" ? "Être notifié du retour en stock" : "Get notified when back in stock"}
+                  </a>
+                </div>
+              ) : ((product.effectivePrice ?? product.price) != null && (product.effectivePrice ?? product.price)! > 0) ? (
                 <div className="mb-8 p-6 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-100">
                   {/* Quantity Selector */}
                   <div className="flex items-center gap-4 mb-4">

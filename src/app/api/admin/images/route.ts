@@ -3,14 +3,101 @@ import { readdirSync, statSync, unlinkSync, existsSync } from 'fs';
 import { join } from 'path';
 import { isSpacesConfigured, listSpacesImages, deleteFromSpaces } from '@/lib/spaces';
 import { requireAdminSession } from '@/lib/admin-auth';
+import { prisma } from '@/lib/prisma';
+import { loadProducts } from '@/lib/products-storage';
+import { getHeroSlides, getPromotions, getSpecialOffers, getBrands } from '@/lib/homepage-storage';
 
 const PUBLIC_IMAGES_DIR = join(process.cwd(), 'public/images');
 
-interface ImageFile {
+export interface ImageFile {
   name: string;
   path: string;
   url: string;
   size?: number;
+}
+
+/** Normalize URL or path to a comparable key (e.g. "products/onduleurs/foo.png") */
+function normalizeImageKey(urlOrPath: string): string {
+  const u = urlOrPath.replace(/^https?:\/\/[^/]+/, '').trim();
+  const idx = u.indexOf('images/');
+  if (idx >= 0) return u.slice(idx + 7).split('?')[0].replace(/\/$/, '');
+  return u.replace(/^\//, '').replace(/^images\//, '').split('?')[0];
+}
+
+export interface ImageUsageProduct {
+  id: string;
+  name: string;
+  brand: string;
+  category: string;
+}
+
+export interface ImageUsageNews {
+  id: number;
+  title: string;
+}
+
+export interface ImageUsage {
+  products: ImageUsageProduct[];
+  heroSlides: number;
+  promotions: number;
+  specialOffers: number;
+  brands: number;
+  news: ImageUsageNews[];
+}
+
+/** Build a map: normalizedKey -> ImageUsage */
+async function buildUsageMap(): Promise<Record<string, ImageUsage>> {
+  const [products, heroSlides, promotions, specialOffers, brands, newsArticles] = await Promise.all([
+    loadProducts(),
+    getHeroSlides(),
+    getPromotions(),
+    getSpecialOffers(),
+    getBrands(),
+    prisma.newsArticle.findMany({ where: { published: true }, select: { id: true, title: true, image: true } }),
+  ]);
+
+  const map: Record<string, ImageUsage> = {};
+
+  const add = (key: string, upd: Partial<ImageUsage>) => {
+    if (!key) return;
+    if (!map[key]) {
+      map[key] = { products: [], heroSlides: 0, promotions: 0, specialOffers: 0, brands: 0, news: [] };
+    }
+    const m = map[key];
+    if (upd.products?.length) m.products.push(...upd.products);
+    if (upd.heroSlides) m.heroSlides += upd.heroSlides;
+    if (upd.promotions) m.promotions += upd.promotions;
+    if (upd.specialOffers) m.specialOffers += upd.specialOffers;
+    if (upd.brands) m.brands += upd.brands;
+    if (upd.news?.length) m.news.push(...upd.news);
+  };
+
+  for (const p of products) {
+    const urls = [...new Set([p.image, ...(p.images || [])].filter(Boolean))] as string[];
+    const info: ImageUsageProduct = { id: p.id, name: p.name, brand: p.brand, category: p.category };
+    for (const url of urls) {
+      add(normalizeImageKey(url), { products: [info] });
+    }
+  }
+  heroSlides.forEach((s, i) => {
+    if (s.backgroundImage) add(normalizeImageKey(s.backgroundImage), { heroSlides: 1 });
+  });
+  promotions.forEach((p, i) => {
+    if (p.backgroundImage) add(normalizeImageKey(p.backgroundImage), { promotions: 1 });
+  });
+  specialOffers.forEach((o, i) => {
+    if (o.backgroundImage) add(normalizeImageKey(o.backgroundImage), { specialOffers: 1 });
+  });
+  brands.forEach((b) => {
+    if (b.name && /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(b.name)) {
+      add(normalizeImageKey(b.name), { brands: 1 });
+    }
+  });
+  newsArticles.forEach((n) => {
+    if (n.image) add(normalizeImageKey(n.image), { news: [{ id: n.id, title: n.title }] });
+  });
+
+  return map;
 }
 
 function scanImages(dir: string, basePath: string = ''): ImageFile[] {
@@ -53,12 +140,20 @@ export async function GET(request: NextRequest) {
   const authErr = requireAdminSession(request);
   if (authErr) return authErr;
   try {
-    if (isSpacesConfigured()) {
-      const images = await listSpacesImages('images/');
-      return NextResponse.json({ images });
+    const [images, usageMap] = await Promise.all([
+      isSpacesConfigured() ? listSpacesImages('images/') : Promise.resolve(scanImages(PUBLIC_IMAGES_DIR)),
+      buildUsageMap(),
+    ]);
+
+    const usage: Record<string, ImageUsage> = {};
+    for (const img of images) {
+      const key = normalizeImageKey(img.url);
+      const fromPath = img.path.startsWith('images/') ? img.path.replace(/^images\//, '') : img.path;
+      const u = usageMap[key] ?? usageMap[fromPath] ?? usageMap[img.path];
+      if (u) usage[img.path] = u;
     }
-    const images = scanImages(PUBLIC_IMAGES_DIR);
-    return NextResponse.json({ images });
+
+    return NextResponse.json({ images, usage });
   } catch (error) {
     console.error('Error loading images:', error);
     return NextResponse.json(

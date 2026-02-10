@@ -48,6 +48,11 @@ export default function ProductGrid({ products }: ProductGridProps) {
             <Link href={product.link} className="block">
               <article className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-square bg-gray-100 relative overflow-hidden">
+                  {product.outOfStock && (
+                    <span className="absolute top-2 left-2 z-10 px-2 py-1 rounded-md bg-amber-500 text-white text-xs font-bold shadow">
+                      {language === "fr" ? "Rupture de stock" : "Out of stock"}
+                    </span>
+                  )}
                   {(() => {
                     const productImage = product.images?.[0] || product.image;
                     if (productImage && productImage !== "/placeholder-product.jpg") {
@@ -138,32 +143,41 @@ export default function ProductGrid({ products }: ProductGridProps) {
                     );
                   })()}
                   
-                  {/* Add to Cart Button */}
+                  {/* Add to Cart Button / Rupture de stock */}
                   {(() => {
                     const displayPrice = product.effectivePrice ?? product.price;
+                    const canAddToCart = !product.outOfStock && displayPrice != null && displayPrice > 0;
                     return (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          addItem(product, 1);
-                          openCart();
-                        }}
-                        className={`
-                          w-full py-2.5 px-4 rounded-lg font-semibold 
-                          flex items-center justify-center gap-2
-                          transition-all duration-300 ease-out
-                          transform hover:scale-[1.02] active:scale-[0.98]
-                          ${displayPrice != null && displayPrice > 0
-                            ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 hover:from-orange-600 hover:to-orange-700' 
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          }
-                        `}
-                        disabled={!(displayPrice != null && displayPrice > 0)}
-                      >
-                        <ShoppingCart size={18} className={displayPrice != null && displayPrice > 0 ? 'group-hover:animate-bounce' : ''} />
-                        <span>{language === "fr" ? "Ajouter au panier" : "Add to cart"}</span>
-                      </button>
+                      <>
+                        {product.outOfStock && (
+                          <div className="mb-2 px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 text-sm font-medium text-center">
+                            {language === "fr" ? "Rupture de stock" : "Out of stock"}
+                          </div>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (!canAddToCart) return;
+                            addItem(product, 1);
+                            openCart();
+                          }}
+                          className={`
+                            w-full py-2.5 px-4 rounded-lg font-semibold 
+                            flex items-center justify-center gap-2
+                            transition-all duration-300 ease-out
+                            transform hover:scale-[1.02] active:scale-[0.98]
+                            ${canAddToCart
+                              ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 hover:from-orange-600 hover:to-orange-700' 
+                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }
+                          `}
+                          disabled={!canAddToCart}
+                        >
+                          <ShoppingCart size={18} className={canAddToCart ? 'group-hover:animate-bounce' : ''} />
+                          <span>{language === "fr" ? "Ajouter au panier" : "Add to cart"}</span>
+                        </button>
+                      </>
                     );
                   })()}
                 </div>

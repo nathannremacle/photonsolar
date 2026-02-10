@@ -61,6 +61,7 @@ export default function Navbar() {
     { name: t("nav.home"), key: "nav.home", href: "/" },
     { name: t("nav.downloads"), key: "nav.downloads", href: "/telechargements" },
     { name: t("nav.news"), key: "nav.news", href: "/blogs/news" },
+    { name: t("nav.photonAcademy"), key: "nav.photonAcademy", href: "/formations" },
     { name: t("nav.contact"), key: "nav.contact", href: "/contact" },
   ];
 

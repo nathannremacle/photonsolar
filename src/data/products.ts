@@ -47,6 +47,10 @@ export interface Product {
   // Filtres généraux
   color?: string; // Couleur
   material?: string; // Matériau
+  /** Produit en rupture de stock : affiché mais non ajoutable au panier */
+  outOfStock?: boolean;
+  /** Produit masqué : invisible sur le site, visible uniquement dans l’admin */
+  hidden?: boolean;
 }
 
 export const products: Product[] = [

@@ -15,6 +15,8 @@ import {
   User,
   Building2,
   Shield,
+  Pencil,
+  Search,
 } from "lucide-react";
 import { safeFetchJson } from "@/utils/api";
 import { useToastContext } from "@/contexts/ToastContext";
@@ -42,6 +44,7 @@ interface UserRow {
   id: string;
   name: string | null;
   email: string;
+  companyName?: string | null;
 }
 
 interface ProductRow {
@@ -68,6 +71,8 @@ export default function AdminPricingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [editRuleId, setEditRuleId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [form, setForm] = useState({
     scope: "ROLE" as Scope,
     role: "INSTALLATEUR" as UserRole,
@@ -92,8 +97,8 @@ export default function AdminPricingPage() {
     try {
       setLoading(true);
       const [rulesRes, usersRes, productsRes] = await Promise.all([
-        safeFetchJson<{ rules: PricingRuleRow[] }>("/api/admin/pricing"),
-        safeFetchJson<{ users: UserRow[] }>("/api/admin/users"),
+        safeFetchJson<{ rules: PricingRuleRow[] }>("/api/admin/pricing", { credentials: "include" }),
+        safeFetchJson<{ users: UserRow[] }>("/api/admin/users", { credentials: "include" }),
         safeFetchJson<{ products: ProductRow[] }>("/api/products"),
       ]);
       if (rulesRes.data?.rules) setRules(rulesRes.data.rules);
@@ -111,6 +116,51 @@ export default function AdminPricingPage() {
     if (r.scope === "USER" && r.user) return `User: ${r.user.name || r.user.email}`;
     if (r.scope === "COMPANY" && r.companyName) return `Entreprise: ${r.companyName}`;
     return r.scope;
+  };
+
+  const companyNames = [...new Set(users.map((u) => u.companyName).filter(Boolean))] as string[];
+
+  const filteredRules = rules.filter((r) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    const targetLabel = getTargetLabel(r).toLowerCase();
+    const productName = (r.productName || "").toLowerCase();
+    const company = (r.companyName || "").toLowerCase();
+    const userName = (r.user?.name || r.user?.email || "").toLowerCase();
+    const roleLabel = (r.role ? ROLE_LABELS[r.role] : "").toLowerCase();
+    return (
+      targetLabel.includes(q) ||
+      productName.includes(q) ||
+      company.includes(q) ||
+      userName.includes(q) ||
+      roleLabel.includes(q)
+    );
+  });
+
+  const startEdit = (r: PricingRuleRow) => {
+    setEditRuleId(r.id);
+    setForm({
+      scope: r.scope,
+      role: (r.role as UserRole) || "INSTALLATEUR",
+      userId: r.userId || "",
+      companyName: r.companyName || "",
+      productId: r.productId,
+      type: r.type,
+      value: String(r.value),
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditRuleId(null);
+    setForm({
+      scope: "ROLE",
+      role: "INSTALLATEUR",
+      userId: "",
+      companyName: "",
+      productId: "",
+      type: "PERCENT_DISCOUNT",
+      value: "10",
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -148,34 +198,63 @@ export default function AdminPricingPage() {
       if (form.scope === "ROLE") body.role = form.role;
       if (form.scope === "USER") body.userId = form.userId;
       if (form.scope === "COMPANY") body.companyName = form.companyName.trim();
-      const { data, error: err } = await safeFetchJson<{ rule: PricingRuleRow }>(
-        "/api/admin/pricing",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        }
-      );
-      if (err) {
-        setError(err);
-        return;
-      }
-      if (data?.rule) {
-        setRules((prev) => [
-          ...prev,
+
+      if (editRuleId) {
+        const { data: patchData, error: err } = await safeFetchJson<{ rule: PricingRuleRow }>(
+          `/api/admin/pricing/${editRuleId}`,
           {
-            ...data.rule,
-            productName: products.find((p) => p.id === data.rule.productId)?.name ?? data.rule.productId,
-            productPrice: products.find((p) => p.id === data.rule.productId)?.price ?? null,
-          },
-        ]);
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+            credentials: "include",
+          }
+        );
+        if (err) {
+          setError(err);
+          return;
+        }
+        if (patchData?.rule) {
+          const updated = {
+            ...patchData.rule,
+            productName: products.find((p) => p.id === patchData.rule.productId)?.name ?? patchData.rule.productId,
+            productPrice: products.find((p) => p.id === patchData.rule.productId)?.price ?? null,
+            user: rules.find((r) => r.id === editRuleId)?.user ?? patchData.rule.user ?? null,
+          };
+          setRules((prev) => prev.map((r) => (r.id === editRuleId ? updated : r)));
+        }
+        setEditRuleId(null);
+        toast.success("Règle modifiée");
+      } else {
+        const { data, error: err } = await safeFetchJson<{ rule: PricingRuleRow }>(
+          "/api/admin/pricing",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+            credentials: "include",
+          }
+        );
+        if (err) {
+          setError(err);
+          return;
+        }
+        if (data?.rule) {
+          setRules((prev) => [
+            ...prev,
+            {
+              ...data.rule,
+              productName: products.find((p) => p.id === data.rule.productId)?.name ?? data.rule.productId,
+              productPrice: products.find((p) => p.id === data.rule.productId)?.price ?? null,
+            },
+          ]);
+        }
+        setForm({ ...form, value: "10", productId: "", userId: "", companyName: "" });
+        toast.success("Règle ajoutée");
       }
-      setForm({ ...form, value: "10", productId: "", userId: "", companyName: "" });
-      toast.success("Règle ajoutée");
     } catch (e) {
       console.error("Submit pricing rule error:", e);
-      setError("Erreur lors de l'ajout de la règle.");
-      toast.error("Erreur lors de l'ajout de la règle.");
+      setError(editRuleId ? "Erreur lors de la modification." : "Erreur lors de l'ajout de la règle.");
+      toast.error(editRuleId ? "Erreur lors de la modification." : "Erreur lors de l'ajout de la règle.");
     } finally {
       setSubmitting(false);
     }
@@ -230,12 +309,32 @@ export default function AdminPricingPage() {
           </button>
         </div>
 
-        {/* Add rule form */}
+        {/* Add / Edit rule form */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Ajouter une règle
-          </h2>
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              {editRuleId ? (
+                <>
+                  <Pencil className="h-5 w-5" />
+                  Modifier la règle
+                </>
+              ) : (
+                <>
+                  <Plus className="h-5 w-5" />
+                  Ajouter une règle
+                </>
+              )}
+            </h2>
+            {editRuleId && (
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Annuler
+              </button>
+            )}
+          </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
@@ -378,9 +477,21 @@ export default function AdminPricingPage() {
 
         {/* Rules list */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <h2 className="text-lg font-semibold text-gray-900 p-4 border-b border-gray-200">
-            Règles en vigueur
-          </h2>
+          <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Règles en vigueur
+            </h2>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Rechercher par utilisateur, entreprise, produit, rôle..."
+                className="w-full sm:w-80 pl-9 pr-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              />
+            </div>
+          </div>
           {loading ? (
             <div className="p-8 text-center text-gray-500">Chargement...</div>
           ) : (
@@ -455,15 +566,26 @@ export default function AdminPricingPage() {
                           : `${r.value} €`}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteRequest(r.id)}
-                          disabled={deletingId === r.id}
-                          className="text-red-600 hover:text-red-800 disabled:opacity-50 inline-flex items-center gap-1"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Supprimer
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => startEdit(r)}
+                            className="text-orange-600 hover:text-orange-800 inline-flex items-center gap-1"
+                            title="Modifier"
+                          >
+                            <Pencil className="h-4 w-4" />
+                            Modifier
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteRequest(r.id)}
+                            disabled={deletingId === r.id}
+                            className="text-red-600 hover:text-red-800 disabled:opacity-50 inline-flex items-center gap-1"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Supprimer
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -473,8 +595,9 @@ export default function AdminPricingPage() {
           )}
           {!loading && rules.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-              Aucune règle. Ajoutez une règle ci-dessus pour appliquer des prix
-              différents par rôle, utilisateur ou entreprise.
+              {rules.length === 0
+                ? "Aucune règle. Ajoutez une règle ci-dessus pour appliquer des prix différents par rôle, utilisateur ou entreprise."
+                : "Aucune règle ne correspond à votre recherche."}
             </div>
           )}
         </div>

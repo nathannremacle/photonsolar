@@ -524,6 +524,18 @@ export default function AdminProducts() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="outOfStock"
+                    checked={!!formData.outOfStock}
+                    onChange={(e) => updateFormField('outOfStock', e.target.checked)}
+                    className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                  />
+                  <label htmlFor="outOfStock" className="text-sm font-medium text-gray-700 cursor-pointer">
+                    Rupture de stock (produit affiché mais non ajoutable au panier)
+                  </label>
+                </div>
               </div>
 
               {/* Images */}

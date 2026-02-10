@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { checkAdminSession } from "@/lib/admin-auth";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Package, Eye, CheckCircle2, XCircle, Clock, User, Building2, Phone, Mail, X, RefreshCw, ChevronUp, ChevronDown } from "lucide-react";
+import { Package, Eye, CheckCircle2, XCircle, Clock, User, Building2, Phone, Mail, X, RefreshCw, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import { safeFetchJson } from "@/utils/api";
 import { useToastContext } from "@/contexts/ToastContext";
 
@@ -54,6 +54,7 @@ function AdminOrdersContent() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [updating, setUpdating] = useState<string | null>(null);
+  const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -153,6 +154,27 @@ function AdminOrdersContent() {
       toast.error("Erreur lors de la mise à jour de la commande");
     } finally {
       setUpdating(null);
+    }
+  };
+
+  const deleteOrder = async (orderId: string) => {
+    if (!confirm("Supprimer définitivement cette commande ? Cette action est irréversible.")) return;
+    try {
+      setDeletingOrderId(orderId);
+      const res = await fetch(`/api/admin/orders/${orderId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Erreur lors de la suppression");
+        return;
+      }
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      if (selectedOrder?.id === orderId) setSelectedOrder(null);
+      toast.success("Commande supprimée");
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      toast.error("Erreur lors de la suppression de la commande");
+    } finally {
+      setDeletingOrderId(null);
     }
   };
 
@@ -404,13 +426,28 @@ function AdminOrdersContent() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => setSelectedOrder(order)}
-                          className="text-orange-600 hover:text-orange-700 flex items-center gap-1"
-                        >
-                          <Eye className="w-4 h-4" />
-                          Détails
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => setSelectedOrder(order)}
+                            className="text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Détails
+                          </button>
+                          <button
+                            onClick={() => deleteOrder(order.id)}
+                            disabled={deletingOrderId === order.id}
+                            className="text-red-600 hover:text-red-700 flex items-center gap-1 disabled:opacity-50"
+                            title="Supprimer la commande"
+                          >
+                            {deletingOrderId === order.id ? (
+                              <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                            Supprimer
+                          </button>
+                        </div>
                       </td>
                     </tr>
                     ))}
@@ -570,6 +607,23 @@ function AdminOrdersContent() {
                       <div className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
                     )}
                   </div>
+                </div>
+
+                {/* Delete order */}
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => deleteOrder(selectedOrder.id)}
+                    disabled={deletingOrderId === selectedOrder.id}
+                    className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 font-medium disabled:opacity-50"
+                  >
+                    {deletingOrderId === selectedOrder.id ? (
+                      <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                    Supprimer la commande
+                  </button>
                 </div>
               </div>
             </div>
