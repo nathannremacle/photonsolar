@@ -48,9 +48,21 @@ export async function PATCH(
     if (error && typeof error === "object" && "code" in error && (error as { code?: string }).code === "P2025") {
       return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
     }
+    const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Admin user update error:", error);
+    if (
+      /role|column|Unknown column|does not exist|n'existe pas/i.test(errMsg)
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "La colonne « role » est absente de la base. Exécutez à la racine du projet : npx prisma db push",
+        },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
-      { error: "Erreur lors de la mise à jour du rôle" },
+      { error: "Erreur lors de la mise à jour du rôle", details: errMsg },
       { status: 500 }
     );
   }

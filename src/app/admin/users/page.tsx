@@ -90,6 +90,7 @@ export default function AdminUsersPage() {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ role }),
+          credentials: "include",
         }
       );
       if (error || !data?.user) {
