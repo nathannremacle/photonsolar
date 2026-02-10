@@ -67,3 +67,34 @@ export async function PATCH(
     );
   }
 }
+
+/**
+ * DELETE /api/admin/users/[id]
+ * Delete a user (and related accounts, sessions, orders, pricing rules via cascade).
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const authErr = requireAdminSession(request);
+  if (authErr) return authErr;
+  try {
+    const { id } = await params;
+    if (!id) {
+      return NextResponse.json({ error: "ID utilisateur requis" }, { status: 400 });
+    }
+    await prisma.user.delete({
+      where: { id },
+    });
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "code" in error && (error as { code?: string }).code === "P2025") {
+      return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
+    }
+    console.error("Admin user delete error:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la suppression de l'utilisateur" },
+      { status: 500 }
+    );
+  }
+}

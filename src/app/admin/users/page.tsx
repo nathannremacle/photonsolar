@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { checkAdminSession } from "@/lib/admin-auth";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { User as UserIcon, Mail, Phone, Building2, RefreshCw, Save } from "lucide-react";
+import { User as UserIcon, Mail, Phone, Building2, RefreshCw, Save, Trash2 } from "lucide-react";
 import { safeFetchJson } from "@/utils/api";
 import { useToastContext } from "@/contexts/ToastContext";
 
@@ -39,6 +39,7 @@ export default function AdminUsersPage() {
   const [roleEdits, setRoleEdits] = useState<Record<string, UserRole>>({});
   const [page, setPage] = useState(1);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!checkAdminSession()) {
@@ -117,7 +118,10 @@ export default function AdminUsersPage() {
   if (!authenticated) return null;
 
   return (
-    <AdminLayout title="Utilisateurs" description="Liste des inscrits et gestion des rôles">
+    <AdminLayout
+      title="Utilisateurs"
+      description="Liste des inscrits, gestion des rôles et suppression. Les rôles permettent d'appliquer des prix différenciés (voir Tarification)."
+    >
       <div className="space-y-6">
         {loadError && (
           <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700 text-sm">
@@ -223,20 +227,32 @@ export default function AdminUsersPage() {
                           </select>
                         </td>
                         <td className="px-4 py-3 text-right">
-                          {hasChange && (
+                          <div className="flex items-center justify-end gap-2">
+                            {hasChange && (
+                              <button
+                                type="button"
+                                onClick={() => saveRole(user)}
+                                disabled={updatingId === user.id}
+                                className="inline-flex items-center gap-1 px-2 py-1.5 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg disabled:opacity-50"
+                              >
+                                <Save className="h-4 w-4" />
+                                Enregistrer
+                              </button>
+                            )}
+                            {updatingId === user.id && (
+                              <span className="text-xs text-gray-500">Enregistrement…</span>
+                            )}
                             <button
                               type="button"
-                              onClick={() => saveRole(user)}
-                              disabled={updatingId === user.id}
-                              className="inline-flex items-center gap-1 px-2 py-1.5 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg disabled:opacity-50"
+                              onClick={() => deleteUser(user)}
+                              disabled={deletingId === user.id}
+                              className="inline-flex items-center gap-1 px-2 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
+                              title="Supprimer l'utilisateur"
                             >
-                              <Save className="h-4 w-4" />
-                              Enregistrer
+                              <Trash2 className="h-4 w-4" />
+                              {deletingId === user.id ? "…" : "Supprimer"}
                             </button>
-                          )}
-                          {updatingId === user.id && (
-                            <span className="text-xs text-gray-500">Enregistrement…</span>
-                          )}
+                          </div>
                         </td>
                       </tr>
                     );

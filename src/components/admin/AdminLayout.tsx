@@ -265,7 +265,17 @@ export default function AdminLayout({ children, title, description }: AdminLayou
           </nav>
 
           {/* Sidebar footer */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-gray-200 space-y-2">
+            <Link
+              href="/pages/politique-de-confidentialite"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Politique de confidentialité"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 text-sm"
+            >
+              <ExternalLink className="w-4 h-4 flex-shrink-0" />
+              {!sidebarCollapsed && <span>Politique de confidentialité</span>}
+            </Link>
             {sidebarCollapsed && !isMobile ? (
               <button
                 onClick={handleLogout}
