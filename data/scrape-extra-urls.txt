@@ -1,0 +1,4 @@
+# URLs de produits photonsolar.be à inclure au scraping (une par ligne)
+# Exemples de liens vers des produits à ne pas manquer :
+https://www.photonsolar.be/accueil/92-climatiseur-12-000btu-airsun.html
+https://www.photonsolar.be/pompe-a-chaleur-piscine/153-climatiseur-12-000btu-airsun.html

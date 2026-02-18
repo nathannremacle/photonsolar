@@ -12,6 +12,16 @@ const nextConfig: NextConfig = {
         hostname: "**.cdn.digitaloceanspaces.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "www.photonsolar.be",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "photonsolar.be",
+        pathname: "/**",
+      },
     ],
   },
 };

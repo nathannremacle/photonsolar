@@ -65,6 +65,14 @@ function CategoryContent() {
     "hybride": { fr: "Hybride", en: "Hybrid" },
     "on-grid": { fr: "ON GRID", en: "ON GRID" },
     "micro-onduleur": { fr: "Micro Onduleur 800W à 2000W", en: "Micro Inverter 800W to 2000W" },
+    "toiture-inclinee": { fr: "Toiture inclinée", en: "Sloped Roof" },
+    "toiture-plane": { fr: "Toiture plane", en: "Flat Roof" },
+    "visseries": { fr: "Visseries", en: "Hardware" },
+    "electricite": { fr: "Électricité", en: "Electrical" },
+    "piscine": { fr: "Piscine", en: "Pool" },
+    "ballon-thermodynamique": { fr: "Ballon thermodynamique", en: "Thermodynamic Tank" },
+    "accessoires": { fr: "Accessoires", en: "Accessories" },
+    "batterie": { fr: "Batterie", en: "Battery" },
   };
 
   const subcategory = searchParams.get("subcategory") || undefined;

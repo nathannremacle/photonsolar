@@ -1,0 +1,470 @@
+{
+  "ecopure-mp-r290-bemco-monophase-16kw": {
+    "price": 7500,
+    "sku": "ECOPURE-MP-R290-16KW"
+  },
+  "ecopure-mp-r290-bemco-monophase-9kw": {
+    "price": 5200,
+    "sku": "ECOPURE-MP-R290-9KW"
+  },
+  "onduleur-hybride-triphase-deye-sun-20k-sg05lp3-eu-be": {
+    "price": 4200,
+    "sku": "SUN-20K-SG05LP3-EU-BE"
+  },
+  "micro-onduleur-marstek-saturn-m2-800": {
+    "price": 350,
+    "sku": "MARSTEK-SATURN-M2-800"
+  },
+  "ecopure-mp-r290-bemco-monophase-12kw": {
+    "price": 6000,
+    "sku": "ECOPURE-MP-R290-12KW"
+  },
+  "ballon-thermodynamique-bemco-ecoline-r-250l": {
+    "price": 3600,
+    "sku": "BEMCO-ECOLINE-R-250"
+  },
+  "ballon-thermodynamique-bemco-ecoline-stable-160l": {
+    "price": 3000,
+    "sku": "BEMCO-ECOLINE-160"
+  },
+  "batterie-lithium-marstek-saturn-d2500": {
+    "price": 560,
+    "sku": "MARSTEK-SATURN-D2500"
+  },
+  "ballon-thermodynamique-bemco-ecoline-mural-130l": {
+    "price": 2800,
+    "sku": "BEMCO-ECOLINE-130"
+  },
+  "ballon-thermodynamique-bemco-ecoline-r-200l": {
+    "price": 3400,
+    "sku": "BEMCO-ECOLINE-200"
+  },
+  "optimizer-sun2000-450w-p2": {
+    "price": 80,
+    "sku": "SUN2000-450W-P2"
+  },
+  "clame-quickfix-intermediaire-30-noir": {
+    "price": 12,
+    "sku": "CLAME-QF-INT-30"
+  },
+  "crochet-ardoise-reglable": {
+    "price": 14,
+    "sku": "CROCHET-ARDOISE"
+  },
+  "crochet-tuile-double-reglable": {
+    "price": 14,
+    "sku": "CROCHET-TUILE-DB"
+  },
+  "boulon-m8-x-40-din912": {
+    "price": 3,
+    "sku": "BOULON_M8_X_40_DIN912"
+  },
+  "clame-simple-intermediaire-noir": {
+    "price": 10,
+    "sku": "CLAME-S-INT"
+  },
+  "onduleur-injection-sun2000-4ktl-l1": {
+    "price": 650,
+    "sku": "SUN2000-4KTL-L1"
+  },
+  "onduleur-injection-sun2000-2ktl-l1": {
+    "price": 400,
+    "sku": "SUN2000-2KTL-L1"
+  },
+  "onduleur-hybride-triphase-deye-sun-18k-sg05lp3-eu-be": {
+    "price": 4000,
+    "sku": "SUN-18K-SG05LP3-EU-BE"
+  },
+  "onduleur-injection-sun2000-3-68ktl-l1": {
+    "price": 600,
+    "sku": "SUN2000-3.68KTL-L1"
+  },
+  "onduleur-hybride-triphase-deye-sun-16k-sg05lp3-eu-be": {
+    "price": 3700,
+    "sku": "SUN-16K-SG05LP3-EU-BE"
+  },
+  "ballon-thermodynamique-bemco-ecoline-stable-260l": {
+    "price": 3700,
+    "sku": "BEMCO-ECOLINE-260"
+  },
+  "borne-de-recharge-beny-ac-monte-au-sol-bcpcv-dt2n-ct2n-p-2-22kw": {
+    "price": 3500,
+    "sku": "BENY-BCPCV-DT2N"
+  },
+  "panneau-solaire-elitec-solar-xmax-620w-bifacial": {
+    "price": 220,
+    "sku": "ELITEC-XMAX-620"
+  },
+  "onduleur-hybride-triphase-deye-sun-15k-sg05lp3-eu-be": {
+    "price": 3500,
+    "sku": "SUN-15K-SG05LP3-EU-BE"
+  },
+  "panneau-solaire-elitec-solar-xmax-470w-bifacial": {
+    "price": 165,
+    "sku": "ELITEC-XMAX-470"
+  },
+  "power-module-luna2000-5kw-co-huawei": {
+    "price": 2450,
+    "sku": "LUNA2000-5KW-CO"
+  },
+  "optimizer-sun2000-600w-p2": {
+    "price": 95,
+    "sku": "SUN2000-600W-P2"
+  },
+  "smart-dongle-4g": {
+    "price": 80,
+    "sku": "CT002"
+  },
+  "smart-power-sensor-ddsu666-h-monophase": {
+    "price": 120,
+    "sku": "DDSU666-H"
+  },
+  "smart-power-sensor-dtsu666-h-triphase": {
+    "price": 130,
+    "sku": "DTSU666-H"
+  },
+  "corniere-de-lestage-l-1805mm": {
+    "price": 35,
+    "sku": "CORNIRE-1805"
+  },
+  "power-optimizer-650": {
+    "price": 95,
+    "sku": "SUN2000-650W"
+  },
+  "onduleur-injection-sun2000-8ktl-m1": {
+    "price": 1100,
+    "sku": "SUN2000-8KTL-M1"
+  },
+  "batterie-module-luna2000-5kw-co-huawei": {
+    "price": 2450,
+    "sku": "LUNA2000-5KW-CO"
+  },
+  "batterie-lithium-elitec-lithium-el5-40kwh-bas-voltage": {
+    "price": 15000,
+    "sku": "ELITEC-EL5-40KWH"
+  },
+  "batterie-lithium-10kwh-elitec-lithium-el10-bas-voltage": {
+    "price": 4500,
+    "sku": "ELITEC-EL10-10KWH"
+  },
+  "smart-meter-ct002": {
+    "price": 100,
+    "sku": "CT002"
+  },
+  "batterie-lithium-marstek-venus-c-energycube-2-56kwh": {
+    "price": 1300,
+    "sku": "MARSTEK-VENUS-C-2.56"
+  },
+  "ecopure-mp-r290-bemco-monophase-7kw": {
+    "price": 4500,
+    "sku": "ECOPURE-MP-R290-7KW"
+  },
+  "batterie-lithium-marstek-venus-e-energycube-5-12kwh": {
+    "price": 3500,
+    "sku": "MARSTEK-VENUS-E-5.12"
+  },
+  "cable-de-puissance-batterie-el5-el10-2m": {
+    "price": 120,
+    "sku": "ELITEC-CABLE-EL5-2M"
+  },
+  "batterie-lithium-5kwh-elitec-lithium-el5-bas-voltage": {
+    "price": 2500,
+    "sku": "ELITEC-EL5-5KWH"
+  },
+  "paque-de-connexion": {
+    "price": 18,
+    "sku": "PAQUE-CONN"
+  },
+  "profile-6000-mm": {
+    "price": 85,
+    "sku": "RAIL-6000"
+  },
+  "profile-6000-mm-noir": {
+    "price": 85,
+    "sku": "RAIL-6000-NOIR"
+  },
+  "joint-debout-plat": {
+    "price": 8,
+    "sku": "JOINT_DEBOUT_PLAT"
+  },
+  "boulon-m8-x-45-din912": {
+    "price": 3,
+    "sku": "BOULON_M8_X_45_DIN912"
+  },
+  "ecrou-carre-m8-din557": {
+    "price": 2,
+    "sku": "ECROU_CARRE_M8_DIN557"
+  },
+  "raccord-profile": {
+    "price": 25,
+    "sku": "RACCORD-PROFILE"
+  },
+  "clame-quickfix-extreme-30-noir": {
+    "price": 14,
+    "sku": "CLAME-QF-EXT-30"
+  },
+  "clame-simple-extreme-30mm-noir": {
+    "price": 12,
+    "sku": "CLAME-S-EXT-30"
+  },
+  "onduleur-hybride-monophase-deye-sun-5k-sg04lp1-eu-be": {
+    "price": 950,
+    "sku": "SUN-5K-SG04LP1-EU-BE"
+  },
+  "onduleur-hybride-triphase-deye-sun-5k-sg04lp3-eu-be": {
+    "price": 1200,
+    "sku": "SUN-5K-SG04LP3-EU-BE"
+  },
+  "onduleur-hybride-triphase-deye-sun-6k-sg04lp3-eu-be": {
+    "price": 1450,
+    "sku": "SUN-6K-SG04LP3-EU-BE"
+  },
+  "ecrou-crante-m8-din6923": {
+    "price": 2,
+    "sku": "ECROU_CRANTE_M8_DIN6923"
+  },
+  "ballon-tampon-8-connexions-200l": {
+    "price": 1800,
+    "sku": "BEMCO-TAMPON-200"
+  },
+  "bobine-de-cable-solaire-4-noir-100-m": {
+    "price": 880,
+    "sku": "CABLE-SOL-4-500M"
+  },
+  "ballon-tampon-8-connexions-300l": {
+    "price": 2400,
+    "sku": "BEMCO-TAMPON-300"
+  },
+  "ballon-thermodynamique-bemco-ecoline-stable-avec-serpentin-260l": {
+    "price": 4000,
+    "sku": "BEMCO-ECOLINE-260-S"
+  },
+  "bloc-de-montage-bas-anti-vibration-1000x180x100mm-2pcs": {
+    "price": 220,
+    "sku": "BEMCO-BLOC-1000"
+  },
+  "borne-de-recharge-beny-bcp-a2n-bt2n-at2n-bt2n-p-7-5-22kw": {
+    "price": 2800,
+    "sku": "BENY-BCP-A2N"
+  },
+  "borne-de-recharge-beny-dc-divise-monte-au-sol-bsdc-360-600kw": {
+    "price": 12000,
+    "sku": "BENY-BSDC-360"
+  },
+  "ballon-tampon-4-connexions-50l": {
+    "price": 800,
+    "sku": "BEMCO-TAMPON-50"
+  },
+  "pac-piscine-hybrid-inverter-17k": {
+    "price": 8000,
+    "sku": "POOLSUN-17K"
+  },
+  "ballon-tampon-8-connexions-100l": {
+    "price": 1200,
+    "sku": "BEMCO-TAMPON-100"
+  },
+  "gewiss-disjoncteur-mt45-4p-courbe-c-16a-4-5ka-gw92188": {
+    "price": 12,
+    "sku": "GW92188"
+  },
+  "bobine-de-cable-solaire-4-noir-500-m": {
+    "price": 880,
+    "sku": "CABLE-SOL-4-500M"
+  },
+  "bobine-de-cable-terre-6-jaune-vert-100-m": {
+    "price": 125,
+    "sku": "CABLE-TERRE-6-100M"
+  },
+  "bobine-de-cable-terre-6-jaune-vert-500-m": {
+    "price": 560,
+    "sku": "CABLE-TERRE-6-500M"
+  },
+  "connecteur-de-type-mc4-male-femelle": {
+    "price": 5,
+    "sku": "MC4-MF"
+  },
+  "gewiss-disjoncteur-mt45-4p-courbe-c-10a-4-modules": {
+    "price": 10,
+    "sku": "GW92146"
+  },
+  "gewiss-disjoncteur-mt45-4p-courbe-c-25a-4-5ka-gw92190": {
+    "price": 16,
+    "sku": "GW92190"
+  },
+  "gewiss-disjoncteur-mt45-4p-courbe-c-40a-4-5ka-gw92192": {
+    "price": 22,
+    "sku": "GW92192"
+  },
+  "gewiss-disjoncteur-mt45-2p-courbe-c-20a-4-5ka-gw92149": {
+    "price": 14,
+    "sku": "GW92149"
+  },
+  "gewiss-disjoncteur-mt45-2p-courbe-c-32a-4-5ka-gw92151": {
+    "price": 18,
+    "sku": "GW92151"
+  },
+  "gewiss-disjoncteur-mt45-2p-courbe-c-40a-4-5ka-gw92152": {
+    "price": 22,
+    "sku": "GW92152"
+  },
+  "ecopure-mp-r290-bemco-triphase-16kw": {
+    "price": 7500,
+    "sku": "ECOPURE-MP-R290-16KW"
+  },
+  "gewiss-disjoncteur-mt45-2p-courbe-c-10a-4-5ka-gw92146": {
+    "price": 10,
+    "sku": "GW92146"
+  },
+  "gewiss-disjoncteur-mt45-2p-courbe-c-16a-4-5ka-gw92148": {
+    "price": 12,
+    "sku": "GW92148"
+  },
+  "panneau-solaire-elitec-solar-xmax-560w-bifacial": {
+    "price": 195,
+    "sku": "ELITEC-XMAX-560"
+  },
+  "onduleur-hybride-monophase-deye-sun-6k-sg03lp1": {
+    "price": 95,
+    "sku": "SUN2000-650W"
+  },
+  "onduleur-injection-sun2000-6ktl-m1": {
+    "price": 850,
+    "sku": "SUN2000-6KTL-M1"
+  },
+  "onduleur-injection-sun2000-10ktl-m1": {
+    "price": 1300,
+    "sku": "SUN2000-10KTL-M1"
+  },
+  "ballon-thermodynamique-bemco-ecoline-stable-avec-serpentin-200l": {
+    "price": 3800,
+    "sku": "BEMCO-ECOLINE-200-S"
+  },
+  "batterie-lithium-elitec-lithium-eh-serie-51-2-kwh-haut-voltage": {
+    "price": 25000,
+    "sku": "ELITEC-EH-51.2"
+  },
+  "bobine-de-cable-solaire-6-noir-500-m": {
+    "price": 240,
+    "sku": "CABLE-SOL-6-100M"
+  },
+  "support-murale-luna2000-5kw-co-huawei": {
+    "price": 85,
+    "sku": "SUPPORT-LUNA2000-5KW"
+  },
+  "gewiss-disjoncteur-mt45-2p-courbe-c-25a-4-5ka-gw92150": {
+    "price": 16,
+    "sku": "GW92150"
+  },
+  "ecopure-mp-r290-bemco-triphase-12kw": {
+    "price": 6000,
+    "sku": "ECOPURE-MP-R290-12KW"
+  },
+  "ballon-thermodynamique-bemco-ecoline-mural-100l": {
+    "price": 2500,
+    "sku": "BEMCO-ECOLINE-100"
+  },
+  "flat-rail-avec-epdm": {
+    "price": 45,
+    "sku": "FLAT-RAIL-EPDM"
+  },
+  "ballon-thermodynamique-bemco-ecoline-stable-avec-serpentin-500l": {
+    "price": 5500,
+    "sku": "BEMCO-ECOLINE-500-S"
+  },
+  "ballon-tampon-8-connexions-500l": {
+    "price": 3500,
+    "sku": "BEMCO-TAMPON-500"
+  },
+  "ballon-thermodynamique-bemco-ecoline-200l": {
+    "price": 3400,
+    "sku": "BEMCO-ECOLINE-200"
+  },
+  "bobine-de-cable-solaire-6-noir-100-m": {
+    "price": 240,
+    "sku": "CABLE-SOL-6-100M"
+  },
+  "onduleur-hybride-triphase-deye-sun-10k-sg04lp3-eu-be": {
+    "price": 2500,
+    "sku": "SUN-10K-SG04LP3-EU-BE"
+  },
+  "batterie-lithium-elitec-lithium-es-serie-20kwh-haut-voltage": {
+    "price": 12000,
+    "sku": "ELITEC-ES-20KWH"
+  },
+  "boulon-tete-de-marteau-m10x25": {
+    "price": 4,
+    "sku": "BOULON_TETE_DE_MARTEAU_M10X25"
+  },
+  "connecteur-double-de-type-mc4-male-et-femelle": {
+    "price": 8,
+    "sku": "MC4-DOUBLE"
+  },
+  "joint-debout-rond": {
+    "price": 8,
+    "sku": "JOINT_DEBOUT_ROND"
+  },
+  "boulon-m10-x-25-din933": {
+    "price": 4,
+    "sku": "BOULON_M10_X_25_DIN933"
+  },
+  "connecteur-flat-15-est-ouest": {
+    "price": 42,
+    "sku": "CONN-FLAT-15"
+  },
+  "boulon-m8-x-30-din912": {
+    "price": 3,
+    "sku": "BOULON_M8_X_30_DIN912"
+  },
+  "onduleur-hybride-triphase-deye-sun-14k-sg05lp3-eu-be": {
+    "price": 3200,
+    "sku": "SUN-14K-SG05LP3-EU-BE"
+  },
+  "onduleur-injection-sun2000-5ktl-m1": {
+    "price": 750,
+    "sku": "SUN2000-5KTL-M1"
+  },
+  "tirefond-bois-m10-200-ecrous-epdm": {
+    "price": 2,
+    "sku": "TIREFOND_BOIS_M10_200_ECROUS_EPDM"
+  },
+  "flat-15": {
+    "price": 42,
+    "sku": "CONN-FLAT-15"
+  },
+  "gewiss-disjoncteur-mt45-4p-courbe-c-20a-4-5ka-gw92189": {
+    "price": 14,
+    "sku": "GW92189"
+  },
+  "armoire-el-box-2-batteries-de-5kwh": {
+    "price": 5200,
+    "sku": "ELITEC-ELBOX-2x5"
+  },
+  "bloc-de-montage-bas-anti-vibration-600x180x100mm-2pcs": {
+    "price": 180,
+    "sku": "BEMCO-BLOC-600"
+  },
+  "gewiss-disjoncteur-mt45-4p-courbe-c-32a-4-5ka-gw92191": {
+    "price": 18,
+    "sku": "GW92191"
+  },
+  "onduleur-hybride-monophase-deye-sun-8k-sg05lp1-eu-be": {
+    "price": 1150,
+    "sku": "SUN-8K-SG05LP1-EU-BE"
+  },
+  "onduleur-injection-sun2000-3ktl-l1": {
+    "price": 500,
+    "sku": "SUN2000-3KTL-L1"
+  },
+  "onduleur-injection-sun2000-3ktl-m1": {
+    "price": 500,
+    "sku": "SUN2000-3KTL-L1"
+  },
+  "onduleur-injection-sun2000-4-6ktl-l1": {
+    "price": 746,
+    "sku": "SUN2000-4.6KTL-L1"
+  },
+  "onduleur-injection-sun2000-4ktl-m1": {
+    "price": 650,
+    "sku": "SUN2000-4KTL-L1"
+  }
+}
