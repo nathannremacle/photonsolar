@@ -466,7 +466,7 @@ async function scrapeProductPage(productUrl: string): Promise<ScrapedProduct | n
         if (t.length > description.length && t.length > 50) description = t;
       });
     }
-    description = description.replace(/\s+/g, ' ').trim() || undefined;
+    const descriptionClean = description.replace(/\s+/g, ' ').trim() || undefined;
 
     const mainImg =
       $('.product-cover img, .product-image img, [itemprop="image"]').first().attr('src') ||
@@ -496,7 +496,7 @@ async function scrapeProductPage(productUrl: string): Promise<ScrapedProduct | n
       price,
       originalPrice: undefined,
       sku: sku || undefined,
-      description: description || undefined,
+      description: descriptionClean,
       image,
       images,
       link: `/products/${id}`,
