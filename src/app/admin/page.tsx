@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock } from 'lucide-react';
-import { verifyPassword, setAdminSession, checkAdminSession } from '@/lib/admin-auth';
+import { setAdminSession, checkAdminSession } from '@/lib/admin-auth';
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('');

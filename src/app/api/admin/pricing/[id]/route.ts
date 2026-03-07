@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/admin-auth";
+import { requireAdminSession } from "@/lib/admin-auth-server";
 import type { PricingScope, PricingType, UserRole } from "@prisma/client";
 
 /**

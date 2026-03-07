@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyPassword, createAdminSessionToken, buildAdminSessionCookie } from "@/lib/admin-auth";
+import { verifyPassword, createAdminSessionToken, buildAdminSessionCookie } from "@/lib/admin-auth-server";
 import { adminLoginRateLimiter, getClientIP } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {

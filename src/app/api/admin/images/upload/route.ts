@@ -4,7 +4,7 @@ import {
   uploadToSpaces,
   listSpacesKeys,
 } from '@/lib/spaces';
-import { requireAdminSession } from '@/lib/admin-auth';
+import { requireAdminSession } from '@/lib/admin-auth-server';
 
 const VALID_MIME_TYPES = [
   'image/jpeg',

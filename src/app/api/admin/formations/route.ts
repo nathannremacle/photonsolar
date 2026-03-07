@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadFormationsContent, saveFormationsContent, type Formation } from '@/lib/formation-storage';
-import { requireAdminSession } from '@/lib/admin-auth';
+import { requireAdminSession } from '@/lib/admin-auth-server';
 
 export async function GET(request: NextRequest) {
   const authErr = requireAdminSession(request);

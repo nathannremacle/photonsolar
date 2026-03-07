@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadHomepageContent, saveHomepageContent, type HomepageContent, type NewsItem } from '@/lib/homepage-storage';
 import { loadNewsContent } from '@/lib/news-storage';
-import { requireAdminSession } from '@/lib/admin-auth';
+import { requireAdminSession } from '@/lib/admin-auth-server';
 
 export async function GET(request: NextRequest) {
   const authErr = requireAdminSession(request);

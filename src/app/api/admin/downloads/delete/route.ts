@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { unlinkSync, existsSync } from 'fs';
 import { join } from 'path';
-import { requireAdminSession } from '@/lib/admin-auth';
+import { requireAdminSession } from '@/lib/admin-auth-server';
 import { isSpacesConfigured, deleteFromSpaces, getKeyFromSpacesUrl } from '@/lib/spaces';
 
 const PUBLIC_DOWNLOADS_DIR = join(process.cwd(), 'public/downloads');

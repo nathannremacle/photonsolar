@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/admin-auth";
+import { requireAdminSession } from "@/lib/admin-auth-server";
 import type { UserRole } from "@prisma/client";
 
 const ROLES: UserRole[] = ["PARTICULIER", "INSTALLATEUR", "REVENDEUR", "AUTRE"];

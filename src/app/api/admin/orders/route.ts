@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getProductById } from "@/data/products";
 
-import { requireAdminSession } from "@/lib/admin-auth";
+import { requireAdminSession } from "@/lib/admin-auth-server";
 
 /**
  * GET /api/admin/orders

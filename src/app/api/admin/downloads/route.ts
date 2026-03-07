@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadDownloadsContent, saveDownloadsContent, type DownloadsContent } from '@/lib/downloads-storage';
-import { requireAdminSession } from '@/lib/admin-auth';
+import { requireAdminSession } from '@/lib/admin-auth-server';
 
 export async function GET(request: NextRequest) {
   const authErr = requireAdminSession(request);

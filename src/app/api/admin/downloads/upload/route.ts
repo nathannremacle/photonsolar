@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { requireAdminSession } from '@/lib/admin-auth';
+import { requireAdminSession } from '@/lib/admin-auth-server';
 import { isSpacesConfigured, uploadDownloadToSpaces } from '@/lib/spaces';
 
 const PUBLIC_DOWNLOADS_DIR = join(process.cwd(), 'public/downloads');

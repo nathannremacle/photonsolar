@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readdirSync, statSync, unlinkSync, existsSync } from 'fs';
 import { join } from 'path';
 import { isSpacesConfigured, listSpacesImages, deleteFromSpaces } from '@/lib/spaces';
-import { requireAdminSession } from '@/lib/admin-auth';
+import { requireAdminSession } from '@/lib/admin-auth-server';
 import { prisma } from '@/lib/prisma';
 import { loadProducts } from '@/lib/products-storage';
 import { getHeroSlides, getPromotions, getSpecialOffers, getBrands } from '@/lib/homepage-storage';

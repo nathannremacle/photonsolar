@@ -8,7 +8,7 @@ import {
   deleteProduct,
 } from '@/lib/products-storage';
 import { moveImageToCategory } from '@/lib/spaces';
-import { requireAdminSession } from '@/lib/admin-auth';
+import { requireAdminSession } from '@/lib/admin-auth-server';
 
 async function ensureProductImagesInCategory(product: Product): Promise<Product> {
   const category: string = product.category ?? '';
