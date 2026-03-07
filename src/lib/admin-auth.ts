@@ -1,4 +1,6 @@
 import { createHmac, timingSafeEqual } from "crypto";
+import { readFileSync, existsSync } from "fs";
+import { join } from "path";
 import { compareSync, hashSync } from "bcryptjs";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -8,6 +10,7 @@ const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
 const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || process.env.NEXTAUTH_SECRET || "admin-fallback-secret";
 const SESSION_MAX_AGE = 8 * 60 * 60; // 8 hours
 const COOKIE_NAME = "admin_session";
+const SETTINGS_FILE = join(process.cwd(), "data/admin-settings.json");
 
 function getSecret(): string {
   if (!SESSION_SECRET || SESSION_SECRET.length < 16) {
@@ -16,12 +19,27 @@ function getSecret(): string {
   return SESSION_SECRET;
 }
 
-/** Verify admin password. Supports hashed (ADMIN_PASSWORD_HASH) or plain (ADMIN_PASSWORD). */
+function getPasswordFromSettingsFile(): string | null {
+  try {
+    if (existsSync(SETTINGS_FILE)) {
+      const raw = readFileSync(SETTINGS_FILE, "utf-8");
+      const data = JSON.parse(raw) as { adminPassword?: string };
+      if (data.adminPassword && typeof data.adminPassword === "string") {
+        return data.adminPassword;
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+/** Verify admin password. Order: ADMIN_PASSWORD_HASH (env) > ADMIN_PASSWORD (env) > data/admin-settings.json > "Opusweb". */
 export function verifyPassword(password: string): boolean {
   if (ADMIN_PASSWORD_HASH) {
     return compareSync(password, ADMIN_PASSWORD_HASH);
   }
-  const pwd = ADMIN_PASSWORD || "Opusweb";
+  const pwd = ADMIN_PASSWORD || getPasswordFromSettingsFile() || "Opusweb";
   return password === pwd;
 }
 
