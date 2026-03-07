@@ -24,8 +24,9 @@ function getPasswordFromSettingsFile(): string | null {
     if (existsSync(SETTINGS_FILE)) {
       const raw = readFileSync(SETTINGS_FILE, "utf-8");
       const data = JSON.parse(raw) as { adminPassword?: string };
-      if (data.adminPassword && typeof data.adminPassword === "string") {
-        return data.adminPassword;
+      if (data.adminPassword != null && typeof data.adminPassword === "string") {
+        const trimmed = data.adminPassword.trim();
+        if (trimmed) return trimmed;
       }
     }
   } catch {
@@ -34,13 +35,45 @@ function getPasswordFromSettingsFile(): string | null {
   return null;
 }
 
-/** Verify admin password. Order: ADMIN_PASSWORD_HASH (env) > ADMIN_PASSWORD (env) > data/admin-settings.json > "Opusweb". */
-export function verifyPassword(password: string): boolean {
-  if (ADMIN_PASSWORD_HASH) {
-    return compareSync(password, ADMIN_PASSWORD_HASH);
+async function getAdminPasswordHashFromDb(): Promise<string | null> {
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const row = await prisma.adminSettings.findUnique({ where: { id: "admin" } });
+    if (row?.adminPasswordHash?.trim()) return row.adminPasswordHash.trim();
+  } catch (e) {
+    // ignore: table missing, DB unreachable, or Prisma client without AdminSettings
   }
-  const pwd = ADMIN_PASSWORD || getPasswordFromSettingsFile() || "Opusweb";
-  return password === pwd;
+  return null;
+}
+
+const DEFAULT_ADMIN_PASSWORD = "Opusweb";
+
+function safeBcryptCompare(input: string, hash: string): boolean {
+  try {
+    return compareSync(input, hash);
+  } catch {
+    return false;
+  }
+}
+
+/** Verify admin password. Order: ADMIN_PASSWORD_HASH (env) > ADMIN_PASSWORD (env) > DB hash > file > "Opusweb". Never throws. */
+export async function verifyPassword(password: string): Promise<boolean> {
+  try {
+    const input = typeof password === "string" ? password.trim() : "";
+    if (!input) return false;
+    if (ADMIN_PASSWORD_HASH?.trim()) {
+      return safeBcryptCompare(input, ADMIN_PASSWORD_HASH);
+    }
+    const fromEnv = ADMIN_PASSWORD && typeof ADMIN_PASSWORD === "string" ? ADMIN_PASSWORD.trim() : "";
+    if (fromEnv) return input === fromEnv;
+    const dbHash = await getAdminPasswordHashFromDb();
+    if (dbHash) return safeBcryptCompare(input, dbHash);
+    const fromFile = getPasswordFromSettingsFile();
+    const pwd = fromFile || DEFAULT_ADMIN_PASSWORD;
+    return input === pwd;
+  } catch {
+    return false;
+  }
 }
 
 /** Generate a hash for ADMIN_PASSWORD_HASH. Run: node -e "require('bcryptjs').hash(process.argv[1], 10, (e,h)=>console.log(h))" YOUR_PASSWORD */

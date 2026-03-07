@@ -386,6 +386,21 @@ model Download {
 }
 
 // ============================================
+// Admin panel settings (password hash, site name/url)
+// ============================================
+
+model AdminSettings {
+  id                String   @id @default("admin")
+  adminPasswordHash String?
+  siteName          String?
+  siteUrl           String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("admin_settings")
+}
+
+// ============================================
 // Pricing rules (per role, per user, per company)
 // ============================================
 
